@@ -1,0 +1,46 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+
+model ConnectLink {
+  id        Int      @id @default(autoincrement())
+  title     String
+  url       String
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+}
+
+model Offering {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?
+  price       Float
+  coverImage  String?
+  coverPageData String?
+  pdfUrl      String?
+  bundles     Bundle[]
+  createdAt   DateTime @default(now())
+}
+
+model Bundle {
+  id          Int        @id @default(autoincrement())
+  title       String
+  description      String?
+  price            Float
+  hasConsultation  Boolean    @default(false)
+  offerings        Offering[]
+  createdAt        DateTime   @default(now())
+}
+
+model ConsultationSetting {
+  id          Int      @id @default(1)
+  price       Float    @default(50.0)
+  duration    Int      @default(30)
+  description String?
+}

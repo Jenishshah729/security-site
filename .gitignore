@@ -1,0 +1,7 @@
+node_modules
+dist
+.env
+google-credentials.json
+backend/dev.db
+.DS_Store
+scratch
