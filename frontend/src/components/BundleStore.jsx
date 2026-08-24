@@ -92,8 +92,8 @@ const BundleStore = ({ onSuccess }) => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          bundleId: selectedBundle.id,
-          selectedPdfs: selectedPdfs.map(p => p.id),
+          bundleId: selectedBundle.title,
+          selectedPdfs: selectedPdfs.map(p => p.title),
           amount: selectedBundle.price,
           name,
           email,
@@ -125,9 +125,7 @@ const BundleStore = ({ onSuccess }) => {
             });
             const verifyData = await verifyRes.json();
             if (verifyData.success) {
-              alert('Payment successful! Your bundle access is confirmed.');
-              // Reset
-              navigate('/');
+              if (onSuccess) onSuccess(selectedBundle.hasConsultation);
             } else {
               alert('Payment verification failed. Invalid signature.');
             }

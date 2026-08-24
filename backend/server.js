@@ -28,7 +28,35 @@ try {
   console.error("Google Calendar API initialization failed:", e);
 }
 
+
 const GOOGLE_CALENDAR_ID = process.env.GOOGLE_CALENDAR_ID;
+
+// Email Notification Setup
+const smtpUser = process.env.SMTP_USER;
+const smtpPass = process.env.SMTP_PASS;
+const adminEmail = process.env.ADMIN_EMAIL || smtpUser;
+let mailTransporter = null;
+if (smtpUser && smtpPass) {
+  mailTransporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: { user: smtpUser, pass: smtpPass }
+  });
+}
+async function sendAdminNotification(subject, text) {
+  if (!mailTransporter) return;
+  try {
+    await mailTransporter.sendMail({
+      from: smtpUser,
+      to: adminEmail,
+      subject,
+      text
+    });
+    console.log("Admin email notification sent.");
+  } catch (err) {
+    console.error("Failed to send admin notification:", err);
+  }
+}
+
 
 // Security Middlewares
 app.use(helmet()); 
@@ -139,7 +167,7 @@ app.get('/api/slots', async (req, res) => {
 app.post('/api/consultation/create-order', async (req, res) => {
   try {
     console.log(`[DEBUG] /api/consultation/create-order called. Using Razorpay Key ID: ${process.env.RAZORPAY_KEY_ID}`);
-    const { eventId, slotStart, slotEnd, email, name, phone, amount, topic } = req.body;
+    const { eventId, slotStart, slotEnd, email, name, phone, amount, topic, bundleId, selectedPdfs } = req.body;
     
     const finalAmount = amount || 349;
     
@@ -156,7 +184,9 @@ app.post('/api/consultation/create-order', async (req, res) => {
         name: name || '',
         email: email || '',
         phone: phone || '',
-        topic: topic || ''
+        topic: topic || '',
+        bundleId: bundleId || null,
+        selectedPdfs: selectedPdfs ? JSON.stringify(selectedPdfs) : null
       }
     });
 
@@ -269,6 +299,19 @@ app.post('/api/consultation/verify-payment', async (req, res) => {
             }
           });
         }
+        
+        if (booking.bundleId) {
+          sendAdminNotification(
+            'New Bundle Purchase (WITH Consultation!)',
+            `You have a new bundle purchase with a consultation!\n\nName: ${booking.name}\nEmail: ${booking.email}\nPhone: ${booking.phone || 'N/A'}\nBundle ID: ${booking.bundleId}\nSelected PDFs: ${booking.selectedPdfs || '[]'}\nAmount Paid: ₹${booking.amount}\nTime Slot: ${booking.slotStart.toISOString()} - ${booking.slotEnd.toISOString()}\n\nPlease fulfill the PDFs and verify they are on your calendar.`
+          );
+        } else {
+          sendAdminNotification(
+            'New Consultation Booking!',
+            `Name: ${booking.name}\nEmail: ${booking.email}\nPhone: ${booking.phone || 'N/A'}\nTopic: ${booking.topic || 'N/A'}\nAmount Paid: ₹${booking.amount}\nTime Slot: ${booking.slotStart.toISOString()} - ${booking.slotEnd.toISOString()}`
+          );
+        }
+
       }
       res.json({ success: true });
     } else {
@@ -432,15 +475,29 @@ app.post('/api/webhook/payment', express.raw({type: 'application/json'}), async 
           }
         }
       } else if (type === 'PDF') {
-        await prisma.pdfPurchase.updateMany({
-          where: { orderId: order.id, status: { not: 'SUCCESS' } },
-          data: { status: 'SUCCESS', paymentId: payment.id }
-        });
+        const purchase = await prisma.pdfPurchase.findUnique({ where: { orderId: order.id } });
+        if (purchase && purchase.status !== 'SUCCESS') {
+          await prisma.pdfPurchase.update({
+            where: { id: purchase.id },
+            data: { status: 'SUCCESS', paymentId: payment.id }
+          });
+          sendAdminNotification(
+            'New PDF Purchase!',
+            `You have a new purchase!\n\nName: ${purchase.name}\nEmail: ${purchase.email}\nPhone: ${purchase.phone || 'N/A'}\nProduct PDF ID: ${purchase.pdfId}\nAmount Paid: ₹${purchase.amount}\n\nPlease fulfill this order and check the "isFulfilled" box in Prisma Studio when done.`
+          );
+        }
       } else if (type === 'BUNDLE') {
-        await prisma.bundlePurchase.updateMany({
-          where: { orderId: order.id, status: { not: 'SUCCESS' } },
-          data: { status: 'SUCCESS', paymentId: payment.id }
-        });
+        const purchase = await prisma.bundlePurchase.findUnique({ where: { orderId: order.id } });
+        if (purchase && purchase.status !== 'SUCCESS') {
+          await prisma.bundlePurchase.update({
+            where: { id: purchase.id },
+            data: { status: 'SUCCESS', paymentId: payment.id }
+          });
+          sendAdminNotification(
+            'New Bundle Purchase!',
+            `You have a new purchase!\n\nName: ${purchase.name}\nEmail: ${purchase.email}\nPhone: ${purchase.phone || 'N/A'}\nBundle ID: ${purchase.bundleId}\nSelected PDFs: ${purchase.selectedPdfs}\nAmount Paid: ₹${purchase.amount}\n\nPlease fulfill this order and check the "isFulfilled" box in Prisma Studio when done.`
+          );
+        }
       }
     }
 
@@ -500,13 +557,17 @@ app.post('/api/pdf/verify-payment', async (req, res) => {
       .digest('hex');
       
     if (expectedSignature === razorpay_signature) {
-      await prisma.pdfPurchase.update({
-        where: { orderId: razorpay_order_id },
-        data: {
-          status: 'SUCCESS',
-          paymentId: razorpay_payment_id
-        }
-      });
+      const purchase = await prisma.pdfPurchase.findUnique({ where: { orderId: razorpay_order_id } });
+      if (purchase && purchase.status !== 'SUCCESS') {
+        await prisma.pdfPurchase.update({
+          where: { id: purchase.id },
+          data: { status: 'SUCCESS', paymentId: razorpay_payment_id }
+        });
+        sendAdminNotification(
+          'New PDF Purchase!',
+          `You have a new purchase!\n\nName: ${purchase.name}\nEmail: ${purchase.email}\nPhone: ${purchase.phone || 'N/A'}\nProduct PDF ID: ${purchase.pdfId}\nAmount Paid: ₹${purchase.amount}\n\nPlease fulfill this order and check the "isFulfilled" box in Prisma Studio when done.`
+        );
+      }
       res.json({ success: true });
     } else {
       await prisma.pdfPurchase.update({
@@ -568,13 +629,17 @@ app.post('/api/bundle/verify-payment', async (req, res) => {
       .digest('hex');
       
     if (expectedSignature === razorpay_signature) {
-      await prisma.bundlePurchase.update({
-        where: { orderId: razorpay_order_id },
-        data: {
-          status: 'SUCCESS',
-          paymentId: razorpay_payment_id
-        }
-      });
+      const purchase = await prisma.bundlePurchase.findUnique({ where: { orderId: razorpay_order_id } });
+      if (purchase && purchase.status !== 'SUCCESS') {
+        await prisma.bundlePurchase.update({
+          where: { id: purchase.id },
+          data: { status: 'SUCCESS', paymentId: razorpay_payment_id }
+        });
+        sendAdminNotification(
+          'New Bundle Purchase!',
+          `You have a new purchase!\n\nName: ${purchase.name}\nEmail: ${purchase.email}\nPhone: ${purchase.phone || 'N/A'}\nBundle ID: ${purchase.bundleId}\nSelected PDFs: ${purchase.selectedPdfs}\nAmount Paid: ₹${purchase.amount}\n\nPlease fulfill this order and check the "isFulfilled" box in Prisma Studio when done.`
+        );
+      }
       res.json({ success: true });
     } else {
       await prisma.bundlePurchase.update({

@@ -45,7 +45,7 @@ const PDFStore = ({ onSuccess }) => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          pdfId: selectedProduct.id,
+          pdfId: selectedProduct.title,
           amount: selectedProduct.price,
           name,
           email,
@@ -70,7 +70,6 @@ const PDFStore = ({ onSuccess }) => {
             });
             const verifyData = await verifyRes.json();
             if (verifyData.success) {
-              alert('Payment successful! We will email you the PDF shortly.');
               setSelectedProduct(null);
               if (onSuccess) onSuccess();
             } else {
@@ -90,10 +89,14 @@ const PDFStore = ({ onSuccess }) => {
           color: '#00e5ff'
         }
       };
-      const rzp1 = new window.Razorpay(options);
-      rzp1.open();
-    } catch (error) {
-      console.error(error);
+      const rzp = new window.Razorpay(options);
+      rzp.on('payment.failed', function (response){
+        console.error(response.error);
+        alert('Payment failed: ' + response.error.description);
+      });
+      rzp.open();
+    } catch (err) {
+      console.error("Failed to process PDF payment", err);
       alert('Something went wrong during checkout.');
     } finally {
       setIsProcessing(false);

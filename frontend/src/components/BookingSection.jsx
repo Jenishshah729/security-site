@@ -97,7 +97,9 @@ const BookingSection = ({ onSuccess, isBundle }) => {
             email: formData.email,
             phone: formData.phone,
             topic: formData.topic,
-            amount: isBundle ? bundle?.price : settings.price
+            amount: isBundle ? bundle?.price : settings.price,
+            bundleId: isBundle ? bundle?.title : null,
+            selectedPdfs: isBundle ? selectedPdfs.map(p => p.title) : null
           })
         });
         
@@ -123,7 +125,6 @@ const BookingSection = ({ onSuccess, isBundle }) => {
                   if (verifyData.conflict) {
                     setConflictUI(true);
                   } else {
-                    alert('Payment successful! Your slot is confirmed.');
                     setShowForm(false);
                     setSelectedSlot(null);
                     if (onSuccess) onSuccess();
