@@ -12,6 +12,13 @@ const BundleStore = ({ onSuccess }) => {
   const [bundles, setBundles] = useState([]);
   const [offerings, setOfferings] = useState([]);
 
+  // Buyer details
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [validationError, setValidationError] = useState('');
+  const [isProcessing, setIsProcessing] = useState(false);
+
   useEffect(() => {
     fetch('/api/bundles')
       .then(res => res.json())
@@ -30,9 +37,11 @@ const BundleStore = ({ onSuccess }) => {
     if (b.pdfSelectionCount > 0) {
       setStep('select-pdfs');
     } else if (b.hasConsultation) {
-      navigate('/bundle', { state: { bundle: b, selectedPdfs: [] } });
+      const pdfsToPass = b.id === 'all-in-one' ? offerings : [];
+      navigate('/bundle', { state: { bundle: b, selectedPdfs: pdfsToPass } });
     } else {
       setStep('checkout');
+      setValidationError('');
     }
   };
 
@@ -51,12 +60,109 @@ const BundleStore = ({ onSuccess }) => {
       navigate('/bundle', { state: { bundle: selectedBundle, selectedPdfs } });
     } else {
       setStep('checkout');
+      setValidationError('');
     }
   };
 
-  const handleCheckout = (e) => {
+  const handleCheckout = async (e) => {
     e.preventDefault();
-    setTimeout(() => onSuccess(selectedBundle?.hasConsultation), 800);
+    
+    if (!name.trim() || !email.trim() || !phone.trim()) {
+      setValidationError('Please fill in all fields before proceeding');
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setValidationError('Please enter a valid email address');
+      return;
+    }
+
+    const phoneRegex = /^\+?[\d\s-]{10,}$/;
+    if (!phoneRegex.test(phone)) {
+      setValidationError('Please enter a valid phone number');
+      return;
+    }
+    
+    setValidationError('');
+    setIsProcessing(true);
+
+    try {
+      const res = await fetch('/api/bundle/create-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          bundleId: selectedBundle.id,
+          selectedPdfs: selectedPdfs.map(p => p.id),
+          amount: selectedBundle.price,
+          name,
+          email,
+          phone
+        }),
+      });
+
+      const orderData = await res.json();
+
+      if (orderData.error) {
+        setValidationError(orderData.error);
+        setIsProcessing(false);
+        return;
+      }
+
+      const options = {
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+        amount: orderData.amount,
+        currency: orderData.currency,
+        name: 'Jenish Shah',
+        description: selectedBundle.title,
+        order_id: orderData.id,
+        handler: async function (response) {
+          try {
+            const verifyRes = await fetch('/api/bundle/verify-payment', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ ...response, bundleId: selectedBundle.id })
+            });
+            const verifyData = await verifyRes.json();
+            if (verifyData.success) {
+              alert('Payment successful! Your bundle access is confirmed.');
+              // Reset
+              navigate('/');
+            } else {
+              alert('Payment verification failed. Invalid signature.');
+            }
+          } catch (err) {
+            console.error(err);
+            alert('Verification error. Please check console.');
+          }
+        },
+        prefill: {
+          name: name,
+          email: email,
+          contact: phone,
+        },
+        theme: {
+          color: "#00ff66"
+        },
+        modal: {
+          ondismiss: function() {
+            setIsProcessing(false);
+          }
+        }
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.on('payment.failed', function (response){
+        console.error(response.error);
+        alert('Payment failed: ' + response.error.description);
+      });
+      rzp.open();
+    } catch (error) {
+      console.error(error);
+      alert('Failed to initialize checkout. Please try again.');
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   return (
@@ -258,15 +364,46 @@ const BundleStore = ({ onSuccess }) => {
                 <span className="font-bold text-slate-400">Total Due</span>
                 <span className="font-black text-[#00ff66] text-3xl tracking-tight">₹{selectedBundle.price}</span>
               </div>
+              
+              <div className="mt-8 pt-8 border-t border-white/5 relative z-10">
+                <p className="text-xs text-slate-500 uppercase font-bold tracking-widest mb-4">Your Details</p>
+                <div className="space-y-4">
+                  <input
+                    type="text"
+                    placeholder="Full Name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-slate-500 focus:outline-none focus:border-[#00ff66]/50 focus:bg-[#00ff66]/5 transition-colors"
+                  />
+                  <input
+                    type="email"
+                    placeholder={selectedBundle?.hasConsultation ? "Email (to receive meeting link and pdf)" : "Email (for PDF delivery)"}
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-slate-500 focus:outline-none focus:border-[#00ff66]/50 focus:bg-[#00ff66]/5 transition-colors"
+                  />
+                  <input
+                    type="tel"
+                    placeholder="Phone Number"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-slate-500 focus:outline-none focus:border-[#00ff66]/50 focus:bg-[#00ff66]/5 transition-colors"
+                  />
+                </div>
+              </div>
             </div>
             
             <div className="flex flex-col gap-4 pt-4">
               <button 
                 onClick={handleCheckout}
-                className="w-full py-5 bg-[#00ff66] text-[#0B0C10] font-bold text-lg rounded-2xl flex items-center justify-center gap-3 hover:bg-[#00cc52] transition-colors active:scale-95"
+                disabled={isProcessing}
+                className="w-full py-5 bg-[#00ff66] disabled:bg-[#00ff66]/50 disabled:cursor-not-allowed text-[#0B0C10] font-bold text-lg rounded-2xl flex items-center justify-center gap-3 hover:bg-[#00cc52] transition-colors active:scale-95"
               >
-                Proceed to Secure Payment <ArrowRight weight="bold" size={20} />
+                {isProcessing ? 'Processing...' : 'Proceed to Secure Payment'} <ArrowRight weight="bold" size={20} />
               </button>
+              {validationError && (
+                <p className="text-red-500 text-sm text-center font-medium">{validationError}</p>
+              )}
             </div>
           </motion.div>
         )}

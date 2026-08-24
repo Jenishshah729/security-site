@@ -6,6 +6,11 @@ import { Link } from 'react-router-dom';
 const PDFStore = ({ onSuccess }) => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [offerings, setOfferings] = useState([]);
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [formError, setFormError] = useState('');
+  const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
     fetch('/api/offerings')
@@ -14,9 +19,85 @@ const PDFStore = ({ onSuccess }) => {
       .catch(console.error);
   }, []);
 
-  const handleCheckout = (e) => {
+  const handleCheckout = async (e) => {
     e.preventDefault();
-    setTimeout(() => onSuccess(), 800);
+    setFormError('');
+    if (!name || !email || !phone) {
+      setFormError('Please fill in all fields before proceeding');
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setFormError('Please enter a valid email address');
+      return;
+    }
+
+    const phoneRegex = /^\+?[\d\s-]{10,}$/;
+    if (!phoneRegex.test(phone)) {
+      setFormError('Please enter a valid phone number');
+      return;
+    }
+    
+    setIsProcessing(true);
+    try {
+      const orderRes = await fetch('/api/pdf/create-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          pdfId: selectedProduct.id,
+          amount: selectedProduct.price,
+          name,
+          email,
+          phone
+        })
+      });
+      const order = await orderRes.json();
+      
+      const options = {
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+        amount: order.amount,
+        currency: order.currency,
+        name: 'Thejenishshah',
+        description: selectedProduct.title,
+        order_id: order.id,
+        handler: async function (response) {
+          try {
+            const verifyRes = await fetch('/api/pdf/verify-payment', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(response)
+            });
+            const verifyData = await verifyRes.json();
+            if (verifyData.success) {
+              alert('Payment successful! We will email you the PDF shortly.');
+              setSelectedProduct(null);
+              if (onSuccess) onSuccess();
+            } else {
+              alert('Payment verification failed. Invalid signature.');
+            }
+          } catch (err) {
+            console.error(err);
+            alert('Verification error. Please check console.');
+          }
+        },
+        prefill: {
+          name,
+          email,
+          contact: phone
+        },
+        theme: {
+          color: '#00e5ff'
+        }
+      };
+      const rzp1 = new window.Razorpay(options);
+      rzp1.open();
+    } catch (error) {
+      console.error(error);
+      alert('Something went wrong during checkout.');
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   return (
@@ -58,7 +139,7 @@ const PDFStore = ({ onSuccess }) => {
                     className="group relative rounded-[28px] overflow-hidden bg-[#12141D] border border-white/10 hover:border-[#00e5ff]/30 transition-all duration-500 flex flex-col shadow-xl"
                   >
                     <div className="aspect-[2/3] w-full overflow-hidden bg-[#0B0F19] relative flex items-center justify-center">
-                      <img src={p.coverImage || "https://placehold.co/600x800/12141D/ffffff?text=PDF"} alt={p.title} className="w-full h-full object-contain opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-transform duration-700 ease-out" />
+                      <img src={p.coverImage ? `${import.meta.env.BASE_URL}${p.coverImage.replace(/^\/+/, '')}` : "https://placehold.co/600x800/12141D/ffffff?text=PDF"} alt={p.title} className="w-full h-full object-contain opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-transform duration-700 ease-out" />
                       <div className="absolute inset-0 bg-gradient-to-t from-[#12141D] via-[#12141D]/20 to-transparent"></div>
                       <div className="absolute top-4 right-4 bg-black/40 backdrop-blur-md text-slate-300 px-3 py-1.5 rounded-full text-xs font-bold tracking-wide border border-white/10 flex items-center gap-1.5">
                         <FilePdf size={16} weight="fill" className="text-slate-400" /> E-Book
@@ -113,18 +194,47 @@ const PDFStore = ({ onSuccess }) => {
                 </div>
               </div>
               
-              <div className="flex justify-between items-center text-xl relative z-10">
+              <div className="flex justify-between items-center text-xl relative z-10 mb-6">
                 <span className="font-bold text-slate-400">Total Due</span>
                 <span className="font-black text-[#00e5ff] text-3xl tracking-tight">₹{selectedProduct.price}</span>
               </div>
+              
+              <div className="space-y-4">
+                <input 
+                  type="text"
+                  placeholder="Your Name"
+                  value={name}
+                  onChange={e => setName(e.target.value)}
+                  className="w-full bg-[#0B0F19] text-white border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-[#00e5ff] transition-colors"
+                />
+                <input 
+                  type="email"
+                  placeholder="Your Email (for PDF delivery)"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  className="w-full bg-[#0B0F19] text-white border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-[#00e5ff] transition-colors"
+                />
+                <input 
+                  type="tel"
+                  placeholder="Your Phone Number"
+                  value={phone}
+                  onChange={e => setPhone(e.target.value)}
+                  className="w-full bg-[#0B0F19] text-white border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-[#00e5ff] transition-colors"
+                />
+              </div>
+              
+              {formError && (
+                <p className="text-red-500 text-sm mt-4 font-medium text-center">{formError}</p>
+              )}
             </div>
             
             <div className="flex flex-col gap-4 pt-4">
               <button 
                 onClick={handleCheckout}
-                className="w-full py-5 bg-[#00e5ff] text-[#0B0C10] font-bold text-lg rounded-2xl flex items-center justify-center gap-3 hover:bg-[#00ccff] transition-colors active:scale-95"
+                disabled={isProcessing}
+                className="w-full py-5 bg-[#00e5ff] text-[#0B0C10] font-bold text-lg rounded-2xl flex items-center justify-center gap-3 hover:bg-[#00ccff] transition-colors active:scale-95 disabled:opacity-50"
               >
-                Proceed to Secure Payment <ArrowRight weight="bold" size={20} />
+                {isProcessing ? 'Processing...' : 'Proceed to Secure Payment'} <ArrowRight weight="bold" size={20} />
               </button>
               <button 
                 type="button" 

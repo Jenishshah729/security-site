@@ -3,5 +3,7 @@ dist
 .env
 google-credentials.json
 backend/dev.db
+backend/prisma/dev.db
+*.db
 .DS_Store
 scratch

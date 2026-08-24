@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Calendar, Clock, ArrowRight, ArrowLeft } from '@phosphor-icons/react';
+import { Calendar, Clock, ArrowRight, ArrowLeft, CheckCircle } from '@phosphor-icons/react';
 import { Link, useLocation } from 'react-router-dom';
 
 const BookingSection = ({ onSuccess, isBundle }) => {
@@ -13,8 +13,11 @@ const BookingSection = ({ onSuccess, isBundle }) => {
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [formError, setFormError] = useState('');
+  const [conflictUI, setConflictUI] = useState(false);
   
-  const [formData, setFormData] = useState({ name: '', email: '' });
+  const [formData, setFormData] = useState({ name: '', email: '', phone: '', topic: '' });
 
   useEffect(() => {
     const fetchSlots = async () => {
@@ -61,10 +64,29 @@ const BookingSection = ({ onSuccess, isBundle }) => {
 
   const handleCheckout = async (e) => {
     e.preventDefault();
+    setFormError('');
+
+    if (!formData.name || !formData.email || !formData.phone || !formData.topic) {
+      setFormError('Please fill in all fields before proceeding');
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      setFormError('Please enter a valid email address');
+      return;
+    }
+
+    const phoneRegex = /^\+?[\d\s-]{10,}$/;
+    if (!phoneRegex.test(formData.phone)) {
+      setFormError('Please enter a valid phone number');
+      return;
+    }
 
     if (selectedSlot) {
+      setIsProcessing(true);
       try {
-        await fetch('/api/book-slot', {
+        const response = await fetch('/api/consultation/create-order', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ 
@@ -72,14 +94,74 @@ const BookingSection = ({ onSuccess, isBundle }) => {
             slotStart: selectedSlot.slotStart,
             slotEnd: selectedSlot.slotEnd,
             name: formData.name,
-            email: formData.email
+            email: formData.email,
+            phone: formData.phone,
+            topic: formData.topic,
+            amount: isBundle ? bundle?.price : settings.price
           })
         });
+        
+        const data = await response.json();
+        
+        if (data.success && data.order) {
+          const options = {
+            key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+            amount: data.order.amount,
+            currency: data.order.currency,
+            name: 'Thejenishshah',
+            description: isBundle ? bundle?.title : '1:1 Consultation',
+            order_id: data.order.id,
+            handler: async function (response) {
+              try {
+                const verifyRes = await fetch('/api/consultation/verify-payment', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ ...response, bookingId: data.bookingId })
+                });
+                const verifyData = await verifyRes.json();
+                if (verifyData.success) {
+                  if (verifyData.conflict) {
+                    setConflictUI(true);
+                  } else {
+                    alert('Payment successful! Your slot is confirmed.');
+                    setShowForm(false);
+                    setSelectedSlot(null);
+                    if (onSuccess) onSuccess();
+                  }
+                } else {
+                  alert('Payment verification failed. Invalid signature.');
+                }
+              } catch (err) {
+                console.error(err);
+                alert('Verification error. Please check console.');
+              }
+            },
+            prefill: {
+              name: formData.name,
+              email: formData.email,
+              contact: formData.phone
+            },
+            theme: {
+              color: isBundle ? '#00ff66' : '#b026ff'
+            }
+          };
+          const rzp = new window.Razorpay(options);
+          rzp.on('payment.failed', function (response){
+            console.error(response.error);
+            alert('Payment failed: ' + response.error.description);
+          });
+          rzp.open();
+          return;
+        } else {
+          alert('Failed to initiate checkout. Please try again.');
+        }
       } catch (err) {
         console.error("Failed to book slot", err);
+        alert('Something went wrong while initiating payment.');
+      } finally {
+        setIsProcessing(false);
       }
     }
-    setTimeout(() => onSuccess(), 800);
   };
 
   const formatDate = (dateString) => {
@@ -178,41 +260,134 @@ const BookingSection = ({ onSuccess, isBundle }) => {
               </div>
             )}
           </motion.div>
+        ) : conflictUI ? (
+          <motion.div 
+            key="conflict"
+            initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.98 }}
+            className="space-y-6 max-w-lg mx-auto py-12 relative z-10 text-center"
+          >
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl mb-6 shadow-xl border bg-orange-500/10 text-orange-500 border-orange-500/20 shadow-orange-500/10">
+              <Calendar size={40} weight="duotone" />
+            </div>
+            <h3 className="text-3xl font-bold text-white tracking-tight mb-4">Payment Successful</h3>
+            <p className="text-slate-300 text-lg leading-relaxed bg-[#12141D] p-6 rounded-2xl border border-white/10">
+              Your payment went through successfully, but this slot was <span className="text-orange-400 font-bold">just taken</span> by another booking a moment ago.
+              <br /><br />
+              Don't worry! We will email you within 24 hours to help you reschedule to a new time that works for you.
+            </p>
+            <button 
+              onClick={() => { setConflictUI(false); setShowForm(false); setSelectedSlot(null); }}
+              className="mt-8 py-4 px-8 rounded-xl font-bold text-slate-300 bg-white/5 border border-white/10 hover:bg-white/10 hover:text-white transition-all w-full"
+            >
+              Return Home
+            </button>
+          </motion.div>
         ) : (
           <motion.div 
             key="checkout"
-            initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}
-            className="space-y-6 relative z-10"
+            initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.98 }}
+            className="space-y-6 max-w-lg mx-auto py-8 relative z-10"
           >
-            <div className="flex items-center justify-between p-6 bg-[#12141D] border border-white/10 rounded-2xl mb-4">
-              <div>
-                <p className="text-xs text-slate-500 uppercase tracking-widest font-bold mb-1">Selected Slot</p>
-                <p className="text-base font-bold text-white">{formatDate(selectedDate)} at {selectedSlot?.time}</p>
+            <div className="text-center mb-10">
+              <div className={`inline-flex items-center justify-center w-20 h-20 rounded-2xl mb-6 shadow-xl border ${isBundle ? 'bg-[#00ff66]/10 text-[#00ff66] border-[#00ff66]/20 shadow-[#00ff66]/10' : 'bg-[#b026ff]/10 text-[#b026ff] border-[#b026ff]/20 shadow-[#b026ff]/10'}`}>
+                <Calendar size={40} weight="duotone" />
               </div>
-              <button type="button" onClick={() => setShowForm(false)} className="text-sm font-medium text-slate-400 hover:text-white bg-white/5 px-4 py-2 rounded-lg transition-colors outline-none">
-                Change
-              </button>
+              <h3 className="text-3xl font-bold text-white tracking-tight">Complete Order</h3>
+            </div>
+
+            <div className="p-8 bg-[#12141D] border border-white/10 rounded-[28px] shadow-2xl relative overflow-hidden">
+              <div className="mb-8 pb-8 border-b border-white/5 relative z-10">
+                
+                <div className="flex justify-between items-start mb-6">
+                  <div>
+                    <p className="text-xs text-slate-500 uppercase font-bold tracking-widest mb-2">{isBundle ? 'Bundle summary' : 'Consultation'}</p>
+                    <p className="text-xl font-bold text-white leading-snug">{isBundle ? bundle?.title : '1:1 Consultation'}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs text-slate-500 uppercase font-bold tracking-widest mb-2">Amount</p>
+                    <p className="text-xl font-bold text-white">₹{isBundle ? bundle?.price : settings.price}</p>
+                  </div>
+                </div>
+
+                <div className="mt-4 p-4 bg-white/5 rounded-xl border border-white/5 flex justify-between items-center">
+                  <div>
+                    <p className="text-xs text-slate-500 uppercase font-bold tracking-widest mb-1">Selected Slot</p>
+                    <p className="text-sm font-bold text-white">{formatDate(selectedDate)} at {selectedSlot?.time}</p>
+                  </div>
+                  <button type="button" onClick={() => setShowForm(false)} className="text-xs font-bold text-slate-400 hover:text-white bg-white/5 px-3 py-1.5 rounded-lg transition-colors outline-none">
+                    Change
+                  </button>
+                </div>
+
+                {selectedPdfs.length > 0 && (
+                  <div className="mt-4 p-4 bg-white/5 rounded-xl border border-white/5">
+                    <p className="text-xs text-slate-500 uppercase font-bold tracking-widest mb-3">Included PDFs</p>
+                    <ul className="space-y-2">
+                      {selectedPdfs.map(pdf => (
+                        <li key={pdf.id} className="text-sm text-slate-300 flex items-center gap-2">
+                          <CheckCircle size={14} className={isBundle ? "text-[#00ff66]" : "text-[#b026ff]"} weight="fill" /> {pdf.title}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                
+              </div>
+              
+              <div className="flex justify-between items-center text-xl relative z-10">
+                <span className="font-bold text-slate-400">Total Due</span>
+                <span className={`font-black text-3xl tracking-tight ${isBundle ? 'text-[#00ff66]' : 'text-[#b026ff]'}`}>₹{isBundle ? bundle?.price : settings.price}</span>
+              </div>
             </div>
             
-            {selectedPdfs.length > 0 && (
-              <div className="p-4 bg-[#12141D] border border-white/10 rounded-2xl mb-4">
-                <p className="text-xs text-slate-500 uppercase tracking-widest font-bold mb-2">Included PDFs</p>
-                <ul className="space-y-1">
-                  {selectedPdfs.map(pdf => (
-                    <li key={pdf.id} className="text-sm text-slate-300 flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#00ff66]"></span> {pdf.title}
-                    </li>
-                  ))}
-                </ul>
+            <div className="flex flex-col gap-4 pt-4">
+              <div className="space-y-4">
+                <input 
+                  type="text"
+                  placeholder="Your Name"
+                  value={formData.name}
+                  onChange={e => setFormData({ ...formData, name: e.target.value })}
+                  className={`w-full bg-[#0B0F19] text-white border border-white/10 rounded-xl px-4 py-3 focus:outline-none transition-colors ${isBundle ? 'focus:border-[#00ff66]' : 'focus:border-[#b026ff]'}`}
+                />
+                <input 
+                  type="email"
+                  placeholder={isBundle ? "Email (to receive meeting link and pdf)" : "Email (for meeting link)"}
+                  value={formData.email}
+                  onChange={e => setFormData({ ...formData, email: e.target.value })}
+                  className={`w-full bg-[#0B0F19] text-white border border-white/10 rounded-xl px-4 py-3 focus:outline-none transition-colors ${isBundle ? 'focus:border-[#00ff66]' : 'focus:border-[#b026ff]'}`}
+                />
+                <input 
+                  type="tel"
+                  placeholder="Your Phone Number"
+                  value={formData.phone}
+                  onChange={e => setFormData({ ...formData, phone: e.target.value })}
+                  className={`w-full bg-[#0B0F19] text-white border border-white/10 rounded-xl px-4 py-3 focus:outline-none transition-colors ${isBundle ? 'focus:border-[#00ff66]' : 'focus:border-[#b026ff]'}`}
+                />
               </div>
-            )}
-            
-            <button 
-              onClick={handleCheckout}
-              className="w-full py-5 bg-[#b026ff] text-white font-bold text-lg rounded-2xl flex items-center justify-center gap-3 hover:bg-[#9d22e6] transition-colors active:scale-95 mt-4"
-            >
-              Confirm Booking <ArrowRight weight="bold" />
-            </button>
+
+              <div className="mb-2">
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Topic to Discuss</label>
+                <textarea 
+                  value={formData.topic}
+                  onChange={(e) => setFormData({ ...formData, topic: e.target.value })}
+                  placeholder="What would you like to cover in this call?"
+                  className="w-full px-5 py-4 bg-[#12141D] border border-white/10 rounded-xl text-white text-sm placeholder:text-slate-600 focus:border-[#b026ff]/50 outline-none transition-colors resize-none"
+                  rows={2}
+                />
+              </div>
+              
+              {formError && (
+                <p className="text-red-500 text-sm font-medium text-center">{formError}</p>
+              )}
+
+              <button 
+                onClick={handleCheckout}
+                disabled={isProcessing}
+                className={`w-full py-5 font-bold text-lg rounded-2xl flex items-center justify-center gap-3 transition-colors active:scale-95 disabled:opacity-50 ${isBundle ? 'bg-[#00ff66] hover:bg-[#00cc52] text-[#0B0C10]' : 'bg-[#b026ff] hover:bg-[#9d22e6] text-white'}`}
+              >
+                {isProcessing ? 'Processing...' : 'Proceed to Secure Payment'} <ArrowRight weight="bold" size={20} />
+              </button>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

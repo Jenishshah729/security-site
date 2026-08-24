@@ -14,7 +14,7 @@ const Header = () => {
         <div className="absolute inset-0 rounded-full bg-accent/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
         <div className="w-full h-full rounded-full overflow-hidden bg-surface-elevated flex items-center justify-center relative z-10">
           <img 
-            src="/logo.jpg" 
+            src={`${import.meta.env.BASE_URL}logo.jpg`} 
             alt="Jenish Shah" 
             className="w-full h-full object-cover transition-all duration-500"
             onError={(e) => {

@@ -14,7 +14,7 @@ async function main() {
   const links = [
     { title: 'Instagram', url: 'https://instagram.com/thejenishshah', order: 2 },
     { title: 'Facebook', url: 'https://facebook.com/thejenishshah', order: 3 },
-    { title: 'YouTube', url: 'https://youtube.com/thejenishshah', order: 4 },
+    { title: 'YouTube', url: 'https://www.youtube.com/@thejenishshah', order: 4 },
     { title: 'LinkedIn', url: 'https://www.linkedin.com/in/thejenishshah/', order: 5 },
   ];
 
