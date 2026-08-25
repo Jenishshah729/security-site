@@ -233,7 +233,9 @@ const BookingSection = ({ onSuccess, isBundle }) => {
 
                 {selectedDate && (
                   <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}>
-                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">Available Times</label>
+                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">
+                      Available Times in IST Time Zone
+                    </label>
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                       {getSlotsForDate(selectedDate).map((slot) => (
                         <motion.button
