@@ -5,5 +5,9 @@ google-credentials.json
 backend/dev.db
 backend/prisma/dev.db
 *.db
+*.db-journal
+*.db-wal
+.env*
+!.env.example
 .DS_Store
 scratch
