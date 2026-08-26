@@ -59,6 +59,7 @@ model Booking {
   bundleId  String?
   selectedPdfs String? // JSON array of pdf IDs
   orderId   String?  @unique
+  amount    Float    @default(0)
   createdAt DateTime @default(now())
 }
 

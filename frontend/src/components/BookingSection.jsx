@@ -14,10 +14,11 @@ const BookingSection = ({ onSuccess, isBundle }) => {
   const [showForm, setShowForm] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
   const [formError, setFormError] = useState('');
   const [conflictUI, setConflictUI] = useState(false);
   
-  const [formData, setFormData] = useState({ name: '', email: '', phone: '', topic: '' });
+  const [formData, setFormData] = useState({ name: '', email: '', phone: '', countryCode: '91', topic: '' });
 
   useEffect(() => {
     const fetchSlots = async () => {
@@ -71,15 +72,20 @@ const BookingSection = ({ onSuccess, isBundle }) => {
       return;
     }
 
+    if (!formData.countryCode || formData.countryCode.length < 1 || formData.countryCode.length > 3) {
+      setFormError('Country code must be 1 to 3 digits');
+      return;
+    }
+
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.email)) {
       setFormError('Please enter a valid email address');
       return;
     }
 
-    const phoneRegex = /^\+?[\d\s-]{10,}$/;
+    const phoneRegex = /^\d{10}$/;
     if (!phoneRegex.test(formData.phone)) {
-      setFormError('Please enter a valid phone number');
+      setFormError('Phone number must be exactly 10 digits');
       return;
     }
 
@@ -95,10 +101,10 @@ const BookingSection = ({ onSuccess, isBundle }) => {
             slotEnd: selectedSlot.slotEnd,
             name: formData.name,
             email: formData.email,
-            phone: formData.phone,
+            phone: '+' + formData.countryCode + formData.phone,
             topic: formData.topic,
             amount: isBundle ? bundle?.price : settings.price,
-            bundleId: isBundle ? bundle?.title : null,
+            bundleId: isBundle ? bundle?.id : null,
             selectedPdfs: isBundle ? selectedPdfs.map(p => p.title) : null
           })
         });
@@ -115,6 +121,7 @@ const BookingSection = ({ onSuccess, isBundle }) => {
             order_id: data.order.id,
             handler: async function (response) {
               try {
+                setIsVerifying(true);
                 const verifyRes = await fetch('/api/consultation/verify-payment', {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
@@ -135,6 +142,8 @@ const BookingSection = ({ onSuccess, isBundle }) => {
               } catch (err) {
                 console.error(err);
                 alert('Verification error. Please check console.');
+              } finally {
+                setIsVerifying(false);
               }
             },
             prefill: {
@@ -149,7 +158,6 @@ const BookingSection = ({ onSuccess, isBundle }) => {
           const rzp = new window.Razorpay(options);
           rzp.on('payment.failed', function (response){
             console.error(response.error);
-            alert('Payment failed: ' + response.error.description);
           });
           rzp.open();
           return;
@@ -359,13 +367,33 @@ const BookingSection = ({ onSuccess, isBundle }) => {
                   onChange={e => setFormData({ ...formData, email: e.target.value })}
                   className={`w-full bg-[#0B0F19] text-white border border-white/10 rounded-xl px-4 py-3 focus:outline-none transition-colors ${isBundle ? 'focus:border-[#00ff66]' : 'focus:border-[#b026ff]'}`}
                 />
-                <input 
-                  type="tel"
-                  placeholder="Your Phone Number"
-                  value={formData.phone}
-                  onChange={e => setFormData({ ...formData, phone: e.target.value })}
-                  className={`w-full bg-[#0B0F19] text-white border border-white/10 rounded-xl px-4 py-3 focus:outline-none transition-colors ${isBundle ? 'focus:border-[#00ff66]' : 'focus:border-[#b026ff]'}`}
-                />
+                <div className="flex gap-2">
+                  <div className={`flex items-center bg-[#0B0F19] text-white border border-white/10 rounded-xl px-4 py-3 focus-within:border-[#00ff66] transition-colors ${isBundle ? 'focus-within:border-[#00ff66]' : 'focus-within:border-[#b026ff]'}`}>
+                    <span className="text-white/50 mr-1">+</span>
+                    <input 
+                      type="tel"
+                      value={formData.countryCode}
+                      maxLength="3"
+                      placeholder="91"
+                      onChange={e => {
+                        const val = e.target.value.replace(/\D/g, '');
+                        setFormData({ ...formData, countryCode: val });
+                      }}
+                      className="bg-transparent outline-none w-8 text-center"
+                    />
+                  </div>
+                  <input 
+                    type="tel"
+                    placeholder="Your Phone Number"
+                    value={formData.phone}
+                    maxLength="10"
+                    onChange={e => {
+                      const val = e.target.value.replace(/\D/g, '');
+                      setFormData({ ...formData, phone: val });
+                    }}
+                    className={`w-full bg-[#0B0F19] text-white border border-white/10 rounded-xl px-4 py-3 focus:outline-none transition-colors ${isBundle ? 'focus:border-[#00ff66]' : 'focus:border-[#b026ff]'}`}
+                  />
+                </div>
               </div>
 
               <div className="mb-2">
@@ -385,10 +413,20 @@ const BookingSection = ({ onSuccess, isBundle }) => {
 
               <button 
                 onClick={handleCheckout}
-                disabled={isProcessing}
+                disabled={isProcessing || isVerifying}
                 className={`w-full py-5 font-bold text-lg rounded-2xl flex items-center justify-center gap-3 transition-colors active:scale-95 disabled:opacity-50 ${isBundle ? 'bg-[#00ff66] hover:bg-[#00cc52] text-[#0B0C10]' : 'bg-[#b026ff] hover:bg-[#9d22e6] text-white'}`}
               >
-                {isProcessing ? 'Processing...' : 'Proceed to Secure Payment'} <ArrowRight weight="bold" size={20} />
+                {isProcessing ? 'Processing...' : isVerifying ? (
+                  <>
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Confirming your booking...
+                  </>
+                ) : (
+                  <>Proceed to Secure Payment <ArrowRight weight="bold" size={20} /></>
+                )}
               </button>
             </div>
           </motion.div>

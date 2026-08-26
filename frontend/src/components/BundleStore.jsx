@@ -16,6 +16,7 @@ const BundleStore = ({ onSuccess }) => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
+  const [countryCode, setCountryCode] = useState('91');
   const [validationError, setValidationError] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -72,15 +73,20 @@ const BundleStore = ({ onSuccess }) => {
       return;
     }
 
+    if (!countryCode || countryCode.length < 1 || countryCode.length > 3) {
+      setValidationError('Country code must be 1 to 3 digits');
+      return;
+    }
+
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       setValidationError('Please enter a valid email address');
       return;
     }
 
-    const phoneRegex = /^\+?[\d\s-]{10,}$/;
+    const phoneRegex = /^\d{10}$/;
     if (!phoneRegex.test(phone)) {
-      setValidationError('Please enter a valid phone number');
+      setValidationError('Phone number must be exactly 10 digits');
       return;
     }
     
@@ -92,12 +98,12 @@ const BundleStore = ({ onSuccess }) => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          bundleId: selectedBundle.title,
+          bundleId: selectedBundle.id,
           selectedPdfs: selectedPdfs.map(p => p.title),
           amount: selectedBundle.price,
           name,
           email,
-          phone
+          phone: '+' + countryCode + phone
         }),
       });
 
@@ -116,23 +122,16 @@ const BundleStore = ({ onSuccess }) => {
         name: 'Jenish Shah',
         description: selectedBundle.title,
         order_id: orderData.id,
-        handler: async function (response) {
-          try {
-            const verifyRes = await fetch('/api/bundle/verify-payment', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ ...response, bundleId: selectedBundle.id })
-            });
-            const verifyData = await verifyRes.json();
-            if (verifyData.success) {
-              if (onSuccess) onSuccess(selectedBundle.hasConsultation);
-            } else {
-              alert('Payment verification failed. Invalid signature.');
-            }
-          } catch (err) {
-            console.error(err);
-            alert('Verification error. Please check console.');
-          }
+        handler: function (response) {
+          // Immediately redirect
+          if (onSuccess) onSuccess(selectedBundle.hasConsultation);
+          
+          // Verify in background
+          fetch('/api/bundle/verify-payment', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ...response, bundleId: selectedBundle.id })
+          }).catch(console.error);
         },
         prefill: {
           name: name,
@@ -152,7 +151,6 @@ const BundleStore = ({ onSuccess }) => {
       const rzp = new window.Razorpay(options);
       rzp.on('payment.failed', function (response){
         console.error(response.error);
-        alert('Payment failed: ' + response.error.description);
       });
       rzp.open();
     } catch (error) {
@@ -380,13 +378,33 @@ const BundleStore = ({ onSuccess }) => {
                     onChange={(e) => setEmail(e.target.value)}
                     className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-slate-500 focus:outline-none focus:border-[#00ff66]/50 focus:bg-[#00ff66]/5 transition-colors"
                   />
-                  <input
-                    type="tel"
-                    placeholder="Phone Number"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-slate-500 focus:outline-none focus:border-[#00ff66]/50 focus:bg-[#00ff66]/5 transition-colors"
-                  />
+                  <div className="flex gap-2">
+                    <div className="flex items-center bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus-within:border-[#00ff66]/50 focus-within:bg-[#00ff66]/5 transition-colors">
+                      <span className="text-white/50 mr-1">+</span>
+                      <input 
+                        type="tel"
+                        value={countryCode}
+                        maxLength="3"
+                        placeholder="91"
+                        onChange={e => {
+                          const val = e.target.value.replace(/\D/g, '');
+                          setCountryCode(val);
+                        }}
+                        className="bg-transparent outline-none w-8 text-center"
+                      />
+                    </div>
+                    <input
+                      type="tel"
+                      placeholder="Phone Number"
+                      value={phone}
+                      maxLength="10"
+                      onChange={e => {
+                        const val = e.target.value.replace(/\D/g, '');
+                        setPhone(val);
+                      }}
+                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-slate-500 focus:outline-none focus:border-[#00ff66]/50 focus:bg-[#00ff66]/5 transition-colors"
+                    />
+                  </div>
                 </div>
               </div>
             </div>

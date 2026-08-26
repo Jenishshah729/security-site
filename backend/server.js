@@ -57,25 +57,102 @@ async function sendAdminNotification(subject, text) {
   }
 }
 
+async function getPdfTitlesText(pdfIdString) {
+  if (!pdfIdString || pdfIdString === '[]') return '';
+  try {
+    let ids = [];
+    if (pdfIdString.startsWith('[')) {
+      const parsed = JSON.parse(pdfIdString);
+      ids = Array.isArray(parsed) ? parsed : [];
+    } else {
+      ids = pdfIdString.split(',').map(s => s.trim());
+    }
+    const numericIds = ids.map(Number).filter(n => !isNaN(n));
+    if (numericIds.length === 0) return pdfIdString;
+    const offerings = await prisma.offering.findMany({
+      where: { id: { in: numericIds } }
+    });
+    if (offerings.length === 0) return pdfIdString;
+    return offerings.map(o => o.title).join(', ');
+  } catch (err) {
+    return pdfIdString;
+  }
+}
 
 // Security Middlewares
-app.use(helmet()); 
-app.use(cors()); 
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "https://checkout.razorpay.com"],
+      frameSrc: ["'self'", "https://api.razorpay.com"],
+    },
+  },
+  xFrameOptions: { action: "deny" },
+  strictTransportSecurity: {
+    maxAge: 31536000, // 1 year
+    includeSubDomains: true,
+    preload: true
+  },
+  xContentTypeOptions: true
+})); 
+app.use(cors({
+  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  credentials: true
+})); 
 app.use(express.json());
 
-// Rate Limiting on all API routes to prevent brute-force/spam
+// Rate Limiting on general API routes
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 1000, // Increased limit for testing
+  max: 1000, 
   standardHeaders: true,
   legacyHeaders: false,
   message: 'Too many requests from this IP, please try again after 15 minutes'
 });
 app.use('/api/', apiLimiter);
 
-const slotSchema = z.object({
-  date: z.string(), // e.g., "2026-08-20"
-  time: z.string()  // e.g., "14:00"
+// Specific rate limit for payment/booking endpoints
+const paymentLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: 'Too many payment requests, please try again later'
+});
+
+const customBundles = [
+  { id: 'all-in-one', title: 'All-in-One (1:1 + all 6 PDFs)', price: 649, originalPrice: 763, savings: 114, description: '1:1 Consultation\nAll 6 PDFs included\nMaximum value package', hasConsultation: true, pdfSelectionCount: 0, paymentLink: 'https://rzp.io/rzp/all61' },
+  { id: '1-1-any-4', title: '1:1 + any 4 PDFs', price: 549, originalPrice: 625, savings: 76, description: '1:1 Consultation\nChoose any 4 PDFs', hasConsultation: true, pdfSelectionCount: 4, paymentLink: 'https://rzp.io/rzp/1and4' },
+  { id: '1-1-any-2', title: '1:1 + any 2 PDFs', price: 449, originalPrice: 487, savings: 38, description: '1:1 Consultation\nChoose any 2 PDFs', hasConsultation: true, pdfSelectionCount: 2, paymentLink: 'https://rzp.io/rzp/2and1' },
+  { id: 'any-4-pdfs', title: 'Any 4 PDFs', price: 229, originalPrice: 276, savings: 47, description: 'Choose any 4 PDFs', hasConsultation: false, pdfSelectionCount: 4, paymentLink: 'https://rzp.io/rzp/any4' },
+  { id: 'any-2-pdfs', title: 'Any 2 PDFs', price: 119, originalPrice: 138, savings: 19, description: 'Choose any 2 PDFs', hasConsultation: false, pdfSelectionCount: 2, paymentLink: 'https://rzp.io/rzp/any2pd' }
+];
+
+const contactSchema = z.object({
+  name: z.string().min(1, "Name is required").max(100),
+  email: z.string().email("Invalid email address"),
+  phone: z.string().max(20).optional().nullable(),
+});
+
+const consultationOrderSchema = contactSchema.extend({
+  eventId: z.string().min(1),
+  slotStart: z.string().min(1),
+  slotEnd: z.string().min(1),
+  topic: z.string().optional().nullable(),
+  bundleId: z.string().optional().nullable(),
+  selectedPdfs: z.array(z.string()).optional().nullable()
+});
+
+const pdfOrderSchema = contactSchema.extend({
+  pdfIds: z.union([z.string(), z.array(z.string())]).refine(val => {
+    return Array.isArray(val) ? val.length > 0 : val.trim().length > 0;
+  }, "At least one PDF must be selected")
+});
+
+const bundleOrderSchema = contactSchema.extend({
+  bundleId: z.string().min(1, "Bundle ID is required"),
+  selectedPdfs: z.array(z.string()).optional().nullable()
 });
 
 // --- TIME SLOT ROUTES ---
@@ -163,13 +240,20 @@ app.get('/api/slots', async (req, res) => {
   }
 });
 
-// Public route to initialize booking intent with Orders API
-app.post('/api/consultation/create-order', async (req, res) => {
+app.post('/api/consultation/create-order', paymentLimiter, async (req, res) => {
   try {
-    console.log(`[DEBUG] /api/consultation/create-order called. Using Razorpay Key ID: ${process.env.RAZORPAY_KEY_ID}`);
-    const { eventId, slotStart, slotEnd, email, name, phone, amount, topic, bundleId, selectedPdfs } = req.body;
+    const validatedData = consultationOrderSchema.parse(req.body);
+    const { eventId, slotStart, slotEnd, email, name, phone, topic, bundleId, selectedPdfs } = validatedData;
     
-    const finalAmount = amount || 349;
+    // Server-side price calculation
+    let finalAmount = 349;
+    if (bundleId) {
+      const bundle = customBundles.find(b => b.id === bundleId);
+      if (bundle) finalAmount = bundle.price;
+    } else {
+      const settings = await prisma.consultationSetting.findUnique({ where: { id: 1 } });
+      if (settings) finalAmount = settings.price;
+    }
     
     const expiresAt = new Date();
     expiresAt.setMinutes(expiresAt.getMinutes() + 15);
@@ -181,12 +265,13 @@ app.post('/api/consultation/create-order', async (req, res) => {
         slotEnd: new Date(slotEnd),
         status: 'PENDING',
         expiresAt,
-        name: name || '',
-        email: email || '',
+        name,
+        email,
         phone: phone || '',
         topic: topic || '',
         bundleId: bundleId || null,
-        selectedPdfs: selectedPdfs ? JSON.stringify(selectedPdfs) : null
+        selectedPdfs: selectedPdfs ? JSON.stringify(selectedPdfs) : null,
+        amount: finalAmount
       }
     });
 
@@ -211,12 +296,15 @@ app.post('/api/consultation/create-order', async (req, res) => {
 
     res.json({ success: true, order, bookingId: newBooking.id });
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ error: 'Validation failed', details: error.errors });
+    }
     console.error("Failed to create consultation order:", error);
-    res.status(400).json({ error: 'Failed to create consultation order' });
+    res.status(500).json({ error: 'Failed to create consultation order' });
   }
 });
 
-app.post('/api/consultation/verify-payment', async (req, res) => {
+app.post('/api/consultation/verify-payment', paymentLimiter, async (req, res) => {
   try {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature, bookingId } = req.body;
     
@@ -481,9 +569,10 @@ app.post('/api/webhook/payment', express.raw({type: 'application/json'}), async 
             where: { id: purchase.id },
             data: { status: 'SUCCESS', paymentId: payment.id }
           });
+          const pdfNames = await getPdfTitlesText(purchase.pdfId);
           sendAdminNotification(
             'New PDF Purchase!',
-            `You have a new purchase!\n\nName: ${purchase.name}\nEmail: ${purchase.email}\nPhone: ${purchase.phone || 'N/A'}\nProduct PDF ID: ${purchase.pdfId}\nAmount Paid: ₹${purchase.amount}\n\nPlease fulfill this order and check the "isFulfilled" box in Prisma Studio when done.`
+            `You have a new purchase!\n\nName: ${purchase.name}\nEmail: ${purchase.email}\nPhone: ${purchase.phone || 'N/A'}\nPurchased PDFs: ${pdfNames}\nAmount Paid: ₹${purchase.amount}`
           );
         }
       } else if (type === 'BUNDLE') {
@@ -493,9 +582,12 @@ app.post('/api/webhook/payment', express.raw({type: 'application/json'}), async 
             where: { id: purchase.id },
             data: { status: 'SUCCESS', paymentId: payment.id }
           });
+          const bundle = customBundles.find(b => b.id === purchase.bundleId);
+          const bundleTitle = bundle ? bundle.title : purchase.bundleId;
+          const pdfNames = await getPdfTitlesText(purchase.selectedPdfs);
           sendAdminNotification(
             'New Bundle Purchase!',
-            `You have a new purchase!\n\nName: ${purchase.name}\nEmail: ${purchase.email}\nPhone: ${purchase.phone || 'N/A'}\nBundle ID: ${purchase.bundleId}\nSelected PDFs: ${purchase.selectedPdfs}\nAmount Paid: ₹${purchase.amount}\n\nPlease fulfill this order and check the "isFulfilled" box in Prisma Studio when done.`
+            `You have a new purchase!\n\nName: ${purchase.name}\nEmail: ${purchase.email}\nPhone: ${purchase.phone || 'N/A'}\nBundle: ${bundleTitle}\nSelected PDFs: ${pdfNames}\nAmount Paid: ₹${purchase.amount}`
           );
         }
       }
@@ -516,12 +608,22 @@ const razorpay = new Razorpay({
 });
 console.log(`[DEBUG] Initialized Razorpay with Key ID: ${process.env.RAZORPAY_KEY_ID}`);
 
-app.post('/api/pdf/create-order', async (req, res) => {
+app.post('/api/pdf/create-order', paymentLimiter, async (req, res) => {
   try {
-    const { pdfId, amount, name, email, phone } = req.body;
+    const validatedData = pdfOrderSchema.parse(req.body);
+    const { pdfIds, name, email, phone } = validatedData;
+    
+    // Server-side price calculation
+    const pdfIdArray = Array.isArray(pdfIds) ? pdfIds : [pdfIds];
+    const validIds = pdfIdArray.map(Number).filter(n => !isNaN(n));
+    const offerings = await prisma.offering.findMany({
+      where: { id: { in: validIds.length > 0 ? validIds : [-1] } }
+    });
+    let finalAmount = offerings.reduce((sum, offer) => sum + offer.price, 0);
+    if (finalAmount <= 0) finalAmount = 149; // fallback
     
     const options = {
-      amount: amount * 100, // amount in smallest currency unit
+      amount: finalAmount * 100, // amount in smallest currency unit
       currency: "INR",
       receipt: `receipt_order_${Date.now()}`,
       notes: { type: 'PDF' }
@@ -532,8 +634,8 @@ app.post('/api/pdf/create-order', async (req, res) => {
     await prisma.pdfPurchase.create({
       data: {
         orderId: order.id,
-        pdfId: String(pdfId),
-        amount: parseFloat(amount),
+        pdfId: Array.isArray(pdfIds) ? pdfIds.join(', ') : String(pdfIds),
+        amount: finalAmount,
         name,
         email,
         phone: phone || null,
@@ -542,12 +644,15 @@ app.post('/api/pdf/create-order', async (req, res) => {
     
     res.json(order);
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ error: 'Validation failed', details: error.errors });
+    }
     console.error("Failed to create Razorpay order:", error);
     res.status(500).json({ error: 'Failed to create order' });
   }
 });
 
-app.post('/api/pdf/verify-payment', async (req, res) => {
+app.post('/api/pdf/verify-payment', paymentLimiter, async (req, res) => {
   try {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
     
@@ -563,9 +668,10 @@ app.post('/api/pdf/verify-payment', async (req, res) => {
           where: { id: purchase.id },
           data: { status: 'SUCCESS', paymentId: razorpay_payment_id }
         });
+        const pdfNames = await getPdfTitlesText(purchase.pdfId);
         sendAdminNotification(
           'New PDF Purchase!',
-          `You have a new purchase!\n\nName: ${purchase.name}\nEmail: ${purchase.email}\nPhone: ${purchase.phone || 'N/A'}\nProduct PDF ID: ${purchase.pdfId}\nAmount Paid: ₹${purchase.amount}\n\nPlease fulfill this order and check the "isFulfilled" box in Prisma Studio when done.`
+          `You have a new purchase!\n\nName: ${purchase.name}\nEmail: ${purchase.email}\nPhone: ${purchase.phone || 'N/A'}\nPurchased PDFs: ${pdfNames}\nAmount Paid: ₹${purchase.amount}`
         );
       }
       res.json({ success: true });
@@ -587,12 +693,18 @@ app.post('/api/pdf/verify-payment', async (req, res) => {
 
 // --- BUNDLE PURCHASE ROUTES ---
 
-app.post('/api/bundle/create-order', async (req, res) => {
+app.post('/api/bundle/create-order', paymentLimiter, async (req, res) => {
   try {
-    const { bundleId, selectedPdfs, amount, name, email, phone } = req.body;
+    const validatedData = bundleOrderSchema.parse(req.body);
+    const { bundleId, selectedPdfs, name, email, phone } = validatedData;
+    
+    // Server-side price calculation
+    let finalAmount = 229; // fallback
+    const bundle = customBundles.find(b => b.id === bundleId);
+    if (bundle) finalAmount = bundle.price;
     
     const options = {
-      amount: amount * 100,
+      amount: finalAmount * 100,
       currency: "INR",
       receipt: `receipt_bundle_${Date.now()}`,
       notes: { type: 'BUNDLE' }
@@ -605,7 +717,7 @@ app.post('/api/bundle/create-order', async (req, res) => {
         orderId: order.id,
         bundleId: String(bundleId),
         selectedPdfs: JSON.stringify(selectedPdfs || []),
-        amount: parseFloat(amount),
+        amount: finalAmount,
         name,
         email,
         phone: phone || null,
@@ -614,12 +726,15 @@ app.post('/api/bundle/create-order', async (req, res) => {
     
     res.json(order);
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ error: 'Validation failed', details: error.errors });
+    }
     console.error("Failed to create bundle order:", error);
     res.status(500).json({ error: 'Failed to create order' });
   }
 });
 
-app.post('/api/bundle/verify-payment', async (req, res) => {
+app.post('/api/bundle/verify-payment', paymentLimiter, async (req, res) => {
   try {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
     
@@ -635,9 +750,12 @@ app.post('/api/bundle/verify-payment', async (req, res) => {
           where: { id: purchase.id },
           data: { status: 'SUCCESS', paymentId: razorpay_payment_id }
         });
+        const bundle = customBundles.find(b => b.id === purchase.bundleId);
+        const bundleTitle = bundle ? bundle.title : purchase.bundleId;
+        const pdfNames = await getPdfTitlesText(purchase.selectedPdfs);
         sendAdminNotification(
           'New Bundle Purchase!',
-          `You have a new purchase!\n\nName: ${purchase.name}\nEmail: ${purchase.email}\nPhone: ${purchase.phone || 'N/A'}\nBundle ID: ${purchase.bundleId}\nSelected PDFs: ${purchase.selectedPdfs}\nAmount Paid: ₹${purchase.amount}\n\nPlease fulfill this order and check the "isFulfilled" box in Prisma Studio when done.`
+          `You have a new purchase!\n\nName: ${purchase.name}\nEmail: ${purchase.email}\nPhone: ${purchase.phone || 'N/A'}\nBundle: ${bundleTitle}\nSelected PDFs: ${pdfNames}\nAmount Paid: ₹${purchase.amount}`
         );
       }
       res.json({ success: true });
