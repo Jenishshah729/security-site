@@ -86,6 +86,7 @@ app.use(helmet({
       defaultSrc: ["'self'"],
       scriptSrc: ["'self'", "https://checkout.razorpay.com"],
       frameSrc: ["'self'", "https://api.razorpay.com"],
+      'upgrade-insecure-requests': null,
     },
   },
   xFrameOptions: { action: "deny" },
@@ -97,7 +98,10 @@ app.use(helmet({
   xContentTypeOptions: true
 })); 
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  origin: [
+    process.env.FRONTEND_URL || 'http://localhost:5173',
+    'http://161.118.191.223'
+  ],
   credentials: true
 })); 
 app.use(express.json());
