@@ -12,6 +12,7 @@ async function main() {
 
   // Seed Connect Links
   const links = [
+    { title: 'WhatsApp', url: 'https://whatsapp.com/channel/thejenishshah', order: 1 },
     { title: 'Instagram', url: 'https://instagram.com/thejenishshah', order: 2 },
     { title: 'Facebook', url: 'https://facebook.com/thejenishshah', order: 3 },
     { title: 'YouTube', url: 'https://www.youtube.com/@thejenishshah', order: 4 },
