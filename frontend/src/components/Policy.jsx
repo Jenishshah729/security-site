@@ -28,7 +28,7 @@ const Policy = () => {
         <section>
           <h3 className="text-xl font-bold text-white mb-4">1. Booking and Cancellations</h3>
           <p className="mb-4">
-            All 1:1 consultation bookings must be paid in advance. If you need to cancel or reschedule your session, please email <a href="mailto:contact@thejenishshah.com" className="text-white underline decoration-white/30 underline-offset-2 hover:text-slate-300">contact@thejenishshah.com</a> at least 24 hours before your scheduled call time. Cancellations made within 24 hours of the call time will not be refunded.<br/><br/>
+            All 1:1 consultation bookings must be paid in advance. If you need to cancel or reschedule your session, please email <a href="mailto:support@thejenishshah.com" className="text-white underline decoration-white/30 underline-offset-2 hover:text-slate-300">support@thejenishshah.com</a> at least 24 hours before your scheduled call time. Cancellations made within 24 hours of the call time will not be refunded.<br/><br/>
             If Jenish needs to cancel or reschedule a session for any reason, you will be notified in advance and offered an alternative time slot or a full refund, your choice.
           </p>
         </section>
@@ -59,7 +59,7 @@ const Policy = () => {
           <h3 className="text-xl font-bold text-white mb-4">4. Privacy Policy</h3>
           <p className="mb-4">
             We respect your privacy. Any personal information you provide — including your name, email address, phone number, and payment details — is used strictly to fulfill your order or schedule your consultation. We do not sell or share your personal data with third parties.<br/><br/>
-            You may request access to or deletion of your personal data at any time by emailing <a href="mailto:contact@thejenishshah.com" className="text-white underline decoration-white/30 underline-offset-2 hover:text-slate-300">contact@thejenishshah.com</a>.
+            You may request access to or deletion of your personal data at any time by emailing <a href="mailto:support@thejenishshah.com" className="text-white underline decoration-white/30 underline-offset-2 hover:text-slate-300">support@thejenishshah.com</a>.
           </p>
         </section>
 
@@ -73,7 +73,7 @@ const Policy = () => {
         <section>
           <h3 className="text-xl font-bold text-white mb-4">6. Contact Information</h3>
           <p>
-            For any questions or concerns regarding these terms, please contact us at <a href="mailto:contact@thejenishshah.com" className="text-white underline decoration-white/30 underline-offset-2 hover:text-slate-300">contact@thejenishshah.com</a>.
+            For any questions or concerns regarding these terms, please contact us at <a href="mailto:support@thejenishshah.com" className="text-white underline decoration-white/30 underline-offset-2 hover:text-slate-300">support@thejenishshah.com</a>.
           </p>
         </section>
       </div>
