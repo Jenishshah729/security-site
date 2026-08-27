@@ -280,13 +280,13 @@ app.post('/api/consultation/create-order', paymentLimiter, async (req, res) => {
     });
 
     const options = {
-      amount: finalAmount * 100, // amount in paise
+      amount: Math.round(finalAmount * 100), // amount in paise
       currency: "INR",
       receipt: `receipt_booking_${newBooking.id}`,
       notes: {
         type: 'BOOKING',
-        bookingId: newBooking.id,
-        topic: topic || 'No topic provided'
+        bookingId: String(newBooking.id),
+        topic: (topic || 'No topic provided').substring(0, 255)
       }
     };
 
@@ -627,7 +627,7 @@ app.post('/api/pdf/create-order', paymentLimiter, async (req, res) => {
     if (finalAmount <= 0) finalAmount = 149; // fallback
     
     const options = {
-      amount: finalAmount * 100, // amount in smallest currency unit
+      amount: Math.round(finalAmount * 100), // amount in smallest currency unit
       currency: "INR",
       receipt: `receipt_order_${Date.now()}`,
       notes: { type: 'PDF' }
@@ -708,7 +708,7 @@ app.post('/api/bundle/create-order', paymentLimiter, async (req, res) => {
     if (bundle) finalAmount = bundle.price;
     
     const options = {
-      amount: finalAmount * 100,
+      amount: Math.round(finalAmount * 100),
       currency: "INR",
       receipt: `receipt_bundle_${Date.now()}`,
       notes: { type: 'BUNDLE' }
