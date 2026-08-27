@@ -80,30 +80,38 @@ async function getPdfTitlesText(pdfIdString) {
 }
 
 // Security Middlewares
-app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "https://checkout.razorpay.com"],
-      frameSrc: ["'self'", "https://api.razorpay.com"],
-      'upgrade-insecure-requests': null,
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "https://checkout.razorpay.com"],
+        frameSrc: ["'self'", "https://api.razorpay.com", "https://checkout.razorpay.com"],
+        connectSrc: ["'self'", "https://lumberjack.razorpay.com", "https://api.razorpay.com"],
+        imgSrc: ["'self'", "data:", "https:"],
+        upgradeInsecureRequests: [], // Correct syntax for Helmet v8+
+      },
     },
-  },
-  xFrameOptions: { action: "deny" },
-  strictTransportSecurity: {
-    maxAge: 31536000, // 1 year
-    includeSubDomains: true,
-    preload: true
-  },
-  xContentTypeOptions: true
-})); 
-app.use(cors({
-  origin: [
-    process.env.FRONTEND_URL || 'http://localhost:5173',
-    'http://161.118.191.223'
-  ],
-  credentials: true
-})); 
+  })
+);
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  'http://localhost:5173',
+  'http://localhost:3000'
+].filter(Boolean);
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Blocked by CORS policy'));
+      }
+    },
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 // Rate Limiting on general API routes
@@ -529,7 +537,7 @@ app.get('/api/consultation-settings', async (req, res) => {
 
 // --- BOOKING & WEBHOOK ---
 
-app.post('/api/webhook/payment', express.raw({type: 'application/json'}), async (req, res) => {
+app.post('/api/webhook/payment', apiLimiter, express.raw({type: 'application/json'}), async (req, res) => {
   try {
     const signature = req.headers['x-razorpay-signature'];
     const secret = process.env.PAYMENT_SECRET || process.env.RAZORPAY_KEY_SECRET || 'dummy_secret';
