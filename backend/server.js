@@ -359,11 +359,20 @@ app.post('/api/consultation/verify-payment', paymentLimiter, async (req, res) =>
                 service: 'gmail',
                 auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS }
               });
+              let bundleDetails = '';
+              if (booking.bundleId) {
+                const bundleTitles = await getPdfTitlesText(booking.selectedPdfs);
+                const bundle = customBundles.find(b => b.id === booking.bundleId);
+                const bundleName = bundle ? bundle.title : booking.bundleId;
+                bundleDetails = `\nBundle: ${bundleName}\nSelected PDFs: ${bundleTitles}`;
+              }
+              const timeSlotInfo = `\nTime Slot Selected: ${booking.slotStart.toISOString()} - ${booking.slotEnd.toISOString()}`;
+
               await transporter.sendMail({
                 from: process.env.SMTP_USER,
                 to: process.env.ADMIN_EMAIL || process.env.SMTP_USER,
                 subject: 'URGENT: Double Booking Conflict Detected',
-                text: `A double booking conflict occurred for eventId: ${booking.eventId}.\n\nThe slot was just taken by another user.\nThe second user has paid, and their booking status is set to CONFLICT_NEEDS_RESCHEDULE.\n\nPlease contact them to reschedule:\nName: ${booking.name}\nEmail: ${booking.email}\nPhone: ${booking.phone}\nTopic: ${booking.topic || 'N/A'}`
+                text: `A double booking conflict occurred for eventId: ${booking.eventId}.\n\nThe slot was just taken by another user.\nThe second user has paid, and their booking status is set to CONFLICT_NEEDS_RESCHEDULE.\n\nPlease contact them to reschedule:\nName: ${booking.name}\nEmail: ${booking.email}\nPhone: ${booking.phone || 'N/A'}\nAmount Paid: ₹${booking.amount}${bundleDetails}${timeSlotInfo}\nTopic: ${booking.topic || 'N/A'}`
               });
             }
           } catch (err) {

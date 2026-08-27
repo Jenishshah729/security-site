@@ -285,6 +285,12 @@ const BookingSection = ({ onSuccess, isBundle }) => {
               Your payment went through successfully, but this slot was <span className="text-orange-400 font-bold">just taken</span> by another booking a moment ago.
               <br /><br />
               Don't worry! We will email you within 24 hours to help you reschedule to a new time that works for you.
+              {isBundle && (
+                <>
+                  <br /><br />
+                  <span className="text-[#00ff66] font-medium">Your selected PDFs have been secured and will be sent to your email shortly.</span>
+                </>
+              )}
             </p>
             <button 
               onClick={() => { setConflictUI(false); setShowForm(false); setSelectedSlot(null); }}
