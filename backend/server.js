@@ -89,7 +89,7 @@ app.use(
         frameSrc: ["'self'", "https://api.razorpay.com", "https://checkout.razorpay.com"],
         connectSrc: ["'self'", "https://lumberjack.razorpay.com", "https://api.razorpay.com"],
         imgSrc: ["'self'", "data:", "https:"],
-        upgradeInsecureRequests: [], // Correct syntax for Helmet v8+
+        // upgradeInsecureRequests: [], // Temporarily disabled until HTTPS is fully setup
       },
     },
   })
@@ -97,7 +97,8 @@ app.use(
 const allowedOrigins = [
   process.env.FRONTEND_URL,
   'http://localhost:5173',
-  'http://localhost:3000'
+  'http://localhost:3000',
+  'http://161.118.191.223' // Fallback for pre-domain
 ].filter(Boolean);
 
 app.use(
