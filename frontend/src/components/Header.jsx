@@ -55,7 +55,7 @@ const Header = () => {
         transition={{ delay: 0.3, duration: 0.5 }}
         className="flex items-center gap-5 md:gap-7 px-6 py-3 rounded-full bg-white/5 border border-white/10 backdrop-blur-md shadow-xl"
       >
-        <a href="https://whatsapp.com/channel/thejenishshah" target="_blank" rel="noopener noreferrer" className="opacity-90 hover:opacity-100 hover:scale-110 transition-all text-[#25D366]">
+        <a href="https://whatsapp.com/channel/0029VbEkxWWGufJ0zMq5WA1P" target="_blank" rel="noopener noreferrer" className="opacity-90 hover:opacity-100 hover:scale-110 transition-all text-[#25D366]">
           <FaWhatsapp size={26} />
         </a>
         <a href="https://instagram.com/thejenishshah" target="_blank" rel="noopener noreferrer" className="opacity-90 hover:opacity-100 hover:scale-110 transition-all text-[#E1306C]">
