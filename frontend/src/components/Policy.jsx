@@ -26,17 +26,19 @@ const Policy = () => {
 
       <div className="space-y-8 text-slate-300 leading-relaxed relative z-10">
         <section>
-          <h3 className="text-xl font-bold text-white mb-4">1. Booking and Cancellations</h3>
+          <h3 className="text-xl font-bold text-white mb-4">1. 1:1 Consultation & Rescheduling Policy</h3>
           <p className="mb-4">
-            All 1:1 consultation bookings must be paid in advance. If you need to cancel or reschedule your session, please email <a href="mailto:support@thejenishshah.com" className="text-white underline decoration-white/30 underline-offset-2 hover:text-slate-300">support@thejenishshah.com</a> at least 24 hours before your scheduled call time. Cancellations made within 24 hours of the call time will not be refunded.<br/><br/>
-            If Jenish needs to cancel or reschedule a session for any reason, you will be notified in advance and offered an alternative time slot or a full refund, your choice.
+            All 1:1 consultation bookings must be paid in advance. Following successful payment, your meeting access link and confirmation details will be delivered to your provided email address within 24 hours. All consultation payments are strictly non-refundable.<br/><br/>
+            If you need to change your session time, you may request to reschedule by emailing <a href="mailto:support@thejenishshah.com" className="text-white underline decoration-white/30 underline-offset-2 hover:text-slate-300">support@thejenishshah.com</a> at least 24 hours prior to your scheduled call time. Rescheduling requests made within 24 hours of the scheduled call time will not be accepted, and the session fee will be forfeited.<br/><br/>
+            If Jenish needs to reschedule a session for any reason, you will be notified in advance and provided with alternative time slots to choose from.
           </p>
         </section>
 
         <section>
           <h3 className="text-xl font-bold text-white mb-4">2. Digital Products (PDFs & Bundles)</h3>
           <p className="mb-4">
-            Digital products (PDFs and bundles) are delivered to your email within 24 hours of purchase. Due to the nature of digital products, all sales are final and non-refundable once the product has been delivered. If you experience any technical issues receiving or opening your purchase, please contact us and we'll help resolve it promptly.
+            Digital products (PDFs and bundles) will be delivered to your email address within 24 hours of successful payment. All sales of digital products are strictly final — no cancellations, returns, or refunds are permitted under any circumstances once payment is completed.<br/><br/>
+            If you experience any technical issues receiving or opening your purchased files after 24 hours, please contact <a href="mailto:support@thejenishshah.com" className="text-white underline decoration-white/30 underline-offset-2 hover:text-slate-300">support@thejenishshah.com</a> and we will resolve it promptly.
           </p>
         </section>
 
@@ -58,7 +60,7 @@ const Policy = () => {
         <section>
           <h3 className="text-xl font-bold text-white mb-4">4. Privacy Policy</h3>
           <p className="mb-4">
-            We respect your privacy. Any personal information you provide — including your name, email address, phone number, and payment details — is used strictly to fulfill your order or schedule your consultation. We do not sell or share your personal data with third parties.<br/><br/>
+            We respect your privacy. Any personal information you provide — including your name, email address, phone number, and payment details — is used strictly to fulfill your order or schedule your consultation. We do not sell or share your personal data with third parties. Payments are processed securely via third-party gateways (e.g., Razorpay); we do not store your financial or credit card information on our servers.<br/><br/>
             You may request access to or deletion of your personal data at any time by emailing <a href="mailto:support@thejenishshah.com" className="text-white underline decoration-white/30 underline-offset-2 hover:text-slate-300">support@thejenishshah.com</a>.
           </p>
         </section>
