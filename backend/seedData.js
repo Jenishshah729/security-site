@@ -6,8 +6,8 @@ async function main() {
   // Update Consultation Setting
   await prisma.consultationSetting.upsert({
     where: { id: 1 },
-    update: { price: 349, duration: 30 },
-    create: { id: 1, price: 349, duration: 30 },
+    update: { price: 449, duration: 30 },
+    create: { id: 1, price: 449, duration: 30 },
   });
 
   // Seed Connect Links

@@ -8,7 +8,7 @@ const BookingSection = ({ onSuccess, isBundle }) => {
   const bundle = location.state?.bundle;
   const selectedPdfs = location.state?.selectedPdfs || [];
   const [slotsData, setSlotsData] = useState([]);
-  const [settings, setSettings] = useState({ price: 349, duration: 30, description: '' });
+  const [settings, setSettings] = useState({ price: 449, duration: 30, description: '' });
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [showForm, setShowForm] = useState(false);
