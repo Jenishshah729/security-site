@@ -218,7 +218,7 @@ const BookingSection = ({ onSuccess, isBundle }) => {
       
       <AnimatePresence mode="wait">
         {!showForm ? (
-          <motion.div key="selector" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="relative z-10">
+          <motion.div key="selector" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="relative z-20">
             {isLoading ? (
               <div className="text-center py-12 text-slate-500">Loading available slots...</div>
             ) : availableDates.length === 0 ? (
