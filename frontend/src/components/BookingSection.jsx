@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Calendar, Clock, ArrowRight, ArrowLeft, CheckCircle } from '@phosphor-icons/react';
+import { Calendar, Clock, ArrowRight, ArrowLeft, CheckCircle, CaretDown } from '@phosphor-icons/react';
 import { Link, useLocation } from 'react-router-dom';
 
 const BookingSection = ({ onSuccess, isBundle }) => {
@@ -17,6 +17,7 @@ const BookingSection = ({ onSuccess, isBundle }) => {
   const [isVerifying, setIsVerifying] = useState(false);
   const [formError, setFormError] = useState('');
   const [conflictUI, setConflictUI] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   
   const [formData, setFormData] = useState({ name: '', email: '', phone: '', countryCode: '91', topic: '' });
 
@@ -227,16 +228,51 @@ const BookingSection = ({ onSuccess, isBundle }) => {
               <div className="space-y-6">
                 <div>
                   <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">Select a Date</label>
-                  <select 
-                    value={selectedDate} 
-                    onChange={(e) => { setSelectedDate(e.target.value); setSelectedSlot(null); }}
-                    className="w-full px-5 py-4 bg-[#12141D] border border-white/10 rounded-xl text-white font-medium cursor-pointer appearance-none hover:border-white/20 transition-colors outline-none focus:border-[#b026ff]/50 bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M5%208l5%205%205-5%22%20stroke%3D%22%238b949e%22%20stroke-width%3D%222%22%20fill%3D%22none%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E')] bg-no-repeat bg-[position:right_1.5rem_center]"
-                  >
-                    <option value="">-- Choose a Date --</option>
-                    {availableDates.map(date => (
-                      <option key={date} value={date}>{formatDate(date)}</option>
-                    ))}
-                  </select>
+                  <div className="relative">
+                    <div 
+                      onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                      className={`w-full px-5 py-4 bg-[#12141D] border ${isDropdownOpen ? (isBundle ? 'border-[#00ff66]/50' : 'border-[#b026ff]/50') : 'border-white/10'} rounded-xl text-white font-medium cursor-pointer hover:border-white/20 transition-colors flex justify-between items-center`}
+                    >
+                      <span className={selectedDate ? 'text-white' : 'text-slate-400'}>{selectedDate ? formatDate(selectedDate) : '-- Choose a Date --'}</span>
+                      <CaretDown size={20} className={`text-slate-400 transition-transform duration-300 ${isDropdownOpen ? 'rotate-180' : ''}`} />
+                    </div>
+                    
+                    <AnimatePresence>
+                      {isDropdownOpen && (
+                        <motion.div 
+                          initial={{ opacity: 0, y: -10, scale: 0.98 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          exit={{ opacity: 0, y: -10, scale: 0.98 }}
+                          transition={{ duration: 0.15 }}
+                          className="absolute z-50 w-full mt-2 bg-[#1A1D27] border border-white/10 rounded-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.5)] overflow-hidden max-h-60 overflow-y-auto"
+                        >
+                          <div 
+                            onClick={() => {
+                              setSelectedDate('');
+                              setSelectedSlot(null);
+                              setIsDropdownOpen(false);
+                            }}
+                            className={`px-5 py-3.5 cursor-pointer hover:bg-white/5 transition-colors border-b border-white/5 ${!selectedDate ? (isBundle ? 'text-[#00ff66] bg-[#00ff66]/5' : 'text-[#b026ff] bg-[#b026ff]/5') : 'text-slate-400'}`}
+                          >
+                            -- Choose a Date --
+                          </div>
+                          {availableDates.map(date => (
+                            <div 
+                              key={date}
+                              onClick={() => {
+                                setSelectedDate(date);
+                                setSelectedSlot(null);
+                                setIsDropdownOpen(false);
+                              }}
+                              className={`px-5 py-3.5 cursor-pointer hover:bg-white/5 transition-colors ${selectedDate === date ? (isBundle ? 'text-[#00ff66] bg-[#00ff66]/5 border-l-2 border-[#00ff66]' : 'text-[#b026ff] bg-[#b026ff]/5 border-l-2 border-[#b026ff]') : 'text-slate-300 border-l-2 border-transparent'}`}
+                            >
+                              {formatDate(date)}
+                            </div>
+                          ))}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
                 </div>
 
                 {selectedDate && (
