@@ -184,10 +184,12 @@ const BookingSection = ({ onSuccess, isBundle }) => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
-      className="p-6 md:p-10 relative overflow-hidden bg-[#0B0C10] rounded-[32px] shadow-2xl border border-white/10"
+      className="p-6 md:p-10 relative bg-[#0B0C10] rounded-[32px] shadow-2xl border border-white/10"
     >
       {/* Subtle Background Effects */}
-      <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-[#b026ff]/5 rounded-full blur-[100px] -mr-32 -mt-32 pointer-events-none"></div>
+      <div className="absolute inset-0 overflow-hidden rounded-[32px] pointer-events-none">
+        <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-[#b026ff]/5 rounded-full blur-[100px] -mr-32 -mt-32"></div>
+      </div>
 
       <Link to="/" className="inline-flex items-center gap-2 text-sm text-slate-400 hover:text-white transition-colors mb-8 outline-none group relative z-10 font-medium">
         <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" /> Back to Home
