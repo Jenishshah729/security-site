@@ -379,8 +379,9 @@ const BookingSection = ({ onSuccess, isBundle }) => {
                     <p className="text-xs text-slate-500 uppercase font-bold tracking-widest mb-3">Included PDFs</p>
                     <ul className="space-y-2">
                       {selectedPdfs.map(pdf => (
-                        <li key={pdf.id} className="text-sm text-slate-300 flex items-center gap-2">
-                          <CheckCircle size={14} className={isBundle ? "text-[#00ff66]" : "text-[#b026ff]"} weight="fill" /> {pdf.title}
+                        <li key={pdf.id} className="text-sm text-slate-300 flex items-start gap-2">
+                          <CheckCircle size={16} className={`shrink-0 mt-0.5 ${isBundle ? "text-[#00ff66]" : "text-[#b026ff]"}`} weight="fill" />
+                          <span className="leading-snug">{pdf.title}</span>
                         </li>
                       ))}
                     </ul>
