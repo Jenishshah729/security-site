@@ -8,8 +8,8 @@ async function main() {
 
   await prisma.consultationSetting.upsert({
     where: { id: 1 },
-    update: { price: 449 },
-    create: { id: 1, price: 449, duration: 30 }
+    update: { price: 349 },
+    create: { id: 1, price: 349, duration: 30 }
   });
 
   console.log('Prices updated successfully in DB');

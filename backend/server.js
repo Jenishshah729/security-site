@@ -135,9 +135,9 @@ const paymentLimiter = rateLimit({
 });
 
 const customBundles = [
-  { id: 'all-in-one', title: 'All-in-One (1:1 + all 6 PDFs)', price: 999, originalPrice: 1463, savings: 464, description: '1:1 Consultation\nAll 6 PDFs included\nMaximum value package', hasConsultation: true, pdfSelectionCount: 0, paymentLink: 'https://rzp.io/rzp/all61' },
-  { id: '1-1-any-4', title: '1:1 + any 4 PDFs', price: 899, originalPrice: 1125, savings: 226, description: '1:1 Consultation\nChoose any 4 PDFs', hasConsultation: true, pdfSelectionCount: 4, paymentLink: 'https://rzp.io/rzp/1and4' },
-  { id: '1-1-any-2', title: '1:1 + any 2 PDFs', price: 699, originalPrice: 787, savings: 88, description: '1:1 Consultation\nChoose any 2 PDFs', hasConsultation: true, pdfSelectionCount: 2, paymentLink: 'https://rzp.io/rzp/2and1' },
+  { id: 'all-in-one', title: 'All-in-One (1:1 + all 6 PDFs)', price: 899, originalPrice: 1363, savings: 464, description: '1:1 Consultation\nAll 6 PDFs included\nMaximum value package', hasConsultation: true, pdfSelectionCount: 0, paymentLink: 'https://rzp.io/rzp/all61' },
+  { id: '1-1-any-4', title: '1:1 + any 4 PDFs', price: 799, originalPrice: 1025, savings: 226, description: '1:1 Consultation\nChoose any 4 PDFs', hasConsultation: true, pdfSelectionCount: 4, paymentLink: 'https://rzp.io/rzp/1and4' },
+  { id: '1-1-any-2', title: '1:1 + any 2 PDFs', price: 599, originalPrice: 687, savings: 88, description: '1:1 Consultation\nChoose any 2 PDFs', hasConsultation: true, pdfSelectionCount: 2, paymentLink: 'https://rzp.io/rzp/2and1' },
   { id: 'any-4-pdfs', title: 'Any 4 PDFs', price: 559, originalPrice: 676, savings: 117, description: 'Choose any 4 PDFs', hasConsultation: false, pdfSelectionCount: 4, paymentLink: 'https://rzp.io/rzp/any4' },
   { id: 'any-2-pdfs', title: 'Any 2 PDFs', price: 289, originalPrice: 338, savings: 49, description: 'Choose any 2 PDFs', hasConsultation: false, pdfSelectionCount: 2, paymentLink: 'https://rzp.io/rzp/any2pd' }
 ];
@@ -259,7 +259,7 @@ app.post('/api/consultation/create-order', paymentLimiter, async (req, res) => {
     const { eventId, slotStart, slotEnd, email, name, phone, topic, bundleId, selectedPdfs } = validatedData;
     
     // Server-side price calculation
-    let finalAmount = 449;
+    let finalAmount = 349;
     if (bundleId) {
       const bundle = customBundles.find(b => b.id === bundleId);
       if (bundle) finalAmount = bundle.price;
@@ -464,8 +464,8 @@ app.get('/api/bundles', async (req, res) => {
       {
         id: 'all-in-one',
         title: 'All-in-One (1:1 + all 6 PDFs)',
-        price: 999,
-        originalPrice: 1463,
+        price: 899,
+        originalPrice: 1363,
         savings: 464,
         description: '1:1 Consultation\nAll 6 PDFs included\nMaximum value package',
         hasConsultation: true,
@@ -475,8 +475,8 @@ app.get('/api/bundles', async (req, res) => {
       {
         id: '1-1-any-4',
         title: '1:1 + any 4 PDFs',
-        price: 899,
-        originalPrice: 1125,
+        price: 799,
+        originalPrice: 1025,
         savings: 226,
         description: '1:1 Consultation\nChoose any 4 PDFs',
         hasConsultation: true,
@@ -486,8 +486,8 @@ app.get('/api/bundles', async (req, res) => {
       {
         id: '1-1-any-2',
         title: '1:1 + any 2 PDFs',
-        price: 699,
-        originalPrice: 787,
+        price: 599,
+        originalPrice: 687,
         savings: 88,
         description: '1:1 Consultation\nChoose any 2 PDFs',
         hasConsultation: true,
