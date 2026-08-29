@@ -235,11 +235,11 @@ const BundleStore = ({ onSuccess }) => {
                     <div className="text-center">
                       <p className="text-xs text-slate-500 uppercase font-bold tracking-widest mb-2">Investment</p>
                       {b.originalPrice > b.price && (
-                        <p className="text-lg text-slate-400 line-through mb-1 flex items-center justify-center"><span className="mr-0.5 opacity-80">₹</span>{b.originalPrice}</p>
+                        <p className="text-lg text-slate-400 line-through mb-1 flex items-center justify-center"><span className="mr-0.5">₹</span>{b.originalPrice}</p>
                       )}
-                      <p className="text-5xl font-black text-white tracking-tighter flex items-center justify-center"><span className="mr-1.5 opacity-80 font-bold">₹</span>{b.price}</p>
+                      <p className="text-5xl font-black text-white tracking-tighter flex items-center justify-center"><span className="mr-1.5">₹</span>{b.price}</p>
                       {b.savings > 0 && (
-                        <p className="text-sm font-bold text-[#00ff66] mt-2 flex items-center justify-center">Save <span className="ml-1 mr-0.5 opacity-80">₹</span>{b.savings}</p>
+                        <p className="text-sm font-bold text-[#00ff66] mt-2 flex items-center justify-center">Save <span className="ml-1 mr-0.5">₹</span>{b.savings}</p>
                       )}
                     </div>
                     <button 
@@ -334,7 +334,7 @@ const BundleStore = ({ onSuccess }) => {
                   </div>
                   <div className="text-right">
                     <p className="text-xs text-slate-500 uppercase font-bold tracking-widest mb-2">Amount</p>
-                    <p className="text-xl font-bold text-white flex items-center justify-end"><span className="mr-0.5 opacity-80">₹</span>{selectedBundle.price}</p>
+                    <p className="text-xl font-bold text-white flex items-center justify-end"><span className="mr-0.5">₹</span>{selectedBundle.price}</p>
                   </div>
                 </div>
 
@@ -358,7 +358,7 @@ const BundleStore = ({ onSuccess }) => {
               
               <div className="flex justify-between items-center text-xl relative z-10">
                 <span className="font-bold text-slate-400">Total Due</span>
-                <span className="font-black text-[#00ff66] text-3xl tracking-tight flex items-center"><span className="mr-1 opacity-80 font-bold">₹</span>{selectedBundle.price}</span>
+                <span className="font-black text-[#00ff66] text-3xl tracking-tight flex items-center"><span className="mr-1">₹</span>{selectedBundle.price}</span>
               </div>
               
               <div className="mt-8 pt-8 border-t border-white/5 relative z-10">

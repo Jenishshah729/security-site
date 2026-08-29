@@ -170,7 +170,7 @@ const PDFStore = ({ onSuccess }) => {
                           <div className="flex flex-col mt-4 border-t border-white/5 pt-5 gap-5">
                             <div className="flex flex-col">
                               <span className="text-xs text-slate-500 uppercase tracking-widest font-bold mb-0.5">Investment</span>
-                              <span className="text-3xl font-black text-white tracking-tight flex items-center"><span className="mr-1 opacity-80 font-bold">₹</span>{p.price}</span>
+                              <span className="text-3xl font-black text-white tracking-tight flex items-center"><span className="mr-1">₹</span>{p.price}</span>
                             </div>
                             {inCart ? (
                               <button 
@@ -204,7 +204,7 @@ const PDFStore = ({ onSuccess }) => {
                 >
                   <div className="flex flex-col">
                     <span className="font-bold text-sm opacity-80 uppercase tracking-widest mb-1">{cart.length} item{cart.length > 1 ? 's' : ''} in cart</span>
-                    <span className="text-2xl md:text-3xl font-black flex items-center"><span className="mr-1 opacity-80 font-bold">₹</span>{totalAmount}</span>
+                    <span className="text-2xl md:text-3xl font-black flex items-center"><span className="mr-1">₹</span>{totalAmount}</span>
                   </div>
                   <button 
                     onClick={() => setIsCheckout(true)} 
@@ -235,14 +235,14 @@ const PDFStore = ({ onSuccess }) => {
                 {cart.map(item => (
                   <div key={item.id} className="flex justify-between items-center">
                     <p className="text-md font-medium text-slate-300 leading-snug max-w-[70%] truncate" title={item.title}>{item.title}</p>
-                    <p className="text-md font-bold text-white flex items-center"><span className="mr-0.5 opacity-80">₹</span>{item.price}</p>
+                    <p className="text-md font-bold text-white flex items-center"><span className="mr-0.5">₹</span>{item.price}</p>
                   </div>
                 ))}
               </div>
               
               <div className="flex justify-between items-center text-xl relative z-10 mb-8 pt-2">
                 <span className="font-bold text-slate-400">Total Due</span>
-                <span className="font-black text-[#00e5ff] text-3xl tracking-tight flex items-center"><span className="mr-1 opacity-80 font-bold">₹</span>{totalAmount}</span>
+                <span className="font-black text-[#00e5ff] text-3xl tracking-tight flex items-center"><span className="mr-1">₹</span>{totalAmount}</span>
               </div>
               
               <div className="space-y-4">
