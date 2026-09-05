@@ -3,15 +3,15 @@ const prisma = new PrismaClient();
 
 const pdfs = [
   {
-    title: "Top 10 Beginner Mistakes When Starting Cybersecurity",
-    description: "The costly mistakes every beginner makes early on, and exactly how to skip them.",
-    price: 69,
+    title: "10 Mistakes That Get Beginner Hackers Nowhere",
+    description: "The costly mistakes almost every beginner makes — and exactly how to skip them.",
+    price: 169,
     coverImage: "/top-10-mistakes.png"
   },
   {
-    title: "Free Tools Every Beginner Hacker Should Know",
-    description: "A curated list of the free tools real hackers actually use, with why and when to use each.",
-    price: 69,
+    title: "20 Free Tools Real Hackers Actually Use",
+    description: "A curated list of the free tools real hackers rely on, with why and when to use each.",
+    price: 169,
     coverImage: "/hackers-toolkit.jpg",
     coverPageData: JSON.stringify({
       canvas: { width_px: 1600, height_px: 2560, background_color: "#0B0F19" },
@@ -24,9 +24,9 @@ const pdfs = [
     })
   },
   {
-    title: "Burp Suite for Beginners",
-    description: "A simple, step-by-step guide to setting up Burp Suite and intercepting your first request.",
-    price: 69,
+    title: "Burp Suite in 30 Minutes",
+    description: "Set up Burp Suite and intercept your first request — no prior experience needed.",
+    price: 169,
     coverImage: "/burp-suite.jpg",
     coverPageData: JSON.stringify({
       canvas: { width_px: 1600, height_px: 2560, background_color: "#0B0F19" },
@@ -39,9 +39,9 @@ const pdfs = [
     })
   },
   {
-    title: "CTF (Capture The Flag) Beginner Guide",
-    description: "Everything you need to solve your first CTF challenge, from categories to strategy.",
-    price: 69,
+    title: "Solve Your First CTF This Week",
+    description: "Everything you need to crack your first CTF challenge — categories, tools, and strategy.",
+    price: 169,
     coverImage: "/ctf-guide.jpg",
     coverPageData: JSON.stringify({
       canvas: { width_px: 1600, height_px: 2560, background_color: "#0B0F19" },
@@ -54,9 +54,9 @@ const pdfs = [
     })
   },
   {
-    title: "Cloud Security Basics",
-    description: "Understand how cloud platforms get attacked, and the fundamentals every security beginner needs to know.",
-    price: 69,
+    title: "Why Companies Get Hacked in the Cloud",
+    description: "The real attack patterns behind cloud breaches, and the fundamentals every beginner needs to know.",
+    price: 169,
     coverImage: "/cloud-security-v4.jpg",
     coverPageData: JSON.stringify({
       canvas: { width_px: 1600, height_px: 2560, background_color: "#0B0F19" },
@@ -68,9 +68,9 @@ const pdfs = [
     })
   },
   {
-    title: "The SOC Analyst 101 Guide",
-    description: "What a SOC Analyst actually does day-to-day, and how to start building toward the role.",
-    price: 69,
+    title: "What a SOC Analyst Actually Does All Day",
+    description: "A real look at the day-to-day of the job, and how to start building toward the role.",
+    price: 169,
     coverImage: "/soc-analyst.jpg",
     coverPageData: JSON.stringify({
       canvas: { width_px: 1600, height_px: 2560, background_color: "#0B0F19" },
