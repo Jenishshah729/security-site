@@ -118,6 +118,7 @@ const PDFStore = ({ onSuccess }) => {
   };
 
   return (
+    <>
     <motion.section 
       initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -15 }}
       className="p-6 md:p-10 relative overflow-hidden bg-[#0B0C10] rounded-[32px] shadow-2xl border border-white/10 min-h-screen"
@@ -339,6 +340,7 @@ const PDFStore = ({ onSuccess }) => {
         image={shareModal?.image}
         subtitle={shareModal?.subtitle}
       />
+    </>
   );
 };
 
