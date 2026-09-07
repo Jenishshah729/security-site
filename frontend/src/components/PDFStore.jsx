@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { BookOpen, ShoppingCart, ArrowRight, ArrowLeft, FilePdf, X } from '@phosphor-icons/react';
+import { BookOpen, ShoppingCart, ArrowRight, ArrowLeft, FilePdf, X, DotsThreeVertical } from '@phosphor-icons/react';
 import { Link } from 'react-router-dom';
+import ShareModal from './ShareModal';
 
 const PDFStore = ({ onSuccess }) => {
   const [cart, setCart] = useState([]);
@@ -13,6 +14,7 @@ const PDFStore = ({ onSuccess }) => {
   const [countryCode, setCountryCode] = useState('91');
   const [formError, setFormError] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [shareModal, setShareModal] = useState(null); // { title, url, image, subtitle }
 
   useEffect(() => {
     fetch('/api/offerings')
@@ -161,6 +163,19 @@ const PDFStore = ({ onSuccess }) => {
                         <div className="absolute top-4 right-4 bg-black/40 backdrop-blur-md text-slate-300 px-3 py-1.5 rounded-full text-xs font-bold tracking-wide border border-white/10 flex items-center gap-1.5">
                           <FilePdf size={16} weight="fill" className="text-slate-400" /> E-Book
                         </div>
+                        {/* Share 3-dot button */}
+                        <button
+                          onClick={() => setShareModal({
+                            title: p.title,
+                            url: window.location.origin + '/store',
+                            image: p.coverImage ? `${import.meta.env.BASE_URL}${p.coverImage.replace(/^\/+/, '')}` : null,
+                            subtitle: p.description,
+                          })}
+                          className="absolute top-4 left-4 w-9 h-9 bg-black/40 backdrop-blur-md rounded-full flex items-center justify-center text-white hover:bg-black/60 transition-colors z-10"
+                          aria-label={`Share ${p.title}`}
+                        >
+                          <DotsThreeVertical size={20} weight="bold" />
+                        </button>
                       </div>
                       <div className="p-7 flex flex-col flex-1 justify-between gap-6 -mt-10 relative z-10">
                         <div>
@@ -314,6 +329,16 @@ const PDFStore = ({ onSuccess }) => {
         )}
       </AnimatePresence>
     </motion.section>
+
+      {/* Linktree-style share modal for offerings */}
+      <ShareModal
+        isOpen={!!shareModal}
+        onClose={() => setShareModal(null)}
+        title={shareModal?.title ?? ''}
+        url={shareModal?.url ?? ''}
+        image={shareModal?.image}
+        subtitle={shareModal?.subtitle}
+      />
   );
 };
 
