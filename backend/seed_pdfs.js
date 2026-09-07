@@ -3,8 +3,8 @@ const prisma = new PrismaClient();
 
 const pdfs = [
   {
-    title: "10 Mistakes That Get Beginner Hackers Nowhere",
-    description: "The costly mistakes almost every beginner makes — and exactly how to skip them.",
+    title: "10 Hacking Mistakes That Waste Your First Year",
+    description: "The costly mistakes almost everyone makes when starting out — and exactly how to skip them and move faster.",
     price: 169,
     coverImage: "/top-10-mistakes.png"
   },
@@ -24,8 +24,8 @@ const pdfs = [
     })
   },
   {
-    title: "Burp Suite in 30 Minutes",
-    description: "Set up Burp Suite and intercept your first request — no prior experience needed.",
+    title: "Burp Suite: A Step-by-Step Guide to Intercepting Your First Request",
+    description: "Set up Burp Suite from scratch and intercept your first web request — the exact steps real pentesters use to get started.",
     price: 169,
     coverImage: "/burp-suite.jpg",
     coverPageData: JSON.stringify({
@@ -39,8 +39,8 @@ const pdfs = [
     })
   },
   {
-    title: "Solve Your First CTF This Week",
-    description: "Everything you need to crack your first CTF challenge — categories, tools, and strategy.",
+    title: "Capture The Flag: A Beginner's Playbook to Your First Win",
+    description: "Categories, tools, and strategy to solve your first CTF challenge — from the basics to your first flag.",
     price: 169,
     coverImage: "/ctf-guide.jpg",
     coverPageData: JSON.stringify({
@@ -54,8 +54,8 @@ const pdfs = [
     })
   },
   {
-    title: "Why Companies Get Hacked in the Cloud",
-    description: "The real attack patterns behind cloud breaches, and the fundamentals every beginner needs to know.",
+    title: "How Cloud Platforms Actually Get Hacked",
+    description: "The real attack patterns behind cloud breaches — plus the core cloud security fundamentals you need to know.",
     price: 169,
     coverImage: "/cloud-security-v4.jpg",
     coverPageData: JSON.stringify({
@@ -68,8 +68,8 @@ const pdfs = [
     })
   },
   {
-    title: "What a SOC Analyst Actually Does All Day",
-    description: "A real look at the day-to-day of the job, and how to start building toward the role.",
+    title: "Inside a SOC: Tools, Responsibilities & the Basics You Need",
+    description: "The tools SOC analysts actually use, their core responsibilities on the job, and the fundamentals you need to understand the role.",
     price: 169,
     coverImage: "/soc-analyst.jpg",
     coverPageData: JSON.stringify({
