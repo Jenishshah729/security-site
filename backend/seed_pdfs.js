@@ -54,8 +54,8 @@ const pdfs = [
     })
   },
   {
-    title: "How Cloud Platforms Actually Get Hacked",
-    description: "The real attack patterns behind cloud breaches — plus the core cloud security fundamentals you need to know.",
+    title: "Cloud Security: The Skill Everyone Skips (And Regrets)",
+    description: "The cloud security fundamentals nobody teaches you in a course — the exact gap that trips people up in interviews and on the job.",
     price: 169,
     coverImage: "/cloud-security-v4.jpg",
     coverPageData: JSON.stringify({
