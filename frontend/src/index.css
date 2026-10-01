@@ -6,70 +6,209 @@
 
 @layer base {
   :root {
-    --background: #090a0f;
+    --bg-base: #060608;
+    --bg-gradient-start: #0a0a0f;
+    --bg-gradient-mid: #060608;
+    --bg-gradient-end: #030304;
+    --accent-gold: #E5C158;
+    --accent-gold-glow: rgba(229, 193, 88, 0.18);
+    --accent-cyber-blue: #38bdf8;
+    --accent-cyber-glow: rgba(56, 189, 248, 0.14);
+    --accent-cyan: #00f0ff;
+    --accent-cyan-glow: rgba(0, 240, 255, 0.22);
+    --accent-emerald: #10b981;
+    --accent-emerald-glow: rgba(16, 185, 129, 0.25);
+    --accent-violet: #8b5cf6;
+    --accent-violet-glow: rgba(139, 92, 246, 0.22);
+    --hud-ring-color: rgba(56, 189, 248, 0.28);
+    --grid-line-color: rgba(255, 255, 255, 0.025);
+    --grid-dot-color: rgba(229, 193, 88, 0.15);
+    --background: #060608;
     --foreground: #e2e8f0;
   }
 
   body {
-    @apply text-slate-200 antialiased selection:bg-[#00ff66] selection:text-black;
+    @apply text-slate-200 antialiased selection:bg-[#E5C158] selection:text-black;
     font-family: 'Outfit', system-ui, -apple-system, sans-serif;
     font-feature-settings: "rlig" 1, "calt" 1;
-    background-color: #020617; /* Very dark slate base */
-    background-image: radial-gradient(circle at 50% 100%, rgba(124, 58, 237, 0.05), transparent 50%); /* Subtle purple glow at bottom */
+    background-color: var(--bg-base);
+    background-image: linear-gradient(180deg, var(--bg-gradient-start) 0%, var(--bg-gradient-mid) 50%, var(--bg-gradient-end) 100%);
+    background-attachment: fixed;
     min-height: 100vh;
     overflow-x: hidden;
   }
-
-  body::before, body::after {
-    content: "";
-    position: fixed;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    z-index: -1;
-    pointer-events: none;
-  }
-
-  body::before {
-    background: radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.12), transparent 40%);
-    animation: floatOrb1 20s infinite ease-in-out alternate;
-  }
-
-  body::after {
-    background: radial-gradient(circle at 50% 50%, rgba(14, 165, 233, 0.12), transparent 40%);
-    animation: floatOrb2 25s infinite ease-in-out alternate-reverse;
-  }
-}
-
-@keyframes floatOrb1 {
-  0% { transform: translate(0, 0) scale(1); }
-  33% { transform: translate(15%, 10%) scale(1.3); }
-  66% { transform: translate(-10%, 15%) scale(0.9); }
-  100% { transform: translate(0, 0) scale(1); }
-}
-
-@keyframes floatOrb2 {
-  0% { transform: translate(0, 0) scale(1); }
-  33% { transform: translate(-15%, -10%) scale(1.1); }
-  66% { transform: translate(10%, -15%) scale(1.4); }
-  100% { transform: translate(0, 0) scale(1); }
 }
 
 @layer components {
   .glass-panel {
-    @apply bg-surface/80 backdrop-blur-md border border-white/10 rounded-2xl shadow-[inset_0_1px_0_rgba(255,255,255,0.05)];
+    @apply bg-[#0c0c0e]/85 backdrop-blur-xl border border-white/10 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.5)];
   }
-  
+
   .input-field {
-    @apply w-full px-4 py-3 bg-[#0d1017] border border-white/10 rounded-xl text-slate-200 placeholder:text-muted focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all duration-200;
+    @apply w-full px-4 py-3 bg-[#141418] border border-white/10 rounded-xl text-slate-200 placeholder:text-muted focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all duration-200;
   }
 
   .no-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
+
   .no-scrollbar::-webkit-scrollbar {
     display: none;
+  }
+
+  button, a[role="button"] {
+    box-shadow: none !important;
+  }
+
+  /* Global suppression of hover effects */
+  *:hover, *::before:hover, *::after:hover {
+    transform: none !important;
+  }
+}
+
+/* Luxury Cyber Background Animations & Effects */
+@keyframes cyberOrbFloat1 {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(30px, 40px) scale(1.1);
+  }
+}
+
+@keyframes cyberOrbFloat2 {
+  0%, 100% {
+    transform: translate(0, 0) scale(1.05);
+  }
+  50% {
+    transform: translate(-35px, -30px) scale(0.95);
+  }
+}
+
+@keyframes cyberOrbFloat3 {
+  0%, 100% {
+    transform: translate(0, 0) scale(0.9);
+  }
+  50% {
+    transform: translate(25px, -35px) scale(1.15);
+  }
+}
+
+@keyframes cyberScanPulse {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.6;
+  }
+  85% {
+    opacity: 0.6;
+  }
+  100% {
+    transform: translateY(100vh);
+    opacity: 0;
+  }
+}
+
+@keyframes particleFloatSlow {
+  0%, 100% {
+    transform: translateY(0px) translateX(0px);
+    opacity: 0.3;
+  }
+  50% {
+    transform: translateY(-24px) translateX(12px);
+    opacity: 0.7;
+  }
+}
+
+@keyframes cyberBeaconGlow {
+  0%, 100% {
+    opacity: 0.25;
+    filter: drop-shadow(0 0 10px rgba(229, 193, 88, 0.2));
+  }
+  50% {
+    opacity: 0.55;
+    filter: drop-shadow(0 0 20px rgba(229, 193, 88, 0.45));
+  }
+}
+
+.animate-cyber-orb-1 {
+  animation: cyberOrbFloat1 16s ease-in-out infinite;
+}
+
+.animate-cyber-orb-2 {
+  animation: cyberOrbFloat2 20s ease-in-out infinite;
+}
+
+.animate-cyber-orb-3 {
+  animation: cyberOrbFloat3 24s ease-in-out infinite;
+}
+
+.animate-cyber-scan {
+  animation: cyberScanPulse 8s linear infinite;
+}
+
+.animate-particle-slow {
+  animation: particleFloatSlow 7s ease-in-out infinite;
+}
+
+.animate-beacon-glow {
+  animation: cyberBeaconGlow 4s ease-in-out infinite;
+}
+
+@keyframes hudSlowSpin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes hudReverseSpin {
+  from {
+    transform: rotate(360deg);
+  }
+  to {
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes cyberAvatarPulse {
+  0%, 100% {
+    opacity: 0.45;
+    transform: scale(0.98);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.03);
+  }
+}
+
+.animate-hud-spin {
+  animation: hudSlowSpin 28s linear infinite;
+}
+
+.animate-hud-reverse {
+  animation: hudReverseSpin 38s linear infinite;
+}
+
+.animate-avatar-pulse {
+  animation: cyberAvatarPulse 4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-cyber-orb-1,
+  .animate-cyber-orb-2,
+  .animate-cyber-orb-3,
+  .animate-cyber-scan,
+  .animate-particle-slow,
+  .animate-beacon-glow,
+  .animate-hud-spin,
+  .animate-hud-reverse,
+  .animate-avatar-pulse {
+    animation: none !important;
   }
 }

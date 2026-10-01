@@ -57,7 +57,7 @@ const ShareModal = ({ isOpen, onClose, title, url, subtitle, image }) => {
       label: copied ? 'Copied!' : 'Copy link',
       icon: copied ? Check : FaLink,
       action: handleCopy,
-      bg: 'bg-gray-100 hover:bg-gray-200',
+      bg: 'bg-gray-100 ',
       iconColor: 'text-gray-800',
       isCustom: true,
     },
@@ -66,7 +66,7 @@ const ShareModal = ({ isOpen, onClose, title, url, subtitle, image }) => {
       label: 'X',
       icon: FaXTwitter,
       href: `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`,
-      bg: 'bg-black hover:bg-gray-900',
+      bg: 'bg-black ',
       iconColor: 'text-white',
     },
     {
@@ -74,7 +74,7 @@ const ShareModal = ({ isOpen, onClose, title, url, subtitle, image }) => {
       label: 'Facebook',
       icon: FaFacebook,
       href: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
-      bg: 'bg-[#1877F2] hover:bg-[#166fe5]',
+      bg: 'bg-[#1877F2] ',
       iconColor: 'text-white',
     },
     {
@@ -82,7 +82,7 @@ const ShareModal = ({ isOpen, onClose, title, url, subtitle, image }) => {
       label: 'WhatsApp',
       icon: FaWhatsapp,
       href: `https://wa.me/?text=${encodedTitle}%20${encodedUrl}`,
-      bg: 'bg-[#25D366] hover:bg-[#1eb85a]',
+      bg: 'bg-[#25D366] ',
       iconColor: 'text-white',
     },
     {
@@ -90,7 +90,7 @@ const ShareModal = ({ isOpen, onClose, title, url, subtitle, image }) => {
       label: 'LinkedIn',
       icon: FaLinkedin,
       href: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`,
-      bg: 'bg-[#0A66C2] hover:bg-[#0958a8]',
+      bg: 'bg-[#0A66C2] ',
       iconColor: 'text-white',
     },
     {
@@ -98,7 +98,7 @@ const ShareModal = ({ isOpen, onClose, title, url, subtitle, image }) => {
       label: 'Telegram',
       icon: FaTelegram,
       href: `https://t.me/share/url?url=${encodedUrl}&text=${encodedTitle}`,
-      bg: 'bg-[#229ED9] hover:bg-[#1a8fc4]',
+      bg: 'bg-[#229ED9] ',
       iconColor: 'text-white',
     },
   ];
@@ -142,7 +142,7 @@ const ShareModal = ({ isOpen, onClose, title, url, subtitle, image }) => {
                 <h2 className="text-[17px] font-semibold text-gray-900">Share link</h2>
                 <button
                   onClick={onClose}
-                  className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
+                  className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 transition-colors"
                 >
                   <X size={18} weight="bold" className="text-gray-600" />
                 </button>

@@ -1,0 +1,159 @@
+import puppeteer from 'puppeteer-core';
+import fs from 'fs';
+import path from 'path';
+
+const edgePath = 'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe';
+const chromePath = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
+const executablePath = fs.existsSync(edgePath) ? edgePath : chromePath;
+
+const srcHmt = 'C:/Users/Admin/.gemini/antigravity-ide/brain/f81e64d9-e46b-46ed-a745-c053c96003ee/.user_uploaded/media_1789452096186.png';
+const srcMf = path.resolve('../frontend/public/matrix-fortress-logo.png');
+
+const outDir = path.resolve('../frontend/public');
+
+async function centerLogos() {
+  const browser = await puppeteer.launch({
+    executablePath,
+    headless: true,
+    args: ['--no-sandbox']
+  });
+
+  const page = await browser.newPage();
+
+  const hmtBase64 = fs.readFileSync(srcHmt).toString('base64');
+  const mfBase64 = fs.readFileSync(srcMf).toString('base64');
+
+  await page.setContent(`
+    <!DOCTYPE html>
+    <html>
+    <body>
+      <img id="imgHmt" src="data:image/png;base64,${hmtBase64}" />
+      <img id="imgMf" src="data:image/png;base64,${mfBase64}" />
+      <canvas id="cOut"></canvas>
+      <script>
+        function processAndCenter(img, isHmt) {
+          const w = img.naturalWidth;
+          const h = img.naturalHeight;
+          
+          const cTemp = document.createElement('canvas');
+          cTemp.width = w;
+          cTemp.height = h;
+          const ctxT = cTemp.getContext('2d');
+          ctxT.drawImage(img, 0, 0);
+          const imgData = ctxT.getImageData(0, 0, w, h);
+          const data = imgData.data;
+
+          let minX = w, maxX = 0, minY = h, maxY = 0;
+
+          for (let y = 0; y < h; y++) {
+            for (let x = 0; x < w; x++) {
+              const idx = (y * w + x) * 4;
+              const r = data[idx];
+              const g = data[idx+1];
+              const b = data[idx+2];
+              const a = data[idx+3];
+
+              let isContent = false;
+              if (isHmt) {
+                // Background is white
+                if (a > 50 && !(r > 230 && g > 230 && b > 230)) {
+                  isContent = true;
+                }
+              } else {
+                // Background is transparent
+                if (a > 30) {
+                  isContent = true;
+                }
+              }
+
+              if (isContent) {
+                if (x < minX) minX = x;
+                if (x > maxX) maxX = x;
+                if (y < minY) minY = y;
+                if (y > maxY) maxY = y;
+              }
+            }
+          }
+
+          console.log('Bounds:', { minX, maxX, minY, maxY, w, h });
+
+          // Cutout transparent version of the bounding box
+          const cropW = maxX - minX + 1;
+          const cropH = maxY - minY + 1;
+
+          const cCrop = document.createElement('canvas');
+          cCrop.width = cropW;
+          cCrop.height = cropH;
+          const ctxCrop = cCrop.getContext('2d');
+
+          // Draw cropped content onto cCrop
+          ctxCrop.drawImage(cTemp, minX, minY, cropW, cropH, 0, 0, cropW, cropH);
+          const cropData = ctxCrop.getImageData(0, 0, cropW, cropH);
+          const cd = cropData.data;
+
+          if (isHmt) {
+            // Remove white background in cropped area
+            for (let i = 0; i < cd.length; i += 4) {
+              const r = cd[i], g = cd[i+1], b = cd[i+2];
+              const brightness = (r + g + b) / 3;
+              if (r > 220 && g > 220 && b > 220) {
+                cd[i+3] = Math.max(0, Math.min(255, (255 - brightness) * 4));
+              }
+            }
+            ctxCrop.putImageData(cropData, 0, 0);
+          }
+
+          // Create perfectly square 512x512 canvas with balanced padding (e.g. padding 40px)
+          const targetSize = 512;
+          const padding = 48;
+          const maxInner = targetSize - padding * 2;
+          const scale = Math.min(maxInner / cropW, maxInner / cropH);
+
+          const drawW = cropW * scale;
+          const drawH = cropH * scale;
+          const drawX = (targetSize - drawW) / 2;
+          const drawY = (targetSize - drawH) / 2;
+
+          const cSquare = document.createElement('canvas');
+          cSquare.width = targetSize;
+          cSquare.height = targetSize;
+          const ctxSquare = cSquare.getContext('2d');
+          ctxSquare.imageSmoothingEnabled = true;
+          ctxSquare.imageSmoothingQuality = 'high';
+          ctxSquare.drawImage(cCrop, drawX, drawY, drawW, drawH);
+
+          return cSquare.toDataURL('image/png');
+        }
+
+        window.__RUN__ = () => {
+          const hmtImg = document.getElementById('imgHmt');
+          const mfImg = document.getElementById('imgMf');
+
+          const hmtCentered = processAndCenter(hmtImg, true);
+          const mfCentered = processAndCenter(mfImg, false);
+
+          return { hmtCentered, mfCentered };
+        };
+      </script>
+    </body>
+    </html>
+  `);
+
+  await page.waitForFunction('document.getElementById("imgHmt").complete && document.getElementById("imgMf").complete');
+  const { hmtCentered, mfCentered } = await page.evaluate(() => window.__RUN__());
+
+  const saveBase64 = (dataUrl, filePath) => {
+    const base64 = dataUrl.replace(/^data:image\/png;base64,/, '');
+    fs.writeFileSync(filePath, Buffer.from(base64, 'base64'));
+    console.log(`Saved ${filePath}`);
+  };
+
+  saveBase64(hmtCentered, path.join(outDir, 'hmt-logo-transparent.png'));
+  saveBase64(hmtCentered, path.join(outDir, 'hmt-logo.png'));
+  saveBase64(mfCentered, path.join(outDir, 'matrix-fortress-logo.png'));
+
+  await browser.close();
+  console.log('Logos cropped, centered and saved successfully!');
+}
+
+centerLogos().catch(console.error);

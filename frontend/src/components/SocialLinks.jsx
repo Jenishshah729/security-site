@@ -29,17 +29,14 @@ const SocialLinks = () => {
 
   return (
     <>
-      <motion.section
-        initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.2 }}
-        className="flex flex-col gap-4 w-full mt-2"
-      >
+      <section className="flex flex-col gap-4 w-full mt-2">
         <div className="flex items-center w-full my-2">
           <div className="flex-grow border-t border-slate-700/50"></div>
           <span className="flex-shrink-0 px-4 text-slate-400 text-xs font-semibold uppercase tracking-widest">Connect</span>
           <div className="flex-grow border-t border-slate-700/50"></div>
         </div>
 
-        {links.map((link, i) => {
+        {links.map((link) => {
           const IconComponent = getIcon(link.title);
           return (
             <motion.a
@@ -47,16 +44,11 @@ const SocialLinks = () => {
               href={link.url}
               target="_blank"
               rel="noopener noreferrer"
-              initial={{ opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.1 * i }}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="w-full flex items-center p-3 md:p-4 rounded-full bg-[#edf5e8] hover:bg-[#e2ebd9] transition-colors shadow-sm"
+              whileTap={{ scale: 0.99 }}
+              className="w-full flex items-center p-3 md:p-4 rounded-full bg-[#edf5e8] shadow-sm transition-all border-[2.5px] border-[#C69214]"
             >
               <div className="w-10 h-10 flex items-center justify-center text-gray-900">
-                <IconComponent weight="regular" size={24} />
+                <IconComponent size={25} />
               </div>
 
               <div className="flex-1 text-center">
@@ -70,7 +62,7 @@ const SocialLinks = () => {
                   e.stopPropagation();
                   setShareModal({ title: link.title, url: link.url });
                 }}
-                className="w-10 h-10 flex items-center justify-center text-gray-600 hover:text-gray-900 transition-colors cursor-pointer"
+                className="w-10 h-10 flex items-center justify-center text-gray-900 transition-colors cursor-pointer"
                 aria-label={`Share ${link.title}`}
               >
                 <DotsThreeVertical size={24} weight="bold" />
@@ -78,7 +70,7 @@ const SocialLinks = () => {
             </motion.a>
           );
         })}
-      </motion.section>
+      </section>
 
       {/* Linktree-style share modal */}
       <ShareModal

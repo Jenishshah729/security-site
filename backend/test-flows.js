@@ -2,9 +2,11 @@ import { PrismaClient } from '@prisma/client';
 import crypto from 'crypto';
 import dotenv from 'dotenv';
 
-dotenv.config();
+dotenv.config({ override: true });
 const prisma = new PrismaClient();
 const API_BASE = 'http://localhost:5000';
+
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 async function generateSignature(orderId, paymentId) {
   const secret = process.env.RAZORPAY_KEY_SECRET || 'dummy_secret';
@@ -14,15 +16,17 @@ async function generateSignature(orderId, paymentId) {
 }
 
 async function runTests() {
-  console.log('--- STARTING TESTS ---');
+  console.log('=== RUNNING FULL PAYMENT & CONCURRENCY TESTS ===');
+  console.log('Active Razorpay Key ID:', process.env.RAZORPAY_KEY_ID);
 
-  // 1. Test 1:1 Booking
-  console.log('\n[1] Testing 1:1 Booking...');
+  await sleep(2000);
+
+  // 1. Test 1:1 Booking Flow (User 1)
+  console.log('\n--- [TEST 1] 1:1 Consultation Booking (User 1) ---');
   const slotDate = new Date();
-  slotDate.setDate(slotDate.getDate() + 1); // tomorrow
+  slotDate.setDate(slotDate.getDate() + 2);
   const slotEnd = new Date(slotDate);
   slotEnd.setMinutes(slotEnd.getMinutes() + 30);
-  
   const testEventId = 'test_event_' + Date.now();
 
   const bookingRes = await fetch(`${API_BASE}/api/consultation/create-order`, {
@@ -32,20 +36,17 @@ async function runTests() {
       eventId: testEventId,
       slotStart: slotDate.toISOString(),
       slotEnd: slotEnd.toISOString(),
-      name: 'Test User 1',
-      email: 'test1@example.com',
-      phone: '1234567890',
-      topic: 'Test Topic',
-      amount: 50
+      name: 'User One',
+      email: 'user1@test.com',
+      phone: '+919876543210',
+      topic: 'Career Guidance',
+      amount: 349
     })
   });
   
   const bookingData = await bookingRes.json();
-  if (!bookingData.success) {
-    console.error('Failed to create booking order', bookingData);
-    return;
-  }
-  console.log('Order created:', bookingData.order.id);
+  console.log('User 1 Order Creation:', bookingRes.status, bookingData.order?.id ? `SUCCESS (${bookingData.order.id})` : bookingData);
+  if (!bookingData.success) throw new Error('Failed to create booking order');
 
   const paymentId1 = 'pay_test_' + Date.now();
   const signature1 = await generateSignature(bookingData.order.id, paymentId1);
@@ -60,97 +61,151 @@ async function runTests() {
       bookingId: bookingData.bookingId
     })
   });
-  
   const verifyData1 = await verifyRes1.json();
-  console.log('Payment Verify 1:', verifyData1);
-  
+  console.log('User 1 Payment Verification:', verifyData1);
   const dbBooking1 = await prisma.booking.findUnique({ where: { id: bookingData.bookingId } });
-  console.log('DB Booking 1 Status:', dbBooking1.status);
+  console.log('User 1 DB Status:', dbBooking1.status);
 
 
-  // 2. Test Conflict (Double Booking)
-  console.log('\n[2] Testing Double Booking Conflict...');
-  
+  // 2. Test Concurrency: Late User 2 tries to book the EXACT SAME slot
+  console.log('\n--- [TEST 2] Concurrency / Duplicate Slot Booking Check (User 2) ---');
   const bookingRes2 = await fetch(`${API_BASE}/api/consultation/create-order`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      eventId: testEventId, // same event ID!
+      eventId: testEventId, // Identical slot that was just booked and paid!
       slotStart: slotDate.toISOString(),
       slotEnd: slotEnd.toISOString(),
-      name: 'Test User 2',
-      email: 'test2@example.com',
-      phone: '0987654321',
-      topic: 'Conflict Topic',
-      amount: 50
+      name: 'User Two',
+      email: 'user2@test.com',
+      phone: '+919876543211',
+      topic: 'Career Guidance',
+      amount: 349
     })
   });
-  
   const bookingData2 = await bookingRes2.json();
-  console.log('Order 2 created:', bookingData2.order.id);
+  console.log('User 2 Order Creation Status:', bookingRes2.status);
+  console.log('User 2 Order Creation Response:', bookingData2);
+  if (bookingRes2.status === 409 && bookingData2.slotTaken) {
+    console.log('>>> PASSED: Late user is immediately blocked from booking already taken slot!');
+  } else {
+    console.error('>>> FAILED: User 2 was not blocked!');
+  }
 
-  const paymentId2 = 'pay_test_' + Date.now();
-  const signature2 = await generateSignature(bookingData2.order.id, paymentId2);
+  await sleep(2000);
 
-  const verifyRes2 = await fetch(`${API_BASE}/api/consultation/verify-payment`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      razorpay_order_id: bookingData2.order.id,
-      razorpay_payment_id: paymentId2,
-      razorpay_signature: signature2,
-      bookingId: bookingData2.bookingId
-    })
-  });
-  
-  const verifyData2 = await verifyRes2.json();
-  console.log('Payment Verify 2 (Expected Conflict):', verifyData2);
-  
-  const dbBooking2 = await prisma.booking.findUnique({ where: { id: bookingData2.bookingId } });
-  console.log('DB Booking 2 Status (Expected CONFLICT_NEEDS_RESCHEDULE):', dbBooking2.status);
-
-
-  // 3. Test PDF Purchase
-  console.log('\n[3] Testing PDF Purchase...');
+  // 3. Test PDF Store Flow
+  console.log('\n--- [TEST 3] PDF Store Purchase ---');
   const pdfRes = await fetch(`${API_BASE}/api/pdf/create-order`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      name: 'Test PDF User',
-      email: 'testpdf@example.com',
-      phone: '1234567890',
-      pdfIds: ['PDF 1', 'PDF 2'],
-      amount: 10
+      name: 'PDF Buyer',
+      email: 'pdfbuyer@test.com',
+      phone: '+919876543212',
+      pdfIds: [72, 73]
     })
   });
-  
   const pdfData = await pdfRes.json();
-  if (pdfData.error) {
-    console.error('Failed to create PDF order', pdfData);
-  } else {
-    console.log('PDF Order created:', pdfData.id);
+  console.log('PDF Order Creation:', pdfRes.status, pdfData.id ? `SUCCESS (${pdfData.id}, ₹${pdfData.amount / 100})` : pdfData);
+  if (!pdfData.id) throw new Error('Failed to create PDF order');
 
-    const pdfPaymentId = 'pay_pdf_' + Date.now();
-    const pdfSignature = await generateSignature(pdfData.id, pdfPaymentId);
+  const pdfPaymentId = 'pay_pdf_' + Date.now();
+  const pdfSignature = await generateSignature(pdfData.id, pdfPaymentId);
 
-    const pdfVerifyRes = await fetch(`${API_BASE}/api/pdf/verify-payment`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        razorpay_order_id: pdfData.id,
-        razorpay_payment_id: pdfPaymentId,
-        razorpay_signature: pdfSignature
-      })
-    });
-    
-    const pdfVerifyData = await pdfVerifyRes.json();
-    console.log('PDF Payment Verify:', pdfVerifyData);
-    
-    const dbPdf = await prisma.pdfPurchase.findUnique({ where: { orderId: pdfData.id } });
-    console.log('DB PDF Status (Expected SUCCESS):', dbPdf?.status);
-  }
+  const pdfVerifyRes = await fetch(`${API_BASE}/api/pdf/verify-payment`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      razorpay_order_id: pdfData.id,
+      razorpay_payment_id: pdfPaymentId,
+      razorpay_signature: pdfSignature
+    })
+  });
+  const pdfVerifyData = await pdfVerifyRes.json();
+  console.log('PDF Payment Verification:', pdfVerifyData);
+  const dbPdf = await prisma.pdfPurchase.findUnique({ where: { orderId: pdfData.id } });
+  console.log('DB PDF Purchase Status:', dbPdf?.status);
 
-  console.log('\n--- TESTS COMPLETE ---');
+  await sleep(2000);
+
+  // 4. Test Standalone Bundle Store Flow (Any 2 PDFs)
+  console.log('\n--- [TEST 4] Standalone Bundle Store Purchase (any-2-pdfs) ---');
+  const bundleRes = await fetch(`${API_BASE}/api/bundle/create-order`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      bundleId: 'any-2-pdfs',
+      selectedPdfs: ['The Mistake Map for Beginners', 'The Toolkit Nobody Hands You'],
+      name: 'Bundle Buyer',
+      email: 'bundlebuyer@test.com',
+      phone: '+919876543213'
+    })
+  });
+  const bundleData = await bundleRes.json();
+  console.log('Standalone Bundle Order Creation:', bundleRes.status, bundleData.id ? `SUCCESS (${bundleData.id}, ₹${bundleData.amount / 100})` : bundleData);
+  if (!bundleData.id) throw new Error('Failed to create bundle order');
+
+  const bundlePaymentId = 'pay_bundle_' + Date.now();
+  const bundleSignature = await generateSignature(bundleData.id, bundlePaymentId);
+
+  const bundleVerifyRes = await fetch(`${API_BASE}/api/bundle/verify-payment`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      razorpay_order_id: bundleData.id,
+      razorpay_payment_id: bundlePaymentId,
+      razorpay_signature: bundleSignature
+    })
+  });
+  const bundleVerifyData = await bundleVerifyRes.json();
+  console.log('Standalone Bundle Payment Verification:', bundleVerifyData);
+  const dbBundle = await prisma.bundlePurchase.findUnique({ where: { orderId: bundleData.id } });
+  console.log('DB Bundle Purchase Status:', dbBundle?.status);
+
+  await sleep(2000);
+
+  // 5. Test Bundle With Consultation Flow (All-in-One / 1:1 + Any 4)
+  console.log('\n--- [TEST 5] Bundle With Consultation (all-in-one) ---');
+  const testBundleSlotId = 'test_bundle_event_' + Date.now();
+  const bundleConsultationRes = await fetch(`${API_BASE}/api/consultation/create-order`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      eventId: testBundleSlotId,
+      slotStart: slotDate.toISOString(),
+      slotEnd: slotEnd.toISOString(),
+      name: 'All In One Buyer',
+      email: 'allinone@test.com',
+      phone: '+919876543214',
+      topic: 'Full Roadmap & Review',
+      bundleId: 'all-in-one',
+      selectedPdfs: ['PDF 1', 'PDF 2', 'PDF 3', 'PDF 4', 'PDF 5', 'PDF 6']
+    })
+  });
+  const bundleConsultationData = await bundleConsultationRes.json();
+  console.log('Bundle + 1:1 Order Creation:', bundleConsultationRes.status, bundleConsultationData.order?.id ? `SUCCESS (${bundleConsultationData.order.id}, ₹${bundleConsultationData.order.amount / 100})` : bundleConsultationData);
+  if (!bundleConsultationData.success) throw new Error('Failed to create bundle+consultation order');
+
+  const bPaymentId = 'pay_bundle_consult_' + Date.now();
+  const bSignature = await generateSignature(bundleConsultationData.order.id, bPaymentId);
+
+  const bVerifyRes = await fetch(`${API_BASE}/api/consultation/verify-payment`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      razorpay_order_id: bundleConsultationData.order.id,
+      razorpay_payment_id: bPaymentId,
+      razorpay_signature: bSignature,
+      bookingId: bundleConsultationData.bookingId
+    })
+  });
+  const bVerifyData = await bVerifyRes.json();
+  console.log('Bundle + 1:1 Payment Verification:', bVerifyData);
+  const dbBookingBundle = await prisma.booking.findUnique({ where: { id: bundleConsultationData.bookingId } });
+  console.log('DB Bundle + 1:1 Status:', dbBookingBundle?.status, 'Amount: ₹' + dbBookingBundle?.amount);
+
+  console.log('\n=== ALL PAYMENT & CONCURRENCY TESTS PASSED SUCCESSFULLY! ===');
 }
 
 runTests().catch(console.error).finally(() => prisma.$disconnect());

@@ -3,7 +3,7 @@ const prisma = new PrismaClient();
 
 async function main() {
   await prisma.offering.updateMany({
-    data: { price: 169 },
+    data: { price: 199 },
   });
 
   await prisma.consultationSetting.upsert({

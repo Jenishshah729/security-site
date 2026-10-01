@@ -17,9 +17,9 @@ const PaymentPopup = ({ isOpen, type, title, message, onConfirm }) => {
             initial={{ opacity: 0, scale: 0.95, y: 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
-            className="relative bg-[#12141D] border border-white/10 p-8 rounded-[32px] max-w-md w-full shadow-[0_0_50px_rgba(0,0,0,0.5)] flex flex-col items-center text-center z-10"
+            className="relative bg-[#141418] border border-white/10 p-8 rounded-[32px] max-w-md w-full shadow-[0_0_50px_rgba(0,0,0,0.7)] flex flex-col items-center text-center z-10"
           >
-            <div className={`w-20 h-20 rounded-full flex items-center justify-center mb-6 shadow-xl ${type === 'success' ? 'bg-[#00ff66]/10 text-[#00ff66] shadow-[#00ff66]/10' : 'bg-red-500/10 text-red-500 shadow-red-500/10'}`}>
+            <div className={`w-20 h-20 rounded-full flex items-center justify-center mb-6 ${type === 'success' ? 'bg-[#E5C158]/10 text-[#E5C158]' : 'bg-red-500/10 text-red-500'}`}>
               {type === 'success' ? (
                 <CheckCircle size={48} weight="fill" />
               ) : (
@@ -34,7 +34,7 @@ const PaymentPopup = ({ isOpen, type, title, message, onConfirm }) => {
             
             <button 
               onClick={onConfirm}
-              className={`w-full py-4 font-bold text-lg rounded-2xl transition-colors active:scale-95 flex items-center justify-center gap-2 ${type === 'success' ? 'bg-[#00ff66] text-[#0B0C10] hover:bg-[#00cc52]' : 'bg-white/10 text-white hover:bg-white/20'}`}
+              className={`w-full py-4 font-bold text-lg rounded-2xl transition-colors active:scale-95 flex items-center justify-center gap-2 ${type === 'success' ? 'bg-[#E5C158] text-slate-950 ' : 'bg-white/10 text-white '}`}
             >
               OK
             </button>

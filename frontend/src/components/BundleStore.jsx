@@ -1,7 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Package, ShoppingCart, ArrowRight, ArrowLeft, CheckCircle, ShieldCheck, BookOpen, Check } from '@phosphor-icons/react';
-import { Link, useNavigate } from 'react-router-dom';
+import { 
+  Package, 
+  ShoppingCart, 
+  ArrowRight, 
+  ArrowLeft, 
+  CheckCircle, 
+  ShieldCheck, 
+  BookOpen, 
+  Check, 
+  User, 
+  EnvelopeSimple, 
+  Phone, 
+  Sparkle, 
+  Calendar, 
+  Lightning, 
+  LockKey,
+  Star
+} from '@phosphor-icons/react';
+import { useNavigate } from 'react-router-dom';
 
 const BundleStore = ({ onSuccess }) => {
   const navigate = useNavigate();
@@ -21,14 +38,15 @@ const BundleStore = ({ onSuccess }) => {
   const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
     fetch('/api/bundles')
       .then(res => res.json())
-      .then(data => setBundles(data))
+      .then(data => setBundles(Array.isArray(data) ? data : []))
       .catch(console.error);
       
     fetch('/api/offerings')
       .then(res => res.json())
-      .then(data => setOfferings(data))
+      .then(data => setOfferings(Array.isArray(data) ? data : []))
       .catch(console.error);
   }, []);
 
@@ -99,52 +117,77 @@ const BundleStore = ({ onSuccess }) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           bundleId: selectedBundle.id,
-          selectedPdfs: selectedPdfs.map(p => p.title),
-          amount: selectedBundle.price,
-          name,
-          email,
-          phone: '+' + countryCode + phone
-        }),
+          selectedPdfs: selectedPdfs.map(p => p.title || p.name || String(p.id)),
+          selectedPdfIds: selectedPdfs.map(p => String(p.id)),
+          name: name,
+          email: email,
+          phone: `+${countryCode}${phone}`,
+          customerName: name,
+          customerEmail: email,
+          customerPhone: `+${countryCode}${phone}`
+        })
       });
 
-      const orderData = await res.json();
+      const responseText = await res.text();
+      let orderData;
+      try {
+        orderData = JSON.parse(responseText);
+      } catch (parseErr) {
+        throw new Error(`Server returned unexpected response (${res.status}). Please try again.`);
+      }
 
-      if (orderData.error) {
-        setValidationError(orderData.error);
-        setIsProcessing(false);
-        return;
+      if (!res.ok) {
+        const errorMsg = orderData.details ? orderData.details.map(d => d.message).join(', ') : (orderData.error || 'Failed to initialize payment');
+        throw new Error(errorMsg);
       }
 
       const options = {
-        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID || orderData.keyId,
         amount: orderData.amount,
-        currency: orderData.currency,
-        name: 'Jenish Shah',
-        description: selectedBundle.title,
-        order_id: orderData.id,
-        handler: function (response) {
-          // Immediately redirect
-          if (onSuccess) onSuccess(selectedBundle.hasConsultation);
-          
-          // Verify in background
-          fetch('/api/bundle/verify-payment', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ ...response, bundleId: selectedBundle.id })
-          }).catch(console.error);
+        currency: orderData.currency || 'INR',
+        name: "Jenish Shah - Cyber Academy",
+        description: `Purchase: ${selectedBundle.title}`,
+        order_id: orderData.order_id || orderData.id || orderData.orderId,
+        handler: async function (response) {
+          try {
+            const verifyRes = await fetch('/api/bundle/verify-payment', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature
+              })
+            });
+            const verifyData = await verifyRes.json();
+            if (verifyRes.ok && verifyData.success) {
+              if (onSuccess) {
+                onSuccess({
+                  type: 'bundle',
+                  title: selectedBundle.title,
+                  amount: selectedBundle.price,
+                  orderId: response.razorpay_order_id,
+                  email: email
+                });
+              } else {
+                alert('Payment Successful! Check your email for files.');
+                navigate('/');
+              }
+            } else {
+              alert('Payment verification failed. Please reach out to support.');
+            }
+          } catch (err) {
+            console.error('Verification error:', err);
+            alert('Error verifying payment.');
+          }
         },
         prefill: {
           name: name,
           email: email,
-          contact: phone,
+          contact: `+${countryCode}${phone}`
         },
         theme: {
-          color: "#00ff66"
-        },
-        modal: {
-          ondismiss: function() {
-            setIsProcessing(false);
-          }
+          color: "#E5C158"
         }
       };
 
@@ -161,265 +204,394 @@ const BundleStore = ({ onSuccess }) => {
     }
   };
 
+  const filteredBundles = bundles;
+
   return (
     <motion.section 
-      initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -15 }}
-      className="p-6 md:p-10 relative overflow-hidden bg-[#0B0C10] rounded-[32px] shadow-2xl border border-white/10"
+      initial={{ opacity: 0, y: 15 }} 
+      animate={{ opacity: 1, y: 0 }} 
+      exit={{ opacity: 0, y: -15 }}
+      className="p-4 sm:p-6 md:p-8 relative bg-[#09090D] rounded-2xl sm:rounded-3xl md:rounded-[32px] shadow-[0_20px_60px_rgba(0,0,0,0.8)] border border-white/10 min-h-[500px] overflow-hidden"
     >
-      {/* Dynamic Background Accents */}
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#00ff66]/5 rounded-full blur-[120px] -mr-40 -mt-40 pointer-events-none"></div>
-      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[#00ff66]/5 rounded-full blur-[100px] -ml-20 -mb-20 pointer-events-none"></div>
-
-      <button 
-        onClick={() => {
-          if (step === 'store') navigate('/');
-          if (step === 'select-pdfs') setStep('store');
-          if (step === 'checkout') selectedBundle.pdfSelectionCount > 0 ? setStep('select-pdfs') : setStep('store');
-        }} 
-        className="inline-flex items-center gap-2 text-sm text-slate-400 hover:text-white transition-colors mb-10 outline-none group relative z-10 font-medium"
-      >
-        <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" /> 
-        {step === 'store' ? 'Back to Home' : 'Go Back'}
-      </button>
+      {/* Navigation / Back Button */}
+      <div className="flex items-center justify-between mb-5 sm:mb-8 relative z-10">
+        <button 
+          onClick={() => {
+            if (step === 'store') navigate('/');
+            if (step === 'select-pdfs') setStep('store');
+            if (step === 'checkout') selectedBundle.pdfSelectionCount > 0 ? setStep('select-pdfs') : setStep('store');
+          }} 
+          className="inline-flex items-center gap-2 text-sm sm:text-base md:text-sm text-slate-200 hover:text-white transition-all outline-none group font-bold bg-white/10 hover:bg-white/15 px-4 sm:px-5 md:px-4 py-2.5 sm:py-3 md:py-2.5 rounded-full border border-white/15 shadow-sm active:scale-95 cursor-pointer"
+        >
+          <ArrowLeft size={18} className="text-[#E5C158] transition-transform group-hover:-translate-x-0.5" /> 
+          <span>{step === 'store' ? 'Back to Home' : 'Back to Bundles'}</span>
+        </button>
+      </div>
 
       <AnimatePresence mode="wait">
         {step === 'store' && (
-          <motion.div key="store" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="relative z-10 space-y-8">
-            <div className="flex items-center gap-5 mb-12 relative z-10">
-              <div className="p-4 bg-[#00ff66]/10 border border-[#00ff66]/20 rounded-2xl text-[#00ff66]">
-                <Package weight="duotone" size={32} />
-              </div>
-              <div>
-                <h2 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight">Premium Bundles</h2>
-                <p className="text-slate-400 text-sm md:text-base font-medium mt-1.5">Exclusive packages designed for maximum value and impact.</p>
+          <motion.div 
+            key="store" 
+            initial={{ opacity: 0, y: 10 }} 
+            animate={{ opacity: 1, y: 0 }} 
+            exit={{ opacity: 0, y: -10 }} 
+            className="relative z-10 space-y-6 sm:space-y-8"
+          >
+            {/* Header Block */}
+            <div className="relative rounded-2xl sm:rounded-3xl bg-gradient-to-br from-[#14141A] via-[#101015] to-[#0A0A0E] p-5 sm:p-7 md:p-9 border border-white/10 shadow-xl overflow-hidden">
+              <div className="relative z-10">
+                <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight leading-tight">
+                  High-Impact Cyber Packages
+                </h1>
+                <p className="text-base sm:text-lg text-slate-200 mt-2.5 max-w-xl leading-relaxed font-normal">
+                  Fast-track your skills with strategic 1:1 mentorship and comprehensive blueprint guides at bundled savings.
+                </p>
               </div>
             </div>
 
-            {bundles.length === 0 ? (
-              <div className="text-center py-12 text-slate-400 bg-white/5 rounded-3xl border border-white/5">
-                <Package size={48} className="mx-auto mb-4 opacity-50 text-[#00ff66]" />
-                <p>No premium bundles available at the moment.</p>
+            {/* Bundles List */}
+            {filteredBundles.length === 0 ? (
+              <div className="text-center py-12 text-slate-400 bg-[#121217] rounded-2xl border border-white/10">
+                <Package size={48} className="mx-auto mb-3 opacity-40 text-[#E5C158]" />
+                <p className="text-base font-semibold">No bundles found in this category.</p>
               </div>
             ) : (
-              bundles.map(b => (
-                <div 
-                  key={b.id}
-                  className={`group relative overflow-hidden rounded-[28px] bg-[#12141D] border ${b.id === 'all-in-one' ? 'border-[#b026ff]/50 shadow-[0_0_40px_rgba(176,38,255,0.15)] scale-[1.02] z-20' : 'border-white/10 hover:border-[#00ff66]/30'} flex flex-col md:flex-row items-center gap-8 md:gap-12 justify-between p-6 md:p-10 transition-all duration-500`}
-                >
-                  <div className="relative z-10 flex-1 min-w-0 text-center md:text-left mb-8 md:mb-0">
-                    {b.id === 'all-in-one' && (
-                      <div className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-[#b026ff]/20 text-[#b026ff] text-xs font-bold uppercase tracking-wider mb-5 border border-[#b026ff]/30">
-                        <ShieldCheck size={16} weight="fill" /> Best Value
-                      </div>
-                    )}
-                    {b.id !== 'all-in-one' && b.id !== 'any-4-pdfs' && b.savings >= 35 && (
-                      <div className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-[#00ff66]/10 text-[#00ff66] text-xs font-bold uppercase tracking-wider mb-5 border border-[#00ff66]/20">
-                        <ShieldCheck size={16} weight="fill" /> Recommended
-                      </div>
-                    )}
-                    <h4 className="text-3xl md:text-4xl font-bold text-white mb-4 tracking-tight">{b.title}</h4>
-                    <ul className="text-slate-400 text-sm md:text-base max-w-md mx-auto md:mx-0 space-y-3">
-                      {b.description ? b.description.split('\n').filter(l => l.trim()).map((line, i) => (
-                        <li key={i} className="flex items-start justify-center md:justify-start gap-3">
-                          <CheckCircle weight="fill" className="text-[#00ff66] text-lg shrink-0 mt-0.5"/> 
-                          <span className="text-left break-words min-w-0 flex-1">{line}</span>
-                        </li>
-                      )) : (
-                        <li className="flex items-center justify-center md:justify-start gap-3 text-slate-500 italic">
-                          <span>No description provided.</span>
-                        </li>
-                      )}
-                    </ul>
-                  </div>
-                  <div className={`relative z-10 w-full md:w-auto flex flex-col items-center gap-6 bg-black/40 border ${b.id === 'all-in-one' ? 'border-[#b026ff]/50 shadow-[0_0_30px_rgba(176,38,255,0.2)]' : 'border-white/10'} p-8 rounded-2xl backdrop-blur-md`}>
-                    <div className="text-center">
-                      <p className="text-xs text-slate-500 uppercase font-bold tracking-widest mb-2">Investment</p>
-                      {b.originalPrice > b.price && (
-                        <p className="text-lg text-slate-400 line-through mb-1 flex items-center justify-center"><span className="mr-0.5">₹</span>{b.originalPrice}</p>
-                      )}
-                      <p className="text-5xl font-black text-white tracking-tighter flex items-center justify-center"><span className="mr-1.5">₹</span>{b.price}</p>
-                      {b.savings > 0 && (
-                        <p className="text-sm font-bold text-[#00ff66] mt-2 flex items-center justify-center">Save <span className="ml-1 mr-0.5">₹</span>{b.savings}</p>
-                      )}
-                    </div>
-                    <button 
-                      onClick={() => handleBundleSelect(b)}
-                      className={`w-full px-8 py-4 ${b.id === 'all-in-one' ? 'bg-[#b026ff] hover:bg-[#9d22e6] text-white' : 'bg-[#00ff66] hover:bg-[#00cc52] text-[#0B0C10]'} font-bold text-lg rounded-xl transition-colors active:scale-95 flex items-center justify-center gap-2`}
+              <div className="grid grid-cols-1 gap-5 sm:gap-6">
+                {filteredBundles.map(b => {
+                  const isAllInOne = b.id === 'all-in-one';
+
+                  return (
+                    <div 
+                      key={b.id}
+                      className={`relative rounded-2xl sm:rounded-3xl p-5 sm:p-7 md:p-8 transition-all duration-300 ${
+                        isAllInOne 
+                          ? 'bg-gradient-to-b from-[#181822] via-[#121218] to-[#0D0D12] border-2 border-[#E5C158] shadow-[0_12px_40px_rgba(229,193,88,0.12)]' 
+                          : 'bg-[#121217] border border-white/10'
+                      }`}
                     >
-                      <ShoppingCart size={24} weight="bold" className="shrink-0" />
-                      Secure Bundle
-                    </button>
-                  </div>
-                </div>
-              ))
+                      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-5 sm:gap-6">
+                        {/* Left Info Column */}
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-xl sm:text-2xl md:text-3xl font-black text-white tracking-tight mb-3">
+                            {b.title}
+                          </h3>
+
+                          {/* Features List */}
+                          <ul className="space-y-2.5 text-sm sm:text-base text-slate-200 max-w-lg font-medium">
+                            {b.description ? b.description.split('\n').filter(l => l.trim()).map((line, i) => (
+                              <li key={i} className="flex items-start gap-2.5">
+                                <CheckCircle weight="fill" className="text-[#E5C158] text-lg shrink-0 mt-0.5"/> 
+                                <span className="leading-snug text-slate-100">{line}</span>
+                              </li>
+                            )) : (
+                              <li className="flex items-center gap-2 text-slate-500 italic">
+                                <span>No description provided.</span>
+                              </li>
+                            )}
+                          </ul>
+                        </div>
+
+                        {/* Right Pricing & Action Box */}
+                        <div className="w-full md:w-64 shrink-0 bg-[#08080C] border border-white/10 p-5 sm:p-6 rounded-2xl flex flex-col items-center justify-center gap-3.5">
+                          <div className="text-center w-full">
+                            <span className="text-xs sm:text-sm font-bold text-slate-300 uppercase tracking-widest block mb-1">
+                              Bundle Price
+                            </span>
+                            
+                            <div className="flex items-baseline justify-center gap-2.5">
+                              {b.originalPrice > b.price && (
+                                <span className="text-base sm:text-lg font-semibold text-slate-500 line-through">
+                                  ₹{b.originalPrice}
+                                </span>
+                              )}
+                              <span className="text-3xl sm:text-4xl font-black text-white tracking-tight">
+                                ₹{b.price}
+                              </span>
+                            </div>
+                          </div>
+
+                          <button 
+                            onClick={() => handleBundleSelect(b)}
+                            className="w-full py-3.5 sm:py-4 px-5 bg-white text-slate-950 font-black text-sm sm:text-base rounded-xl transition-all border border-slate-200 border-l-[4px] border-l-[#C69214] active:scale-95 cursor-pointer shadow-md flex items-center justify-center gap-2 min-h-[48px]"
+                          >
+                            <ShoppingCart size={18} weight="bold" />
+                            {b.pdfSelectionCount > 0 ? `Choose ${b.pdfSelectionCount} PDFs` : 'Select Bundle'}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             )}
           </motion.div>
         )}
 
+        {/* Step 2: PDF Selection */}
         {step === 'select-pdfs' && (
-          <motion.div key="select-pdfs" initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.98 }} className="relative z-10 space-y-8">
-            <div className="flex items-center justify-between mb-8">
+          <motion.div 
+            key="select-pdfs" 
+            initial={{ opacity: 0, scale: 0.98 }} 
+            animate={{ opacity: 1, scale: 1 }} 
+            exit={{ opacity: 0, scale: 0.98 }} 
+            className="relative z-10 space-y-6"
+          >
+            {/* Step 2 Header */}
+            <div className="p-6 bg-gradient-to-br from-[#14141A] to-[#0A0A0E] rounded-2xl border border-white/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div>
-                <h3 className="text-3xl font-bold text-white tracking-tight">Select your PDFs</h3>
-                <p className="text-slate-400 mt-2">
-                  Choose <strong className="text-[#00ff66]">{selectedBundle.pdfSelectionCount}</strong> PDF{selectedBundle.pdfSelectionCount > 1 ? 's' : ''} for your bundle.
+                <h3 className="text-xl md:text-2xl font-extrabold text-white tracking-tight flex items-center gap-2">
+                  <BookOpen size={24} className="text-[#E5C158]" weight="duotone" />
+                  Select Your {selectedBundle.pdfSelectionCount} Ebooks
+                </h3>
+                <p className="text-slate-300 text-xs md:text-sm mt-1">
+                  Click on the blueprints you would like included in your <strong className="text-white font-bold">{selectedBundle.title}</strong> package.
                 </p>
               </div>
-              <div className="bg-[#12141D] border border-white/10 px-4 py-2 rounded-xl text-white font-bold">
-                <span className="text-[#00ff66]">{selectedPdfs.length}</span> / {selectedBundle.pdfSelectionCount}
+              
+              <div className="px-4 py-2 bg-[#08080C] border border-white/15 rounded-xl text-sm font-bold text-white shrink-0">
+                Selected: <span className="text-[#E5C158] text-base">{selectedPdfs.length}</span> / {selectedBundle.pdfSelectionCount}
               </div>
             </div>
 
+            {/* PDFs Grid with Covers */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {offerings.map(pdf => {
-                const isSelected = selectedPdfs.find(p => p.id === pdf.id);
+                const isSelected = selectedPdfs.some(p => p.id === pdf.id);
                 const isDisabled = !isSelected && selectedPdfs.length >= selectedBundle.pdfSelectionCount;
+
                 return (
                   <div 
                     key={pdf.id}
                     onClick={() => !isDisabled && handlePdfToggle(pdf)}
-                    className={`relative p-5 rounded-2xl border transition-all cursor-pointer ${
+                    className={`relative p-4 rounded-2xl border transition-all duration-200 flex items-center gap-4 cursor-pointer ${
                       isSelected 
-                        ? 'bg-[#00ff66]/10 border-[#00ff66] shadow-[0_0_20px_rgba(0,255,102,0.1)]' 
+                        ? 'bg-gradient-to-r from-[#1E1A10] to-[#14141A] border-[#E5C158]' 
                         : isDisabled 
-                          ? 'bg-white/5 border-white/5 opacity-50 cursor-not-allowed' 
-                          : 'bg-[#12141D] border-white/10 hover:border-white/30'
+                          ? 'bg-[#101015]/40 border-white/5 opacity-45 cursor-not-allowed' 
+                          : 'bg-[#121217] border-white/10'
                     }`}
                   >
-                    <div className="flex justify-between items-start mb-2">
-                      <div className="p-2 bg-black/30 rounded-lg text-slate-300">
-                        <BookOpen size={24} weight="duotone" />
-                      </div>
-                      <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${isSelected ? 'border-[#00ff66] bg-[#00ff66] text-[#0B0C10]' : 'border-white/20'}`}>
-                        {isSelected && <Check size={14} weight="bold" />}
-                      </div>
+                    {/* Cover Thumbnail / Icon */}
+                    <div className="w-16 h-24 rounded-lg overflow-hidden bg-black/50 border border-white/10 shrink-0 flex items-center justify-center relative shadow-md">
+                      {pdf.coverImage ? (
+                        <img 
+                          src={pdf.coverImage} 
+                          alt={pdf.title} 
+                          className="w-full h-full object-cover transition-transform" 
+                        />
+                      ) : (
+                        <BookOpen size={24} className="text-[#E5C158]" weight="duotone" />
+                      )}
                     </div>
-                    <h4 className="text-lg font-bold text-white leading-snug mt-3">{pdf.title}</h4>
+
+                    {/* PDF Title & Info */}
+                    <div className="flex-1 min-w-0 pr-2">
+                      <h4 className="text-sm md:text-base font-bold text-white leading-snug line-clamp-2">
+                        {pdf.title}
+                      </h4>
+                      <p className="text-xs text-slate-400 mt-1 line-clamp-2">
+                        {pdf.description}
+                      </p>
+                    </div>
+
+                    {/* Selection Indicator Checkbox */}
+                    <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${
+                      isSelected 
+                        ? 'border-[#E5C158] bg-[#E5C158] text-black' 
+                        : 'border-white/20'
+                    }`}>
+                      {isSelected && <Check size={14} weight="bold" />}
+                    </div>
                   </div>
                 );
               })}
             </div>
 
-            <div className="pt-8 border-t border-white/10 flex justify-end">
+            {/* Bottom Floating/Sticky Action Bar */}
+            <div className="pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <span className="text-xs sm:text-sm text-slate-400">
+                {selectedPdfs.length === selectedBundle.pdfSelectionCount ? (
+                  <span className="text-emerald-400 font-semibold flex items-center gap-1.5">
+                    <CheckCircle size={16} weight="fill" /> Ready to proceed!
+                  </span>
+                ) : (
+                  <span>Please select <strong className="text-[#E5C158]">{selectedBundle.pdfSelectionCount - selectedPdfs.length}</strong> more PDF(s) to continue.</span>
+                )}
+              </span>
+
               <button 
                 disabled={selectedPdfs.length !== selectedBundle.pdfSelectionCount}
                 onClick={handlePdfSelectionComplete}
-                className="px-8 py-4 bg-[#00ff66] disabled:bg-white/10 disabled:text-slate-500 disabled:cursor-not-allowed text-[#0B0C10] font-bold text-lg rounded-xl hover:bg-[#00cc52] transition-colors active:scale-95 flex items-center justify-center gap-2"
+                className="w-full sm:w-auto px-7 py-3.5 bg-white disabled:opacity-40 disabled:cursor-not-allowed text-slate-950 font-extrabold text-sm rounded-xl transition-all border border-slate-200 border-l-[4px] border-l-[#C69214] active:scale-95 cursor-pointer shadow-sm flex items-center justify-center gap-2"
               >
-                {selectedBundle.hasConsultation ? 'Continue to Booking' : 'Review & Checkout'} <ArrowRight size={20} weight="bold" />
+                {selectedBundle.hasConsultation ? 'Continue to Schedule Call' : 'Review & Checkout'} 
+                <ArrowRight size={18} weight="bold" />
               </button>
             </div>
           </motion.div>
         )}
 
+        {/* Step 3: Checkout Form */}
         {step === 'checkout' && (
           <motion.div 
             key="checkout"
-            initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.98 }}
-            className="space-y-6 max-w-lg mx-auto py-8 relative z-10"
+            initial={{ opacity: 0, scale: 0.98 }} 
+            animate={{ opacity: 1, scale: 1 }} 
+            exit={{ opacity: 0, scale: 0.98 }}
+            className="space-y-6 max-w-xl mx-auto py-2 relative z-10"
           >
-            <div className="text-center mb-10">
-              <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-[#00ff66]/10 text-[#00ff66] border border-[#00ff66]/20 mb-6 shadow-xl shadow-[#00ff66]/10">
-                <ShoppingCart size={40} weight="duotone" />
-              </div>
-              <h3 className="text-3xl font-bold text-white tracking-tight">Complete Order</h3>
-            </div>
-
-            <div className="p-8 bg-[#12141D] border border-white/10 rounded-[28px] shadow-2xl relative overflow-hidden">
-              <div className="mb-8 pb-8 border-b border-white/5 relative z-10">
-                <div className="flex justify-between items-start mb-6">
+            <div className="p-6 md:p-8 bg-gradient-to-b from-[#14141A] to-[#0D0D12] border border-white/10 rounded-2xl shadow-2xl">
+              {/* Order Summary */}
+              <div className="mb-6 pb-6 border-b border-white/10">
+                <div className="flex justify-between items-start">
                   <div>
-                    <p className="text-xs text-slate-500 uppercase font-bold tracking-widest mb-2">Bundle summary</p>
-                    <p className="text-xl font-bold text-white leading-snug">{selectedBundle.title}</p>
+                    <span className="text-[11px] font-bold text-[#E5C158] uppercase tracking-wider block mb-1">
+                      Selected Package
+                    </span>
+                    <h3 className="text-xl font-black text-white leading-tight">
+                      {selectedBundle.title}
+                    </h3>
                   </div>
                   <div className="text-right">
-                    <p className="text-xs text-slate-500 uppercase font-bold tracking-widest mb-2">Amount</p>
-                    <p className="text-xl font-bold text-white flex items-center justify-end"><span className="mr-0.5">₹</span>{selectedBundle.price}</p>
+                    <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                      Investment
+                    </span>
+                    <span className="text-2xl font-black text-white">
+                      ₹{selectedBundle.price}
+                    </span>
                   </div>
                 </div>
 
+                {/* Selected Guides List */}
                 {selectedBundle.pdfSelectionCount > 0 && selectedPdfs.length > 0 && (
-                  <div className="mt-4 p-4 bg-white/5 rounded-xl border border-white/5">
-                    <p className="text-xs text-slate-500 uppercase font-bold tracking-widest mb-3">Included PDFs</p>
+                  <div className="mt-4 p-4 bg-[#08080C] rounded-xl border border-white/10">
+                    <p className="text-xs sm:text-sm font-bold text-slate-300 uppercase tracking-wider mb-2.5">
+                      Included Ebooks ({selectedPdfs.length})
+                    </p>
                     <ul className="space-y-2">
                       {selectedPdfs.map(pdf => (
-                        <li key={pdf.id} className="text-sm text-slate-300 flex items-start gap-2">
-                          <CheckCircle size={16} className="text-[#00ff66] shrink-0 mt-0.5" weight="fill" />
+                        <li key={pdf.id} className="text-sm text-slate-200 flex items-start gap-2">
+                          <CheckCircle size={16} className="text-[#E5C158] shrink-0 mt-0.5" weight="fill" />
                           <span className="leading-snug">{pdf.title}</span>
                         </li>
                       ))}
                     </ul>
                   </div>
                 )}
-                
-                {selectedBundle.pdfSelectionCount === 0 && selectedBundle.id !== 'all-in-one' && selectedBundle.id !== 'all-4-pdfs' && (
-                   <p className="text-sm text-slate-400 mt-2 flex items-center gap-2"><CheckCircle size={16} className="text-[#00ff66]" weight="fill"/> All PDFs Included Automatically</p>
-                )}
               </div>
               
-              <div className="flex justify-between items-center text-xl relative z-10">
-                <span className="font-bold text-slate-400">Total Due</span>
-                <span className="font-black text-[#00ff66] text-3xl tracking-tight flex items-center"><span className="mr-1">₹</span>{selectedBundle.price}</span>
+              {/* Total Due Callout */}
+              <div className="flex justify-between items-center bg-[#08080C] p-4 sm:p-5 md:p-4 rounded-2xl border border-[#E5C158]/30">
+                <div>
+                  <span className="text-sm sm:text-base md:text-sm font-bold text-slate-200 uppercase tracking-wide block">Total Due</span>
+                  <span className="text-sm sm:text-base md:text-sm text-slate-300 font-medium mt-1 block">
+                    {selectedBundle.pdfSelectionCount > 0 
+                      ? `${selectedPdfs.length} item${selectedPdfs.length > 1 ? 's' : ''} included` 
+                      : 'Complete Bundle Access included'}
+                  </span>
+                </div>
+                <span className="font-black text-[#F5C842] text-3xl sm:text-4xl md:text-3xl tracking-tight">
+                  ₹{selectedBundle.price}
+                </span>
               </div>
               
-              <div className="mt-8 pt-8 border-t border-white/5 relative z-10">
-                <p className="text-xs text-slate-500 uppercase font-bold tracking-widest mb-4">Your Details</p>
-                <div className="space-y-4">
-                  <input
-                    type="text"
-                    placeholder="Full Name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-slate-500 focus:outline-none focus:border-[#00ff66]/50 focus:bg-[#00ff66]/5 transition-colors"
-                  />
-                  <input
-                    type="email"
-                    placeholder={selectedBundle?.hasConsultation ? "Email (to receive meeting link and pdf)" : "Email (for PDF delivery)"}
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-slate-500 focus:outline-none focus:border-[#00ff66]/50 focus:bg-[#00ff66]/5 transition-colors"
-                  />
-                  <div className="flex gap-2">
-                    <div className="flex items-center bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus-within:border-[#00ff66]/50 focus-within:bg-[#00ff66]/5 transition-colors">
-                      <span className="text-white/50 mr-1">+</span>
-                      <input 
-                        type="tel"
-                        value={countryCode}
-                        maxLength="3"
-                        placeholder="91"
-                        onChange={e => {
-                          const val = e.target.value.replace(/\D/g, '');
-                          setCountryCode(val);
-                        }}
-                        className="bg-transparent outline-none w-8 text-center"
+              {/* Buyer Input Form */}
+              <div className="mt-6 pt-6 border-t border-white/10">
+                <p className="text-sm sm:text-base md:text-sm font-bold text-slate-200 uppercase tracking-wider mb-4 flex items-center gap-2">
+                  <User size={18} className="text-[#E5C158]" /> Buyer Contact Information
+                </p>
+
+                <div className="space-y-4 sm:space-y-5">
+                  <div>
+                    <label className="block text-sm sm:text-base md:text-sm font-bold text-slate-200 mb-2">
+                      Full Name
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        placeholder="John Doe"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        className="w-full bg-[#08080C] border border-white/10 rounded-xl px-4 py-3.5 md:py-3 text-white placeholder:text-slate-500 focus:outline-none focus:border-[#E5C158] focus:ring-1 focus:ring-[#E5C158] text-base md:text-sm transition-all"
                       />
                     </div>
-                    <input
-                      type="tel"
-                      placeholder="Phone Number"
-                      value={phone}
-                      maxLength="10"
-                      onChange={e => {
-                        const val = e.target.value.replace(/\D/g, '');
-                        setPhone(val);
-                      }}
-                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-slate-500 focus:outline-none focus:border-[#00ff66]/50 focus:bg-[#00ff66]/5 transition-colors"
-                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm sm:text-base md:text-sm font-bold text-slate-200 mb-2">
+                      Email Address (for PDF delivery within 24 hours)
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="email"
+                        placeholder="john@example.com"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="w-full bg-[#08080C] border border-white/10 rounded-xl px-4 py-3.5 md:py-3 text-white placeholder:text-slate-500 focus:outline-none focus:border-[#E5C158] focus:ring-1 focus:ring-[#E5C158] text-base md:text-sm transition-all"
+                      />
+                    </div>
+                    <span className="text-xs sm:text-sm md:text-xs text-slate-300 font-medium mt-1.5 block">
+                      Your bundle PDFs will be shared to your email within 24 hours.
+                    </span>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm sm:text-base md:text-sm font-bold text-slate-200 mb-2">
+                      Phone Number (WhatsApp Updates)
+                    </label>
+                    <div className="flex gap-2.5">
+                      <div className="flex items-center bg-[#08080C] border border-white/10 rounded-xl px-3.5 py-3.5 md:py-3 text-white focus-within:border-[#E5C158] text-base md:text-sm transition-colors">
+                        <span className="text-slate-400 mr-1">+</span>
+                        <input 
+                          type="tel"
+                          value={countryCode}
+                          maxLength="3"
+                          placeholder="91"
+                          onChange={e => {
+                            const val = e.target.value.replace(/\D/g, '');
+                            setCountryCode(val);
+                          }}
+                          className="bg-transparent outline-none w-9 text-center text-white font-semibold text-base md:text-sm"
+                        />
+                      </div>
+                      <input
+                        type="tel"
+                        placeholder="9876543210"
+                        value={phone}
+                        maxLength="10"
+                        onChange={e => {
+                          const val = e.target.value.replace(/\D/g, '');
+                          setPhone(val);
+                        }}
+                        className="w-full bg-[#08080C] border border-white/10 rounded-xl px-4 py-3.5 md:py-3 text-white placeholder:text-slate-500 focus:outline-none focus:border-[#E5C158] focus:ring-1 focus:ring-[#E5C158] text-base md:text-sm transition-all"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
             
-            <div className="flex flex-col gap-4 pt-4">
+            {/* Pay Button & Validation Error */}
+            <div className="flex flex-col gap-3 pt-2">
               <button 
                 onClick={handleCheckout}
                 disabled={isProcessing}
-                className="w-full py-5 bg-[#00ff66] disabled:bg-[#00ff66]/50 disabled:cursor-not-allowed text-[#0B0C10] font-bold text-lg rounded-2xl flex items-center justify-center gap-3 hover:bg-[#00cc52] transition-colors active:scale-95"
+                className="w-full py-4 sm:py-4.5 md:py-3.5 bg-white active:scale-95 disabled:opacity-50 text-slate-950 font-black text-base sm:text-lg md:text-base rounded-xl transition-all border border-slate-200 border-l-[4px] border-l-[#C69214] cursor-pointer shadow-md flex items-center justify-center gap-2.5 min-h-[52px] md:min-h-[48px]"
               >
-                {isProcessing ? 'Processing...' : 'Proceed to Secure Payment'} <ArrowRight weight="bold" size={20} />
+                <LockKey weight="bold" size={20} />
+                {isProcessing ? 'Processing...' : `Pay ₹${selectedBundle.price} & Get Access`} 
+                <ArrowRight weight="bold" size={20} />
               </button>
+
+              <div className="flex items-center justify-center gap-2 text-xs sm:text-sm md:text-xs text-slate-400 font-semibold pt-1">
+                <ShieldCheck size={18} className="text-[#E5C158]" weight="fill" />
+                <span>100% Secure Checkout</span>
+              </div>
+
               {validationError && (
-                <p className="text-red-500 text-sm text-center font-medium">{validationError}</p>
+                <p className="text-red-400 text-sm text-center font-semibold bg-red-500/10 border border-red-500/20 py-2.5 px-3 rounded-xl">
+                  {validationError}
+                </p>
               )}
             </div>
           </motion.div>

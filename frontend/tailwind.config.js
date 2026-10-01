@@ -7,23 +7,19 @@ export default {
   theme: {
     extend: {
       colors: {
-        background: '#090a0f', // True off-black for hacker vibe
-        surface: '#11141c',
-        'surface-elevated': '#181c26',
+        background: 'var(--background, #070709)',
+        surface: '#0c0c0e',
+        'surface-elevated': '#141418',
         accent: {
-          DEFAULT: '#00ff66', // Neon green
-          hover: '#00cc52',
-          glow: 'rgba(0, 255, 102, 0.2)'
-        },
-        cyan: {
-          DEFAULT: '#0ea5e9',
-          glow: 'rgba(14, 165, 233, 0.2)'
+          DEFAULT: '#E5C158', // Luxury Cyber Gold
+          hover: '#F3BA2F',
+          glow: 'rgba(229, 193, 88, 0.2)'
         },
         muted: '#8b949e',
         border: 'rgba(255, 255, 255, 0.1)',
       },
       fontFamily: {
-        sans: ['Inter', 'sans-serif'],
+        sans: ['Outfit', 'Inter', 'sans-serif'],
         mono: ['JetBrains Mono', 'monospace'],
       },
     },

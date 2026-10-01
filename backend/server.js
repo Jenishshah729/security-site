@@ -12,10 +12,34 @@ import nodemailer from 'nodemailer';
 
 const prisma = new PrismaClient();
 
-dotenv.config();
+dotenv.config({ override: true });
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+const razorpay = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID || 'dummy_key',
+  key_secret: process.env.RAZORPAY_KEY_SECRET || 'dummy_secret',
+});
+console.log(`[DEBUG] Initialized Razorpay with Key ID: ${process.env.RAZORPAY_KEY_ID}, Secret length: ${process.env.RAZORPAY_KEY_SECRET?.length}`);
+
+async function createRazorpayOrderWithRetry(options, maxRetries = 5) {
+  let lastError;
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      return await razorpay.orders.create(options);
+    } catch (err) {
+      lastError = err;
+      const status = err.statusCode || (err.response && err.response.status);
+      console.log(`[Razorpay Attempt ${attempt}/${maxRetries} Failed]:`, status || err.message);
+      if (attempt < maxRetries) {
+        await new Promise(resolve => setTimeout(resolve, 600 * attempt));
+        continue;
+      }
+    }
+  }
+  throw lastError;
+}
 
 let calendarAPI = null;
 try {
@@ -101,13 +125,32 @@ const allowedOrigins = [
   'http://161.118.191.223' // Fallback for pre-domain
 ].filter(Boolean);
 
+// Allow local LAN IPs (e.g. mobile devices on same Wi-Fi: 192.168.x.x, 10.x.x.x, 172.16-31.x.x)
+const isLocalOrLanOrigin = (origin) => {
+  try {
+    const url = new URL(origin);
+    const host = url.hostname;
+    return (
+      host === 'localhost' ||
+      host === '127.0.0.1' ||
+      host.startsWith('192.168.') ||
+      host.startsWith('10.') ||
+      /^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(host) ||
+      host.endsWith('.local')
+    );
+  } catch {
+    return false;
+  }
+};
+
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
+      if (!origin || allowedOrigins.includes(origin) || isLocalOrLanOrigin(origin)) {
         callback(null, true);
       } else {
-        callback(new Error('Blocked by CORS policy'));
+        console.warn(`[CORS Blocked]: Origin ${origin} not in whitelist`);
+        callback(new Error(`Blocked by CORS policy: Origin ${origin} not allowed`));
       }
     },
     credentials: true,
@@ -135,17 +178,17 @@ const paymentLimiter = rateLimit({
 });
 
 const customBundles = [
-  { id: 'all-in-one', title: 'All-in-One (1:1 + all 6 PDFs)', price: 899, originalPrice: 1363, savings: 464, description: '1:1 Consultation\nAll 6 PDFs included\nMaximum value package', hasConsultation: true, pdfSelectionCount: 0, paymentLink: 'https://rzp.io/rzp/all61' },
-  { id: '1-1-any-4', title: '1:1 + any 4 PDFs', price: 799, originalPrice: 1025, savings: 226, description: '1:1 Consultation\nChoose any 4 PDFs', hasConsultation: true, pdfSelectionCount: 4, paymentLink: 'https://rzp.io/rzp/1and4' },
-  { id: '1-1-any-2', title: '1:1 + any 2 PDFs', price: 599, originalPrice: 687, savings: 88, description: '1:1 Consultation\nChoose any 2 PDFs', hasConsultation: true, pdfSelectionCount: 2, paymentLink: 'https://rzp.io/rzp/2and1' },
-  { id: 'any-4-pdfs', title: 'Any 4 PDFs', price: 559, originalPrice: 676, savings: 117, description: 'Choose any 4 PDFs', hasConsultation: false, pdfSelectionCount: 4, paymentLink: 'https://rzp.io/rzp/any4' },
-  { id: 'any-2-pdfs', title: 'Any 2 PDFs', price: 289, originalPrice: 338, savings: 49, description: 'Choose any 2 PDFs', hasConsultation: false, pdfSelectionCount: 2, paymentLink: 'https://rzp.io/rzp/any2pd' }
+  { id: 'all-in-one', title: 'All-in-One (1:1 + all 6 PDFs)', price: 1199, originalPrice: 1543, savings: 344, description: '1:1 Consultation\nAll 6 PDFs included\nMaximum value package', hasConsultation: true, pdfSelectionCount: 0, paymentLink: 'https://rzp.io/rzp/all61' },
+  { id: '1-1-any-4', title: '1:1 + any 4 PDFs', price: 949, originalPrice: 1145, savings: 196, description: '1:1 Consultation\nChoose any 4 PDFs', hasConsultation: true, pdfSelectionCount: 4, paymentLink: 'https://rzp.io/rzp/1and4' },
+  { id: '1-1-any-2', title: '1:1 + any 2 PDFs', price: 619, originalPrice: 747, savings: 128, description: '1:1 Consultation\nChoose any 2 PDFs', hasConsultation: true, pdfSelectionCount: 2, paymentLink: 'https://rzp.io/rzp/2and1' },
+  { id: 'any-4-pdfs', title: 'Any 4 PDFs', price: 649, originalPrice: 796, savings: 147, description: 'Choose any 4 PDFs', hasConsultation: false, pdfSelectionCount: 4, paymentLink: 'https://rzp.io/rzp/any4' },
+  { id: 'any-2-pdfs', title: 'Any 2 PDFs', price: 339, originalPrice: 398, savings: 59, description: 'Choose any 2 PDFs', hasConsultation: false, pdfSelectionCount: 2, paymentLink: 'https://rzp.io/rzp/any2pd' }
 ];
 
 const contactSchema = z.object({
   name: z.string().min(1, "Name is required").max(100),
   email: z.string().email("Invalid email address"),
-  phone: z.string().max(20).optional().nullable(),
+  phone: z.string().max(25).optional().nullable(),
 });
 
 const consultationOrderSchema = contactSchema.extend({
@@ -158,14 +201,31 @@ const consultationOrderSchema = contactSchema.extend({
 });
 
 const pdfOrderSchema = contactSchema.extend({
-  pdfIds: z.union([z.string(), z.array(z.string())]).refine(val => {
-    return Array.isArray(val) ? val.length > 0 : val.trim().length > 0;
+  pdfIds: z.union([
+    z.string(),
+    z.number(),
+    z.array(z.union([z.string(), z.number()]))
+  ]).refine(val => {
+    return Array.isArray(val) ? val.length > 0 : String(val).trim().length > 0;
   }, "At least one PDF must be selected")
 });
 
-const bundleOrderSchema = contactSchema.extend({
+const bundleOrderSchema = z.object({
+  name: z.string().optional().nullable(),
+  email: z.string().optional().nullable(),
+  phone: z.string().optional().nullable(),
+  customerName: z.string().optional().nullable(),
+  customerEmail: z.string().optional().nullable(),
+  customerPhone: z.string().optional().nullable(),
   bundleId: z.string().min(1, "Bundle ID is required"),
-  selectedPdfs: z.array(z.string()).optional().nullable()
+  selectedPdfs: z.union([
+    z.array(z.union([z.string(), z.number()])),
+    z.string()
+  ]).optional().nullable(),
+  selectedPdfIds: z.union([
+    z.array(z.union([z.string(), z.number()])),
+    z.string()
+  ]).optional().nullable(),
 });
 
 // --- TIME SLOT ROUTES ---
@@ -220,8 +280,8 @@ app.get('/api/slots', async (req, res) => {
       // Skip slots that are in the past
       if (slotStart < new Date()) continue;
       
-      // Skip slots that are actively pending or paid in our local DB
-      if (activeEventIds.has(e.id)) continue;
+      // Mark slot as booked if it's already paid in our local DB
+      const isBooked = activeEventIds.has(e.id);
 
       const tzOptions = { timeZone: 'Asia/Kolkata' };
       const dateParts = new Intl.DateTimeFormat('en-CA', { ...tzOptions, year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(slotStart);
@@ -234,7 +294,7 @@ app.get('/api/slots', async (req, res) => {
         eventId: e.id,
         date: dateStr,
         time: timeStr,
-        isBooked: false,
+        isBooked,
         slotStart: slotStart.toISOString(),
         slotEnd: slotEnd.toISOString()
       });
@@ -257,6 +317,17 @@ app.post('/api/consultation/create-order', paymentLimiter, async (req, res) => {
   try {
     const validatedData = consultationOrderSchema.parse(req.body);
     const { eventId, slotStart, slotEnd, email, name, phone, topic, bundleId, selectedPdfs } = validatedData;
+    
+    // Concurrency Check: Check if slot has already been booked by another user
+    const existingPaid = await prisma.booking.findFirst({
+      where: { eventId, status: 'PAID' }
+    });
+    if (existingPaid) {
+      return res.status(409).json({
+        error: 'This time slot is already taken by another person. Please select a different time slot.',
+        slotTaken: true
+      });
+    }
     
     // Server-side price calculation
     let finalAmount = 349;
@@ -299,7 +370,7 @@ app.post('/api/consultation/create-order', paymentLimiter, async (req, res) => {
       }
     };
 
-    const order = await razorpay.orders.create(options);
+    const order = await createRazorpayOrderWithRetry(options);
     
     // Save the orderId in Booking for the webhook
     await prisma.booking.update({
@@ -307,7 +378,17 @@ app.post('/api/consultation/create-order', paymentLimiter, async (req, res) => {
       data: { orderId: order.id }
     });
 
-    res.json({ success: true, order, bookingId: newBooking.id });
+    res.json({
+      success: true,
+      order: {
+        ...order,
+        orderId: order.id,
+        order_id: order.id,
+        keyId: process.env.RAZORPAY_KEY_ID
+      },
+      bookingId: newBooking.id,
+      keyId: process.env.RAZORPAY_KEY_ID
+    });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return res.status(400).json({ error: 'Validation failed', details: error.errors });
@@ -398,16 +479,20 @@ app.post('/api/consultation/verify-payment', paymentLimiter, async (req, res) =>
         });
 
         if (calendarAPI && GOOGLE_CALENDAR_ID) {
-          const topicDesc = booking.topic ? `\n\nTopic to discuss:\n${booking.topic}` : '';
-          const phoneDesc = booking.phone ? `\nPhone: ${booking.phone}` : '';
-          await calendarAPI.events.patch({
-            calendarId: GOOGLE_CALENDAR_ID,
-            eventId: booking.eventId,
-            requestBody: {
-              summary: `Booked: ${booking.name}`,
-              description: `Email: ${booking.email}${phoneDesc}${topicDesc}`
-            }
-          });
+          try {
+            const topicDesc = booking.topic ? `\n\nTopic to discuss:\n${booking.topic}` : '';
+            const phoneDesc = booking.phone ? `\nPhone: ${booking.phone}` : '';
+            await calendarAPI.events.patch({
+              calendarId: GOOGLE_CALENDAR_ID,
+              eventId: booking.eventId,
+              requestBody: {
+                summary: `Booked: ${booking.name}`,
+                description: `Email: ${booking.email}${phoneDesc}${topicDesc}`
+              }
+            });
+          } catch (calErr) {
+            console.error("Failed to patch Google Calendar event:", calErr.message || calErr);
+          }
         }
         
         if (booking.bundleId) {
@@ -464,9 +549,9 @@ app.get('/api/bundles', async (req, res) => {
       {
         id: 'all-in-one',
         title: 'All-in-One (1:1 + all 6 PDFs)',
-        price: 899,
-        originalPrice: 1363,
-        savings: 464,
+        price: 1199,
+        originalPrice: 1543,
+        savings: 344,
         description: '1:1 Consultation\nAll 6 PDFs included\nMaximum value package',
         hasConsultation: true,
         pdfSelectionCount: 0, // Gets all of them automatically
@@ -475,9 +560,9 @@ app.get('/api/bundles', async (req, res) => {
       {
         id: '1-1-any-4',
         title: '1:1 + any 4 PDFs',
-        price: 799,
-        originalPrice: 1025,
-        savings: 226,
+        price: 949,
+        originalPrice: 1145,
+        savings: 196,
         description: '1:1 Consultation\nChoose any 4 PDFs',
         hasConsultation: true,
         pdfSelectionCount: 4,
@@ -486,9 +571,9 @@ app.get('/api/bundles', async (req, res) => {
       {
         id: '1-1-any-2',
         title: '1:1 + any 2 PDFs',
-        price: 599,
-        originalPrice: 687,
-        savings: 88,
+        price: 619,
+        originalPrice: 747,
+        savings: 128,
         description: '1:1 Consultation\nChoose any 2 PDFs',
         hasConsultation: true,
         pdfSelectionCount: 2,
@@ -497,9 +582,9 @@ app.get('/api/bundles', async (req, res) => {
       {
         id: 'any-4-pdfs',
         title: 'Any 4 PDFs',
-        price: 559,
-        originalPrice: 676,
-        savings: 117,
+        price: 649,
+        originalPrice: 796,
+        savings: 147,
         description: 'Choose any 4 PDFs',
         hasConsultation: false,
         pdfSelectionCount: 4,
@@ -508,9 +593,9 @@ app.get('/api/bundles', async (req, res) => {
       {
         id: 'any-2-pdfs',
         title: 'Any 2 PDFs',
-        price: 289,
-        originalPrice: 338,
-        savings: 49,
+        price: 339,
+        originalPrice: 398,
+        savings: 59,
         description: 'Choose any 2 PDFs',
         hasConsultation: false,
         pdfSelectionCount: 2,
@@ -622,13 +707,55 @@ app.post('/api/webhook/payment', apiLimiter, express.raw({type: 'application/jso
   }
 });
 
-// --- PDF PURCHASE ROUTES ---
-
-const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID || 'dummy_key',
-  key_secret: process.env.RAZORPAY_KEY_SECRET || 'dummy_secret',
+// --- STANDARD RAZORPAY CHECKOUT ROUTES ---
+app.post('/api/create-order', paymentLimiter, async (req, res) => {
+  try {
+    const { amount, currency = "INR", receipt } = req.body;
+    if (!amount || Number(amount) < 100) {
+      return res.status(400).json({ error: 'Minimum amount must be at least 100 paise (₹1)' });
+    }
+    const options = {
+      amount: Math.round(Number(amount)),
+      currency,
+      receipt: receipt || `receipt_${Date.now()}`
+    };
+    const order = await createRazorpayOrderWithRetry(options);
+    res.json({
+      order_id: order.id,
+      id: order.id,
+      amount: order.amount,
+      currency: order.currency,
+      keyId: process.env.RAZORPAY_KEY_ID
+    });
+  } catch (error) {
+    console.error("Razorpay create-order error:", error);
+    res.status(500).json({ error: error.message || 'Failed to create Razorpay order' });
+  }
 });
-console.log(`[DEBUG] Initialized Razorpay with Key ID: ${process.env.RAZORPAY_KEY_ID}`);
+
+app.post('/api/verify-payment', paymentLimiter, async (req, res) => {
+  try {
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+      return res.status(400).json({ success: false, error: 'Missing payment verification fields' });
+    }
+    const secret = process.env.RAZORPAY_KEY_SECRET || 'dummy_secret';
+    const expectedSignature = crypto.createHmac('sha256', secret)
+      .update(razorpay_order_id + "|" + razorpay_payment_id)
+      .digest('hex');
+
+    if (expectedSignature === razorpay_signature) {
+      res.json({ success: true, message: 'Payment verified successfully' });
+    } else {
+      res.status(400).json({ success: false, error: 'Invalid signature mismatch' });
+    }
+  } catch (error) {
+    console.error("Payment verification error:", error);
+    res.status(500).json({ success: false, error: 'Internal verification error' });
+  }
+});
+
+// --- PDF PURCHASE ROUTES ---
 
 app.post('/api/pdf/create-order', paymentLimiter, async (req, res) => {
   try {
@@ -651,7 +778,7 @@ app.post('/api/pdf/create-order', paymentLimiter, async (req, res) => {
       notes: { type: 'PDF' }
     };
     
-    const order = await razorpay.orders.create(options);
+    const order = await createRazorpayOrderWithRetry(options);
     
     await prisma.pdfPurchase.create({
       data: {
@@ -664,7 +791,12 @@ app.post('/api/pdf/create-order', paymentLimiter, async (req, res) => {
       }
     });
     
-    res.json(order);
+    res.json({
+      ...order,
+      orderId: order.id,
+      order_id: order.id,
+      keyId: process.env.RAZORPAY_KEY_ID
+    });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return res.status(400).json({ error: 'Validation failed', details: error.errors });
@@ -718,7 +850,11 @@ app.post('/api/pdf/verify-payment', paymentLimiter, async (req, res) => {
 app.post('/api/bundle/create-order', paymentLimiter, async (req, res) => {
   try {
     const validatedData = bundleOrderSchema.parse(req.body);
-    const { bundleId, selectedPdfs, name, email, phone } = validatedData;
+    const bundleId = validatedData.bundleId;
+    const name = validatedData.name || validatedData.customerName || 'Customer';
+    const email = validatedData.email || validatedData.customerEmail || 'support@example.com';
+    const phone = validatedData.phone || validatedData.customerPhone || null;
+    const selectedPdfs = validatedData.selectedPdfs || validatedData.selectedPdfIds || [];
     
     // Server-side price calculation
     let finalAmount = 229; // fallback
@@ -732,7 +868,7 @@ app.post('/api/bundle/create-order', paymentLimiter, async (req, res) => {
       notes: { type: 'BUNDLE' }
     };
     
-    const order = await razorpay.orders.create(options);
+    const order = await createRazorpayOrderWithRetry(options);
     
     await prisma.bundlePurchase.create({
       data: {
@@ -746,7 +882,12 @@ app.post('/api/bundle/create-order', paymentLimiter, async (req, res) => {
       }
     });
     
-    res.json(order);
+    res.json({
+      ...order,
+      orderId: order.id,
+      order_id: order.id,
+      keyId: process.env.RAZORPAY_KEY_ID
+    });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return res.status(400).json({ error: 'Validation failed', details: error.errors });
@@ -795,6 +936,15 @@ app.post('/api/bundle/verify-payment', paymentLimiter, async (req, res) => {
     console.error("Failed to verify bundle payment:", error);
     res.status(500).json({ error: 'Failed to verify payment' });
   }
+});
+
+// Global JSON Error Handler - Prevents HTML error pages on mobile/API clients
+app.use((err, req, res, next) => {
+  console.error('[API Error Caught]:', err.message);
+  res.status(err.status || 500).json({
+    success: false,
+    error: err.message || 'Internal Server Error'
+  });
 });
 
 app.listen(PORT, () => {

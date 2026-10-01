@@ -21,35 +21,34 @@ const ThankYou = ({ onBack }) => {
       message = 'Your bundle PDFs will be emailed to you within 24 hours.';
     }
   } else {
-    message = 'If you purchased a PDF Store item, you will receive it via email shortly.';
+    message = 'If you purchased a PDF Store item, you will receive it via email within 24 hours.';
   }
 
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }} 
       animate={{ opacity: 1, y: 0 }} 
-      className="glass-panel p-8 md:p-12 text-center flex flex-col items-center"
+      className="p-6 sm:p-8 md:p-12 text-center flex flex-col items-center bg-[#0c0c0e] rounded-2xl sm:rounded-3xl md:rounded-[32px] border border-white/10 shadow-2xl"
     >
       <motion.div 
         initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', damping: 15, delay: 0.1 }}
-        className="w-20 h-20 rounded-full bg-accent/10 text-accent flex items-center justify-center mb-6 border border-accent/30 shadow-[0_0_30px_rgba(0,255,102,0.2)]"
+        className="w-20 h-20 rounded-full bg-[#E5C158]/10 text-[#E5C158] flex items-center justify-center mb-6 border border-[#E5C158]/30 shadow-none"
       >
         <CheckCircle weight="fill" size={48} />
       </motion.div>
       
-      <h2 className="text-2xl font-bold text-white mb-3">Payment Successful</h2>
-      <p className="text-slate-300 mb-8 max-w-sm text-center">
+      <h2 className="text-2xl md:text-3xl font-bold text-white mb-3 tracking-tight">Payment Successful</h2>
+      <p className="text-slate-400 mb-8 max-w-sm text-center leading-relaxed text-sm md:text-base">
         Thank you for your purchase! We have received your payment securely. <br /><br />
-        <span className="text-accent">{message}</span>
+        <span className="text-[#E5C158] font-semibold">{message}</span>
       </p>
       
-      <motion.button 
-        whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+      <button 
         onClick={onBack}
-        className="px-6 py-3 rounded-full border border-white/10 text-sm font-medium text-white hover:bg-white/5 transition-colors flex items-center gap-2"
+        className="px-6 py-3 rounded-full border border-white/10 text-xs md:text-sm font-semibold text-slate-300 bg-white/5 transition-colors flex items-center gap-2 group"
       >
-        <ArrowLeft size={16} /> Return to Home
-      </motion.button>
+        <ArrowLeft size={16} className="text-[#E5C158] transition-transform" /> Return to Home
+      </button>
     </motion.div>
   );
 };
