@@ -227,7 +227,7 @@ const PDFStore = ({ onSuccess }) => {
                       <div>
                         <div className="aspect-[2/3] w-full overflow-hidden bg-[#0c0c0e] relative flex items-center justify-center border-b border-white/5">
                           <img 
-                            src={p.coverImage ? `${import.meta.env.BASE_URL}${p.coverImage.replace(/^\/+/, '')}` : "https://placehold.co/600x800/12141D/ffffff?text=PDF"} 
+                            src={p.coverImage ? `${import.meta.env.BASE_URL}${p.coverImage.replace(/^\/+/, '')}?v=3d` : "https://placehold.co/600x800/12141D/ffffff?text=PDF"} 
                             alt={p.title} 
                             className="w-full h-full object-cover object-top opacity-95 transition-opacity duration-300" 
                           />

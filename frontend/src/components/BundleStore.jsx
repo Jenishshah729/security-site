@@ -375,7 +375,7 @@ const BundleStore = ({ onSuccess }) => {
                     <div className="w-16 h-24 rounded-lg overflow-hidden bg-black/50 border border-white/10 shrink-0 flex items-center justify-center relative shadow-md">
                       {pdf.coverImage ? (
                         <img 
-                          src={pdf.coverImage} 
+                          src={pdf.coverImage ? `${pdf.coverImage}?v=3d` : ''} 
                           alt={pdf.title} 
                           className="w-full h-full object-cover transition-transform" 
                         />
