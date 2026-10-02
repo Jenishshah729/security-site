@@ -99,7 +99,7 @@ const PDFStore = ({ onSuccess }) => {
         key: import.meta.env.VITE_RAZORPAY_KEY_ID || orderData.keyId,
         amount: orderData.amount,
         currency: orderData.currency || 'INR',
-        name: "Jenish Shah - Cyber Academy",
+        name: "Matrix Fortress",
         description: `Access to ${cart.length} Cybersecurity PDF(s)`,
         order_id: orderData.order_id || orderData.id || orderData.orderId,
         handler: async function (response) {

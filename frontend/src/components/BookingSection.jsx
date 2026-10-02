@@ -143,7 +143,7 @@ const BookingSection = ({ onSuccess, isBundle }) => {
             key: import.meta.env.VITE_RAZORPAY_KEY_ID || data.order.keyId || data.keyId,
             amount: data.order.amount,
             currency: data.order.currency || 'INR',
-            name: 'Thejenishshah',
+            name: 'Matrix Fortress',
             description: isBundle ? bundle?.title : '1:1 Consultation',
             order_id: data.order.order_id || data.order.id,
             handler: async function (response) {
@@ -508,7 +508,7 @@ const BookingSection = ({ onSuccess, isBundle }) => {
                       placeholder="91"
                       onChange={e => {
                         const val = e.target.value.replace(/\D/g, '');
-                        setFormData({ ...formData, countryCode: val });
+                        setFormData(prev => ({ ...prev, countryCode: val }));
                       }}
                       className="bg-transparent outline-none w-9 text-center text-white text-base md:text-sm font-semibold"
                     />
@@ -520,8 +520,7 @@ const BookingSection = ({ onSuccess, isBundle }) => {
                     maxLength="10"
                     onChange={e => {
                       const val = e.target.value.replace(/\D/g, '');
-                      setPhone ? null : null; // safe check
-                      setFormData({ ...formData, phone: val });
+                      setFormData(prev => ({ ...prev, phone: val }));
                     }}
                     className="w-full bg-[#141418] text-white border border-white/10 rounded-xl px-4 py-3.5 md:py-3 placeholder:text-slate-500 focus:outline-none focus:border-[#E5C158]/50 focus:ring-1 focus:ring-[#E5C158]/50 transition-all text-base md:text-sm"
                   />
