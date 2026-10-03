@@ -79,6 +79,7 @@ const Home = () => {
       title: item.title,
       url: window.location.origin + item.path,
       subtitle: item.subtitle,
+      icon: item.icon,
     });
   };
 
@@ -111,7 +112,7 @@ const Home = () => {
                 <Link key={item.id} to={item.path} className="outline-none block w-full">
                   <motion.div
                     whileTap={{ scale: 0.99 }}
-                    className="w-full flex items-center p-3 sm:p-3.5 md:py-4.5 md:px-6 rounded-2xl md:rounded-[22px] bg-white shadow-sm transition-all border border-slate-200 border-l-[4px] md:border-l-[5px] border-l-[#C69214] hover:shadow-md md:min-h-[84px]"
+                    className="w-full flex items-center p-3 sm:p-3.5 md:py-4.5 md:px-6 rounded-2xl md:rounded-[22px] bg-white shadow-sm border border-slate-200 border-l-[4px] md:border-l-[5px] border-l-[#C69214] md:min-h-[84px]"
                   >
                     {/* Black Round Icon Badge with White Icon */}
                     <div className="w-11 h-11 md:w-13 md:h-13 rounded-full bg-black flex items-center justify-center text-white shadow-sm flex-shrink-0">
@@ -130,7 +131,7 @@ const Home = () => {
                     {/* 3-dot → opens Linktree-style share modal */}
                     <div
                       onClick={(e) => openShare(e, item)}
-                      className="w-10 h-10 md:w-11 md:h-11 flex items-center justify-center text-gray-700 hover:text-gray-950 hover:bg-gray-100 rounded-xl transition-colors cursor-pointer flex-shrink-0"
+                      className="w-10 h-10 md:w-11 md:h-11 flex items-center justify-center text-gray-700 rounded-xl cursor-pointer flex-shrink-0"
                       aria-label={`Share ${item.title}`}
                     >
                       <DotsThreeVertical size={22} weight="bold" className="md:w-6 md:h-6" />
@@ -159,7 +160,7 @@ const Home = () => {
                 <Link key={item.id} to={item.path} className="outline-none block w-full">
                   <motion.div
                     whileTap={{ scale: 0.99 }}
-                    className="w-full flex items-center p-3 sm:p-3.5 md:py-4.5 md:px-6 rounded-2xl md:rounded-[22px] bg-white shadow-sm transition-all border border-slate-200 border-l-[4px] md:border-l-[5px] border-l-[#C69214] hover:shadow-md md:min-h-[84px]"
+                    className="w-full flex items-center p-3 sm:p-3.5 md:py-4.5 md:px-6 rounded-2xl md:rounded-[22px] bg-white shadow-sm border border-slate-200 border-l-[4px] md:border-l-[5px] border-l-[#C69214] md:min-h-[84px]"
                   >
                     {/* Black Round Icon Badge with White Icon */}
                     <div className="w-11 h-11 md:w-13 md:h-13 rounded-full bg-black flex items-center justify-center text-white shadow-sm flex-shrink-0">
@@ -178,7 +179,7 @@ const Home = () => {
                     {/* 3-dot → opens Linktree-style share modal */}
                     <div
                       onClick={(e) => openShare(e, item)}
-                      className="w-10 h-10 md:w-11 md:h-11 flex items-center justify-center text-gray-700 hover:text-gray-950 hover:bg-gray-100 rounded-xl transition-colors cursor-pointer flex-shrink-0"
+                      className="w-10 h-10 md:w-11 md:h-11 flex items-center justify-center text-gray-700 rounded-xl cursor-pointer flex-shrink-0"
                       aria-label={`Share ${item.title}`}
                     >
                       <DotsThreeVertical size={22} weight="bold" className="md:w-6 md:h-6" />
@@ -198,6 +199,7 @@ const Home = () => {
         title={shareModal?.title ?? ''}
         url={shareModal?.url ?? ''}
         subtitle={shareModal?.subtitle}
+        icon={shareModal?.icon}
       />
     </>
   );

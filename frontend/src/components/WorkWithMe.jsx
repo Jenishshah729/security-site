@@ -32,9 +32,9 @@ const WorkWithMe = () => {
       <nav aria-label="Breadcrumb" className="flex items-center justify-between mb-5 sm:mb-8 relative z-10">
         <Link 
           to="/" 
-          className="inline-flex items-center gap-2 text-sm sm:text-base md:text-sm text-slate-200 hover:text-white transition-all outline-none group font-bold bg-white/10 hover:bg-white/15 px-4 sm:px-5 md:px-4 py-2.5 sm:py-3 md:py-2.5 rounded-full border border-white/15 shadow-sm active:scale-95"
+          className="inline-flex items-center gap-2 text-sm sm:text-base md:text-sm text-slate-200 outline-none font-bold bg-white/10 px-4 sm:px-5 md:px-4 py-2.5 sm:py-3 md:py-2.5 rounded-full border border-white/15 shadow-sm active:scale-95"
         >
-          <ArrowLeft size={18} className="text-[#E5C158] transition-transform group-hover:-translate-x-0.5" /> 
+          <ArrowLeft size={18} className="text-[#E5C158]" /> 
           <span>Back to Home</span>
         </Link>
       </nav>

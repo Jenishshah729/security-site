@@ -231,9 +231,9 @@ const BookingSection = ({ onSuccess, isBundle }) => {
       <div className="flex items-center justify-between mb-5 sm:mb-8 relative z-10">
         <Link 
           to="/" 
-          className="inline-flex items-center gap-2 text-sm sm:text-base md:text-sm text-slate-200 hover:text-white transition-all outline-none group font-bold bg-white/10 hover:bg-white/15 px-4 sm:px-5 md:px-4 py-2.5 sm:py-3 md:py-2.5 rounded-full border border-white/15 shadow-sm active:scale-95"
+          className="inline-flex items-center gap-2 text-sm sm:text-base md:text-sm text-slate-200 outline-none font-bold bg-white/10 px-4 sm:px-5 md:px-4 py-2.5 sm:py-3 md:py-2.5 rounded-full border border-white/15 shadow-sm active:scale-95"
         >
-          <ArrowLeft size={18} className="text-[#E5C158] transition-transform group-hover:-translate-x-0.5" /> 
+          <ArrowLeft size={18} className="text-[#E5C158]" /> 
           <span>Back to Home</span>
         </Link>
       </div>
@@ -344,7 +344,7 @@ const BookingSection = ({ onSuccess, isBundle }) => {
                             className={`flex-shrink-0 flex flex-col items-center justify-center min-w-[78px] py-4 px-3.5 rounded-2xl border transition-all duration-200 cursor-pointer ${
                               isSelected 
                                 ? 'bg-white text-slate-950 border-white font-bold shadow-md' 
-                                : 'bg-[#141418] text-slate-200 border-white/10 hover:border-white/25'
+                                : 'bg-[#141418] text-slate-200 border-white/10'
                             }`}
                           >
                             <span className={`text-xs uppercase tracking-wider font-bold ${isSelected ? 'text-slate-600' : 'text-slate-400'}`}>{weekday}</span>
@@ -379,7 +379,7 @@ const BookingSection = ({ onSuccess, isBundle }) => {
                                     ? 'bg-white/[0.02] border-white/5 text-slate-500 cursor-not-allowed opacity-60' 
                                     : isSelected
                                       ? 'bg-white border-white text-slate-950 font-black shadow-md'
-                                      : 'bg-[#141418] border-white/10 text-slate-200 hover:border-white/30'}
+                                      : 'bg-[#141418] border-white/10 text-slate-200'}
                                 `}
                               >
                                 <Clock size={16} weight={isSelected ? 'bold' : 'regular'} className="shrink-0" />
@@ -438,7 +438,7 @@ const BookingSection = ({ onSuccess, isBundle }) => {
               <button 
                 type="button" 
                 onClick={() => setShowForm(false)} 
-                className="shrink-0 text-xs sm:text-sm font-bold text-[#E5C158] bg-[#E5C158]/10 hover:bg-[#E5C158]/20 border border-[#E5C158]/30 px-3.5 py-2 rounded-xl transition-all outline-none active:scale-95 whitespace-nowrap cursor-pointer"
+                className="shrink-0 text-xs sm:text-sm font-bold text-[#E5C158] bg-[#E5C158]/10 border border-[#E5C158]/30 px-3.5 py-2 rounded-xl outline-none active:scale-95 whitespace-nowrap cursor-pointer"
               >
                 Change
               </button>

@@ -18,7 +18,7 @@ const Footer = () => {
         <div className="flex items-center gap-3 sm:gap-4 md:gap-5 flex-wrap justify-center text-white">
           <Link
             to="/policy"
-            className="text-white hover:text-white/80 transition-colors duration-200"
+            className="text-white"
           >
             Policy & Terms
           </Link>
@@ -29,7 +29,7 @@ const Footer = () => {
             href="https://instagram.com/matrixfortress"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-white hover:text-white/80 transition-colors duration-200"
+            className="text-white"
           >
             Designed by Matrix Fortress
           </a>

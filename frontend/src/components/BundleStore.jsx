@@ -221,9 +221,9 @@ const BundleStore = ({ onSuccess }) => {
             if (step === 'select-pdfs') setStep('store');
             if (step === 'checkout') selectedBundle.pdfSelectionCount > 0 ? setStep('select-pdfs') : setStep('store');
           }} 
-          className="inline-flex items-center gap-2 text-sm sm:text-base md:text-sm text-slate-200 hover:text-white transition-all outline-none group font-bold bg-white/10 hover:bg-white/15 px-4 sm:px-5 md:px-4 py-2.5 sm:py-3 md:py-2.5 rounded-full border border-white/15 shadow-sm active:scale-95 cursor-pointer"
+          className="inline-flex items-center gap-2 text-sm sm:text-base md:text-sm text-slate-200 outline-none font-bold bg-white/10 px-4 sm:px-5 md:px-4 py-2.5 sm:py-3 md:py-2.5 rounded-full border border-white/15 shadow-sm active:scale-95 cursor-pointer"
         >
-          <ArrowLeft size={18} className="text-[#E5C158] transition-transform group-hover:-translate-x-0.5" /> 
+          <ArrowLeft size={18} className="text-[#E5C158]" /> 
           <span>{step === 'store' ? 'Back to Home' : 'Back to Bundles'}</span>
         </button>
       </div>

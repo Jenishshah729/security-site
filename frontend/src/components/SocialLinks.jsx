@@ -60,7 +60,7 @@ const SocialLinks = () => {
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  setShareModal({ title: link.title, url: link.url });
+                  setShareModal({ title: link.title, url: link.url, icon: IconComponent });
                 }}
                 className="w-10 h-10 flex items-center justify-center text-gray-900 transition-colors cursor-pointer"
                 aria-label={`Share ${link.title}`}
@@ -78,6 +78,7 @@ const SocialLinks = () => {
         onClose={() => setShareModal(null)}
         title={shareModal?.title ?? ''}
         url={shareModal?.url ?? ''}
+        icon={shareModal?.icon}
       />
     </>
   );

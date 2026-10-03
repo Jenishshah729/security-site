@@ -2,6 +2,7 @@ import React from 'react';
 import { motion, useReducedMotion } from 'motion/react';
 import { Link } from 'react-router-dom';
 import { FaWhatsapp, FaInstagram, FaFacebook, FaYoutube, FaLinkedin } from 'react-icons/fa';
+import thejenishshahLogo from '../assets/thejenishshah_logo.png';
 
 const socialLinks = [
   {
@@ -55,18 +56,19 @@ const Header = () => {
         initial={shouldReduceMotion ? { opacity: 0 } : { scale: 0.92, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-        className="w-32 h-32 md:w-36 md:h-36 mb-8 md:mb-10 relative flex items-center justify-center group"
+        className="w-32 h-32 md:w-36 md:h-36 mb-7 sm:mb-8 md:mb-10 relative flex items-center justify-center group"
       >
-        {/* 1. Ambient Diffuse Golden Halo */}
+        {/* Ambient Golden Halo */}
         <div
-          className="absolute -inset-2.5 rounded-full opacity-60 blur-xl pointer-events-none transition-opacity duration-500 group-hover:opacity-90"
+          className="absolute -inset-2.5 rounded-full opacity-60 blur-xl pointer-events-none"
           style={{
-            background: 'radial-gradient(circle, rgba(229, 193, 88, 0.22) 0%, rgba(198, 146, 20, 0.10) 45%, transparent 72%)',
+            background:
+              'radial-gradient(circle, rgba(229, 193, 88, 0.25) 0%, rgba(56, 189, 248, 0.12) 45%, transparent 72%)',
           }}
           aria-hidden="true"
         />
 
-        {/* 2. Outer Rotating Precision HUD Segmented Orbital Ring (Golden) */}
+        {/* Outer Rotating Precision HUD Segmented Orbital Ring */}
         <svg
           className={`absolute -inset-2 w-[calc(100%+16px)] h-[calc(100%+16px)] pointer-events-none ${
             shouldReduceMotion ? '' : 'animate-hud-spin'
@@ -75,7 +77,6 @@ const Header = () => {
           fill="none"
           aria-hidden="true"
         >
-          {/* Segmented Outer Track */}
           <circle
             cx="50"
             cy="50"
@@ -86,14 +87,13 @@ const Header = () => {
             strokeOpacity="0.5"
             strokeLinecap="round"
           />
-          {/* Micro Cardinal Tick Marks at 0, 90, 180, 270 degrees in Golden */}
           <line x1="50" y1="0" x2="50" y2="4" stroke="#E5C158" strokeWidth="1.6" strokeOpacity="0.9" />
           <line x1="100" y1="50" x2="96" y2="50" stroke="#E5C158" strokeWidth="1.6" strokeOpacity="0.9" />
           <line x1="50" y1="100" x2="50" y2="96" stroke="#E5C158" strokeWidth="1.6" strokeOpacity="0.9" />
           <line x1="0" y1="50" x2="4" y2="50" stroke="#E5C158" strokeWidth="1.6" strokeOpacity="0.9" />
         </svg>
 
-        {/* 3. Counter-Rotating Inner Dotted Orbit (Golden) */}
+        {/* Counter-Rotating Inner Dotted Orbit */}
         <svg
           className={`absolute -inset-0.5 w-[calc(100%+4px)] h-[calc(100%+4px)] pointer-events-none ${
             shouldReduceMotion ? '' : 'animate-hud-reverse'
@@ -113,8 +113,8 @@ const Header = () => {
           />
         </svg>
 
-        {/* 4. Subtle Gold Border Rim (Matching About page style, completely clean photo) */}
-        <div className="relative w-full h-full rounded-full p-1 bg-gradient-to-b from-white/10 via-[var(--accent-gold,#E5C158)]/25 to-white/5 border border-white/10 shadow-lg">
+        {/* Subtle Gold Border Rim */}
+        <div className="relative w-full h-full rounded-full p-1 bg-gradient-to-b from-white/10 via-[var(--accent-gold,#E5C158)]/30 to-white/5 border border-white/15 shadow-lg">
           <Link
             to="/about"
             title="About Jenish Shah"
@@ -124,7 +124,7 @@ const Header = () => {
             <img
               src={`${import.meta.env.BASE_URL}logo.jpg`}
               alt="Jenish Shah"
-              className="w-full h-full object-cover rounded-full transition-transform duration-300 group-hover:scale-105"
+              className="w-full h-full object-cover rounded-full"
               onError={(e) => {
                 e.target.onerror = null;
                 e.target.src = "https://placehold.co/256x256/141418/E5C158?text=Jenish+Shah";
@@ -134,34 +134,22 @@ const Header = () => {
         </div>
       </motion.div>
 
-      {/* Creator Name: Bold, Minimal, and Clean with generous breathing room */}
-      <motion.h1
-        initial={shouldReduceMotion ? { opacity: 0 } : { y: 6, opacity: 0 }}
+      {/* Creator Logo: 3D Metallic Gaming Style Logo */}
+      <motion.div
+        initial={shouldReduceMotion ? { opacity: 0 } : { y: 8, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.08, duration: 0.4 }}
-        className="text-3xl md:text-5xl font-extrabold tracking-tight text-white mb-2 pt-1"
+        className="w-full flex justify-center mb-7 sm:mb-8 md:mb-10 pt-2 px-4"
       >
-        Thejenishshah
-      </motion.h1>
-
-      {/* Tagline */}
-      <motion.div
-        initial={shouldReduceMotion ? { opacity: 0 } : { y: 6, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.16, duration: 0.4 }}
-        className="mb-6"
-      >
-        <p className="text-slate-300 text-sm md:text-base font-medium tracking-wide flex items-center justify-center gap-1.5">
-          <span>Grab your Chai/Coffee.</span>
-          <span className="font-bold text-[#F5C842] relative inline-block">
-            Let's Hack.
-            <span
-              className="absolute -bottom-0.5 left-0 w-full h-[1.5px] bg-[#F5C842] rounded-full opacity-90 shadow-[0_0_8px_rgba(245,200,66,0.5)]"
-              aria-hidden="true"
-            />
-          </span>
-        </p>
+        <h1 className="sr-only">Thejenishshah</h1>
+        <img
+          src={thejenishshahLogo}
+          alt="Thejenishshah"
+          className="w-full max-w-[270px] sm:max-w-[340px] md:max-w-[390px] h-auto object-contain select-none pointer-events-none"
+        />
       </motion.div>
+
+
 
       {/* Modern Segmented Glass Cyber-Dock for Social Media */}
       <motion.nav

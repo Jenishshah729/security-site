@@ -1,213 +1,411 @@
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import { X, Check } from '@phosphor-icons/react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import {
-  FaLink,
-  FaXTwitter,
-  FaFacebook,
+  X,
+  Check,
+  Copy,
+  ShareNetwork,
+  ArrowSquareOut,
+  LinkSimple,
+  Package,
+  Calendar,
+  BookOpen,
+  UserCircle,
+  Briefcase,
+  EnvelopeSimple,
+  Sparkle
+} from '@phosphor-icons/react';
+import {
   FaWhatsapp,
-  FaLinkedin,
+  FaInstagram,
+  FaFacebookF,
   FaTelegram,
+  FaXTwitter,
+  FaYoutube
 } from 'react-icons/fa6';
 
 /**
- * Linktree-style share modal.
- *
- * Props:
- *   isOpen  – boolean
- *   onClose – () => void
- *   title   – string  (name of the link / PDF)
- *   url     – string  (destination URL)
- *   subtitle – string (optional – shown below the URL preview)
- *   image   – string  (optional – thumbnail/avatar shown in the preview card)
+ * Clean & Minimal AAA Game Box Share Modal
+ * Theme: Golden, Black, White
+ * Buttons follow the website signature design (White + Gold border-l)
  */
-const ShareModal = ({ isOpen, onClose, title, url, subtitle, image }) => {
+const ShareModal = ({ isOpen, onClose, title = 'Jenish Shah', url = '', subtitle, image, icon }) => {
   const [copied, setCopied] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const shouldReduceMotion = useReducedMotion();
 
-  // Close on Escape key
+  // Detect native share capability
+  const [canNativeShare, setCanNativeShare] = useState(false);
   useEffect(() => {
-    const handler = (e) => { if (e.key === 'Escape') onClose(); };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, [onClose]);
-
-  // Prevent body scroll while modal is open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
+    if (typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
+      setCanNativeShare(true);
     }
-    return () => { document.body.style.overflow = ''; };
-  }, [isOpen]);
+  }, []);
+
+  // Close on Escape & handle scroll lock
+  useEffect(() => {
+    const handler = (e) => {
+      if (e.key === 'Escape') onClose();
+    };
+    if (isOpen) {
+      window.addEventListener('keydown', handler);
+      document.body.style.overflow = 'hidden';
+    }
+    return () => {
+      window.removeEventListener('keydown', handler);
+      document.body.style.overflow = '';
+    };
+  }, [isOpen, onClose]);
+
+  const showToast = (msg) => {
+    setToastMessage(msg);
+    setTimeout(() => {
+      setToastMessage('');
+    }, 2400);
+  };
 
   const handleCopy = () => {
+    if (!url) return;
     navigator.clipboard.writeText(url).then(() => {
       setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      showToast('Link copied to clipboard');
+      setTimeout(() => setCopied(false), 2200);
     });
   };
 
-  const encodedUrl = encodeURIComponent(url);
-  const encodedTitle = encodeURIComponent(title);
+  const handleNativeShare = async () => {
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      try {
+        await navigator.share({
+          title,
+          text: subtitle || title,
+          url,
+        });
+      } catch (err) {
+        if (err.name !== 'AbortError') {
+          handleCopy();
+        }
+      }
+    } else {
+      handleCopy();
+    }
+  };
 
-  const shareOptions = [
-    {
-      id: 'copy',
-      label: copied ? 'Copied!' : 'Copy link',
-      icon: copied ? Check : FaLink,
-      action: handleCopy,
-      bg: 'bg-gray-100 ',
-      iconColor: 'text-gray-800',
-      isCustom: true,
-    },
-    {
-      id: 'x',
-      label: 'X',
-      icon: FaXTwitter,
-      href: `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`,
-      bg: 'bg-black ',
-      iconColor: 'text-white',
-    },
-    {
-      id: 'facebook',
-      label: 'Facebook',
-      icon: FaFacebook,
-      href: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
-      bg: 'bg-[#1877F2] ',
-      iconColor: 'text-white',
-    },
-    {
-      id: 'whatsapp',
-      label: 'WhatsApp',
-      icon: FaWhatsapp,
-      href: `https://wa.me/?text=${encodedTitle}%20${encodedUrl}`,
-      bg: 'bg-[#25D366] ',
-      iconColor: 'text-white',
-    },
-    {
-      id: 'linkedin',
-      label: 'LinkedIn',
-      icon: FaLinkedin,
-      href: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`,
-      bg: 'bg-[#0A66C2] ',
-      iconColor: 'text-white',
-    },
-    {
-      id: 'telegram',
-      label: 'Telegram',
-      icon: FaTelegram,
-      href: `https://t.me/share/url?url=${encodedUrl}&text=${encodedTitle}`,
-      bg: 'bg-[#229ED9] ',
-      iconColor: 'text-white',
-    },
-  ];
+  const encodedUrl = encodeURIComponent(url || '');
+  const encodedTitle = encodeURIComponent(title || '');
 
-  // Truncate URL for display
-  const displayUrl = url
-    ? url.replace(/^https?:\/\//, '').slice(0, 38) + (url.length > 38 ? '…' : '')
-    : '';
+  // Resolve matching logo for the selected item (e.g. Bundle -> Package, Consultation -> Calendar)
+  const SelectedIcon = useMemo(() => {
+    if (icon) return icon;
+    const lower = `${title} ${url} ${subtitle || ''}`.toLowerCase();
+    if (lower.includes('bundle')) return Package;
+    if (lower.includes('consultation') || lower.includes('booking') || lower.includes('call')) return Calendar;
+    if (lower.includes('pdf') || lower.includes('store') || lower.includes('guide') || lower.includes('book')) return BookOpen;
+    if (lower.includes('about')) return UserCircle;
+    if (lower.includes('work')) return Briefcase;
+    if (lower.includes('contact') || lower.includes('inquiry')) return EnvelopeSimple;
+    if (lower.includes('whatsapp')) return FaWhatsapp;
+    if (lower.includes('instagram')) return FaInstagram;
+    if (lower.includes('facebook')) return FaFacebookF;
+    if (lower.includes('youtube')) return FaYoutube;
+    return Sparkle;
+  }, [icon, title, url, subtitle]);
+
+  // 5 essential sharing platforms
+  const channels = useMemo(
+    () => [
+      {
+        id: 'whatsapp',
+        name: 'WhatsApp',
+        icon: FaWhatsapp,
+        href: `https://api.whatsapp.com/send?text=${encodedTitle}%20${encodedUrl}`,
+        color: '#25D366',
+        toastText: 'Opening WhatsApp...',
+      },
+      {
+        id: 'instagram',
+        name: 'Instagram',
+        icon: FaInstagram,
+        href: 'https://www.instagram.com/',
+        color: '#E1306C',
+        toastText: 'Link copied // Paste in Instagram DM or Story',
+      },
+      {
+        id: 'facebook',
+        name: 'Facebook',
+        icon: FaFacebookF,
+        href: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
+        color: '#1877F2',
+        toastText: 'Opening Facebook...',
+      },
+      {
+        id: 'telegram',
+        name: 'Telegram',
+        icon: FaTelegram,
+        href: `https://t.me/share/url?url=${encodedUrl}&text=${encodedTitle}`,
+        color: '#229ED9',
+        toastText: 'Opening Telegram...',
+      },
+      {
+        id: 'x',
+        name: 'X',
+        icon: FaXTwitter,
+        href: `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`,
+        color: '#FFFFFF',
+        toastText: 'Opening X...',
+      },
+    ],
+    [encodedUrl, encodedTitle]
+  );
+
+  const displayUrl = url ? url.replace(/^https?:\/\//, '') : '';
+
+  const modalVariants = shouldReduceMotion
+    ? {
+        hidden: { opacity: 0 },
+        visible: { opacity: 1, transition: { duration: 0.15 } },
+        exit: { opacity: 0, transition: { duration: 0.15 } },
+      }
+    : {
+        hidden: { opacity: 0, scale: 0.94, y: 16 },
+        visible: {
+          opacity: 1,
+          scale: 1,
+          y: 0,
+          transition: { type: 'spring', damping: 26, stiffness: 340 },
+        },
+        exit: {
+          opacity: 0,
+          scale: 0.95,
+          y: 10,
+          transition: { duration: 0.15, ease: 'easeIn' },
+        },
+      };
 
   return (
     <AnimatePresence>
       {isOpen && (
-        <>
-          {/* Backdrop */}
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="share-modal-title"
+          className="fixed inset-0 z-[250] flex items-center justify-center p-4 sm:p-6 overflow-y-auto"
+        >
+          {/* Deep Obsidian Backdrop */}
           <motion.div
             key="backdrop"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[200]"
+            className="fixed inset-0 bg-black/80 backdrop-blur-md"
             onClick={onClose}
-          />
+          >
+            {/* Soft ambient golden wash */}
+            <div
+              className="absolute inset-0 pointer-events-none opacity-25"
+              style={{
+                backgroundImage:
+                  'radial-gradient(ellipse at 50% 30%, rgba(229, 193, 88, 0.16) 0%, transparent 60%)',
+              }}
+            />
+          </motion.div>
 
-          {/* Modal sheet from bottom */}
+          {/* Minimal AAA Game Box Modal Container */}
           <motion.div
-            key="modal"
-            initial={{ opacity: 0, y: 80 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 80 }}
-            transition={{ type: 'spring', stiffness: 340, damping: 30 }}
-            className="fixed bottom-0 left-0 right-0 z-[201] mx-auto max-w-md w-full"
+            key="modal-card"
+            variants={modalVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            className="relative w-full max-w-[460px] my-auto z-10 select-none text-slate-100"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="bg-white rounded-t-[28px] pt-5 pb-10 px-5 shadow-2xl">
-              {/* Handle bar */}
-              <div className="w-10 h-1 rounded-full bg-gray-200 mx-auto mb-5" />
+            {/* Separate, High-Contrast Floating Close Button */}
+            {/* Separate, High-Contrast Floating Close Button */}
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Close share dialog"
+              className="absolute -top-3.5 -right-3.5 z-40 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#12141C] border-2 border-[#E5C158] text-white shadow-[0_4px_20px_rgba(0,0,0,0.9),0_0_15px_rgba(229,193,88,0.35)] flex items-center justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E5C158] active:scale-95"
+            >
+              <X size={18} weight="bold" />
+            </button>
 
-              {/* Header */}
-              <div className="flex items-center justify-between mb-5 px-1">
-                <h2 className="text-[17px] font-semibold text-gray-900">Share link</h2>
-                <button
-                  onClick={onClose}
-                  className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 transition-colors"
-                >
-                  <X size={18} weight="bold" className="text-gray-600" />
-                </button>
-              </div>
+            {/* Soft Exterior Golden Glow halo */}
+            <div
+              className="absolute -inset-[1px] rounded-2xl opacity-40 blur-lg pointer-events-none"
+              style={{
+                background:
+                  'radial-gradient(circle at 50% 0%, rgba(229,193,88,0.3) 0%, transparent 70%)',
+              }}
+            />
 
-              {/* Preview card */}
-              <div className="bg-gray-50 rounded-2xl p-4 mb-6 flex items-center gap-4 border border-gray-100">
+            {/* Main Obsidian Glass Box */}
+            <div className="relative rounded-2xl bg-[#090A0E]/95 border border-[#E5C158]/30 shadow-[0_24px_60px_rgba(0,0,0,0.85),0_0_30px_rgba(229,193,88,0.1),inset_0_1px_1px_rgba(255,255,255,0.08)] p-4 sm:p-5 backdrop-blur-2xl overflow-hidden">
+              
+              {/* Toast / Status Alert Banner */}
+              <AnimatePresence>
+                {toastMessage && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -20, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                    className="absolute top-3 left-6 right-6 z-30 flex items-center justify-center gap-2 py-2 px-4 rounded-xl bg-[#E5C158] text-black font-extrabold text-xs tracking-wide shadow-[0_4px_20px_rgba(229,193,88,0.5)] border border-white/40"
+                  >
+                    <Check weight="bold" size={14} />
+                    <span>{toastMessage}</span>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Direct Start: Selected Item Preview in Website Signature White Card with Black Text */}
+              <div className="flex items-center gap-3.5 mb-4 p-3.5 sm:p-4 rounded-2xl bg-white border border-slate-200 border-l-[5px] border-l-[#C69214] shadow-md">
                 {image ? (
                   <img
                     src={image}
                     alt={title}
-                    className="w-16 h-16 rounded-xl object-cover flex-shrink-0 border border-gray-200"
-                    onError={(e) => { e.target.style.display = 'none'; }}
+                    className="w-12 h-12 rounded-full object-cover border border-slate-200 flex-shrink-0 shadow-sm"
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                    }}
                   />
                 ) : (
-                  <div className="w-14 h-14 rounded-xl bg-gray-200 flex items-center justify-center flex-shrink-0">
-                    <FaLink size={18} className="text-gray-500" />
+                  /* Selected Item Logo Badge matching website card aesthetic */
+                  <div className="w-12 h-12 rounded-full bg-black flex items-center justify-center flex-shrink-0 text-white shadow-sm">
+                    <SelectedIcon size={24} weight="fill" />
                   </div>
                 )}
+
                 <div className="min-w-0 flex-1">
-                  <p className="font-bold text-gray-900 text-sm leading-tight line-clamp-2">{title}</p>
-                  <p className="text-xs text-gray-400 mt-1 truncate">{displayUrl}</p>
-                  {subtitle && (
-                    <p className="text-xs text-gray-400 mt-1 line-clamp-2 leading-snug">{subtitle}</p>
-                  )}
+                  <h2
+                    id="share-modal-title"
+                    className="text-base sm:text-lg font-bold text-gray-950 tracking-tight truncate leading-snug"
+                  >
+                    {title}
+                  </h2>
+                  <p className="text-slate-600 text-xs sm:text-[13px] font-medium mt-0.5 line-clamp-1">
+                    {subtitle || displayUrl}
+                  </p>
                 </div>
               </div>
 
-              {/* Share buttons row — scrollable */}
-              <div className="flex gap-4 overflow-x-auto pb-1 no-scrollbar">
-                {shareOptions.map((opt) => {
-                  const IconComp = opt.icon;
-                  const inner = (
-                    <>
-                      <div className={`w-14 h-14 rounded-full flex items-center justify-center transition-all duration-150 active:scale-90 ${opt.bg}`}>
-                        <IconComp size={22} className={opt.iconColor} />
-                      </div>
-                      <span className="text-[11px] text-gray-500 font-medium w-14 text-center leading-tight mt-1">{opt.label}</span>
-                    </>
-                  );
+              {/* Fast Copy Link Bar with Clean Modern Sans Font & Signature Button */}
+              <section className="mb-4">
+                <div className="flex items-center gap-2 p-1.5 rounded-xl bg-[#050608] border border-white/10 focus-within:border-[#E5C158]/70 focus-within:ring-1 focus-within:ring-[#E5C158]/30 shadow-inner">
+                  <div className="pl-2.5 text-[#E5C158] flex items-center">
+                    <LinkSimple size={16} weight="bold" />
+                  </div>
+                  <input
+                    type="text"
+                    readOnly
+                    value={url}
+                    aria-label="Share Link URL"
+                    className="w-full bg-transparent text-sm font-sans font-medium text-slate-100 focus:outline-none select-all px-2 truncate"
+                  />
+                  {/* Website Signature Golden + White Button */}
+                  <button
+                    type="button"
+                    onClick={handleCopy}
+                    className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-black tracking-wide flex-shrink-0 active:scale-95 border cursor-pointer ${
+                      copied
+                        ? 'bg-emerald-50 text-emerald-950 border-slate-200 border-l-[4px] border-l-emerald-500 shadow-md'
+                        : 'bg-white text-slate-950 border-slate-200 border-l-[4px] border-l-[#C69214] shadow-md'
+                    }`}
+                  >
+                    {copied ? (
+                      <>
+                        <Check size={14} weight="bold" className="text-emerald-700" />
+                        <span>Copied</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy size={14} weight="bold" className="text-slate-950" />
+                        <span>Copy</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </section>
 
-                  return opt.isCustom ? (
-                    <button
-                      key={opt.id}
-                      onClick={opt.action}
-                      className="flex flex-col items-center flex-shrink-0"
-                    >
-                      {inner}
-                    </button>
-                  ) : (
-                    <a
-                      key={opt.id}
-                      href={opt.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex flex-col items-center flex-shrink-0"
-                    >
-                      {inner}
-                    </a>
-                  );
-                })}
-              </div>
+              {/* Social Channels with Clean Sans Heading */}
+              <section className={canNativeShare ? "mb-3.5" : ""}>
+                <div className="flex items-center mb-2.5 px-0.5">
+                  <span className="text-xs sm:text-[13px] font-sans font-bold tracking-wide text-slate-200 uppercase">
+                    Share via
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
+                  {channels.map((chan) => {
+                    const IconComp = chan.icon;
+                    const innerContent = (
+                      <>
+                        <div
+                          className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center mb-1.5 bg-white/[0.04] border border-white/[0.08]"
+                        >
+                          <IconComp
+                            size={20}
+                            style={{ color: chan.color }}
+                          />
+                        </div>
+
+                        <span className="text-[10px] sm:text-[11px] font-medium text-slate-300 truncate w-full text-center">
+                          {chan.name}
+                        </span>
+                      </>
+                    );
+
+                    return (
+                      <a
+                        key={chan.id}
+                        href={chan.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={() => {
+                          if (url) navigator.clipboard?.writeText(url);
+                          showToast(chan.toastText || `Opening ${chan.name}...`);
+                        }}
+                        className="relative flex flex-col items-center justify-center py-2.5 px-1 sm:px-2 rounded-xl bg-white/[0.02] border border-white/[0.06] overflow-hidden shadow-sm active:scale-95 cursor-pointer"
+                      >
+                        {innerContent}
+                      </a>
+                    );
+                  })}
+                </div>
+              </section>
+
+              {/* Compact "Share with other apps" Button in White (No Gold Side Border) */}
+              {canNativeShare && (
+                <div className="mt-3">
+                  <button
+                    type="button"
+                    onClick={handleNativeShare}
+                    className="w-full py-2.5 px-3.5 sm:py-3 sm:px-4 rounded-xl sm:rounded-2xl bg-white border border-slate-200 flex items-center justify-between cursor-pointer shadow-sm active:scale-[0.99] text-left"
+                  >
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                      {/* Black round icon with white symbol */}
+                      <div className="w-10 h-10 rounded-full bg-black flex items-center justify-center flex-shrink-0 text-white shadow-sm">
+                        <ShareNetwork size={20} weight="bold" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <span className="text-sm sm:text-[15px] font-bold text-gray-950 block leading-tight truncate">
+                          Share with other apps
+                        </span>
+                        <span className="text-[11px] sm:text-xs text-slate-500 block font-medium mt-0.5 truncate">
+                          Open system sharing menu
+                        </span>
+                      </div>
+                    </div>
+                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center flex-shrink-0 ml-2">
+                      <ArrowSquareOut size={15} weight="bold" />
+                    </div>
+                  </button>
+                </div>
+              )}
             </div>
           </motion.div>
-        </>
+        </div>
       )}
     </AnimatePresence>
   );
