@@ -97,11 +97,11 @@ const Home = () => {
         {/* Offerings Section */}
         <section aria-labelledby="offerings-heading" className="flex flex-col gap-3.5 sm:gap-4 md:gap-4.5 px-1 sm:px-3 md:px-4">
           <div className="flex items-center w-full my-1 md:my-2">
-            <div className="flex-grow border-t border-[#C69214]/40"></div>
+            <div className="flex-grow h-[1.5px] bg-[var(--accent-cyan,#00f0ff)] shadow-[0_0_10px_rgba(0,240,255,0.8),0_0_3px_#00f0ff]"></div>
             <span id="offerings-heading" className="flex-shrink-0 px-3 sm:px-4 text-[#E5C158] text-xs md:text-sm font-bold uppercase tracking-widest md:tracking-[0.16em]">
               Offerings
             </span>
-            <div className="flex-grow border-t border-[#C69214]/40"></div>
+            <div className="flex-grow h-[1.5px] bg-[var(--accent-cyan,#00f0ff)] shadow-[0_0_10px_rgba(0,240,255,0.8),0_0_3px_#00f0ff]"></div>
           </div>
 
           <div className="flex flex-col gap-3 sm:gap-3.5 md:gap-4 w-full">
@@ -146,11 +146,11 @@ const Home = () => {
         {/* Explore Section */}
         <section aria-labelledby="explore-heading" className="flex flex-col gap-3.5 sm:gap-4 md:gap-5 px-1 sm:px-3 md:px-4">
           <div className="flex items-center w-full my-1 md:my-2.5">
-            <div className="flex-grow border-t border-[#C69214]/40"></div>
+            <div className="flex-grow h-[1.5px] bg-[var(--accent-cyan,#00f0ff)] shadow-[0_0_10px_rgba(0,240,255,0.8),0_0_3px_#00f0ff]"></div>
             <span id="explore-heading" className="flex-shrink-0 px-3 sm:px-4 text-[#E5C158] text-xs md:text-[13.5px] font-bold uppercase tracking-widest md:tracking-[0.18em]">
               Explore
             </span>
-            <div className="flex-grow border-t border-[#C69214]/40"></div>
+            <div className="flex-grow h-[1.5px] bg-[var(--accent-cyan,#00f0ff)] shadow-[0_0_10px_rgba(0,240,255,0.8),0_0_3px_#00f0ff]"></div>
           </div>
 
           <div className="flex flex-col gap-3 sm:gap-3.5 md:gap-4.5 w-full">
