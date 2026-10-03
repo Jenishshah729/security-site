@@ -139,13 +139,23 @@ const Header = () => {
         initial={shouldReduceMotion ? { opacity: 0 } : { y: 8, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.08, duration: 0.4 }}
-        className="w-full flex justify-center mb-7 sm:mb-8 md:mb-10 pt-2 px-4"
+        className="w-full flex justify-center mb-7 sm:mb-8 md:mb-10 pt-2 px-4 relative"
       >
+        {/* Subtle Ambient Lightning Blue Glow in background */}
+        <div
+          className="absolute inset-0 max-w-[280px] sm:max-w-[340px] md:max-w-[400px] h-16 sm:h-20 mx-auto my-auto rounded-full opacity-40 blur-2xl pointer-events-none"
+          style={{
+            background:
+              'radial-gradient(ellipse at center, rgba(56, 189, 248, 0.22) 0%, rgba(0, 240, 255, 0.08) 50%, transparent 70%)',
+          }}
+          aria-hidden="true"
+        />
+
         <h1 className="sr-only">Thejenishshah</h1>
         <img
           src={thejenishshahLogo}
           alt="Thejenishshah"
-          className="w-full max-w-[270px] sm:max-w-[340px] md:max-w-[390px] h-auto object-contain select-none pointer-events-none"
+          className="w-full max-w-[270px] sm:max-w-[340px] md:max-w-[390px] h-auto object-contain select-none pointer-events-none relative z-10 drop-shadow-[0_0_8px_rgba(56,189,248,0.14)]"
         />
       </motion.div>
 
