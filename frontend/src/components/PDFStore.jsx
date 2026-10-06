@@ -33,7 +33,24 @@ const PDFStore = ({ onSuccess }) => {
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
     fetch('/api/offerings')
       .then(res => res.json())
-      .then(data => setOfferings(Array.isArray(data) ? data : []))
+      .then(data => {
+        const list = Array.isArray(data) ? data : [];
+        const orderCovers = [
+          '/top-10-mistakes.png', // ₹149 (Beginner Blind Spots)
+          '/burp-suite.jpg',      // ₹249 (Crack the Request)
+          '/ctf-guide.jpg',       // ₹199 (Flag Hunter's Playbook)
+          '/hackers-toolkit.jpg',  // ₹149 (The Hacker's Arsenal)
+          '/cloud-security-v4.jpg',// ₹199 (Breach in the Cloud)
+          '/soc-analyst.jpg'      // ₹249 (Behind the Screens)
+        ];
+        list.sort((a, b) => {
+          const idxA = orderCovers.indexOf(a.coverImage);
+          const idxB = orderCovers.indexOf(b.coverImage);
+          if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+          return 0;
+        });
+        setOfferings(list);
+      })
       .catch(console.error);
   }, []);
 

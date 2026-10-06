@@ -3,39 +3,39 @@ const prisma = new PrismaClient();
 
 const pdfs = [
   {
-    title: "The Mistake Map for Beginners",
+    title: "Beginner Blind Spots",
     description: "The invisible mistakes that cost beginners the most time — skip them entirely.",
-    price: 199,
+    price: 149,
     coverImage: "/top-10-mistakes.png"
   },
   {
-    title: "The Toolkit Nobody Hands You",
+    title: "The Hacker's Arsenal",
     description: "20 free tools real hackers use — what to grab, and when.",
-    price: 199,
+    price: 149,
     coverImage: "/hackers-toolkit.jpg"
   },
   {
-    title: "Burp Suite, Minus the Confusion",
+    title: "Crack the Request (Burp Suite)",
     description: "Go from install to your first intercepted request, step by step.",
-    price: 199,
+    price: 249,
     coverImage: "/burp-suite.jpg"
   },
   {
-    title: "Your First CTF, Made Simple",
+    title: "Flag Hunter's Playbook (CTF)",
     description: "The mindset and strategy to land your first flag, fast.",
     price: 199,
     coverImage: "/ctf-guide.jpg"
   },
   {
-    title: "The Cloud Security Gap",
+    title: "Breach in the Cloud",
     description: "Close the exact gap that trips most beginners up.",
     price: 199,
     coverImage: "/cloud-security-v4.jpg"
   },
   {
-    title: "Before You Walk Into a SOC",
+    title: "Behind the Screens (SOC)",
     description: "The real tools and responsibilities nobody explains upfront.",
-    price: 199,
+    price: 249,
     coverImage: "/soc-analyst.jpg"
   }
 ];

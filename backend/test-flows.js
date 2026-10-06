@@ -103,7 +103,7 @@ async function runTests() {
       name: 'PDF Buyer',
       email: 'pdfbuyer@test.com',
       phone: '+919876543212',
-      pdfIds: [72, 73]
+      pdfIds: [78, 79]
     })
   });
   const pdfData = await pdfRes.json();

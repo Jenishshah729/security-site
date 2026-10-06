@@ -18,7 +18,7 @@ import {
 import {
   FaWhatsapp,
   FaInstagram,
-  FaFacebookF,
+  FaFacebookMessenger,
   FaTelegram,
   FaXTwitter,
   FaYoutube
@@ -106,12 +106,59 @@ const ShareModal = ({ isOpen, onClose, title = 'Jenish Shah', url = '', subtitle
     if (lower.includes('contact') || lower.includes('inquiry')) return EnvelopeSimple;
     if (lower.includes('whatsapp')) return FaWhatsapp;
     if (lower.includes('instagram')) return FaInstagram;
-    if (lower.includes('facebook')) return FaFacebookF;
+    if (lower.includes('facebook') || lower.includes('messenger')) return FaFacebookMessenger;
     if (lower.includes('youtube')) return FaYoutube;
     return Sparkle;
   }, [icon, title, url, subtitle]);
 
-  // 5 essential sharing platforms
+  const handleChannelClick = (chan, e) => {
+    // Copy the link to clipboard so it's ready to paste in any conversation
+    if (url) {
+      navigator.clipboard?.writeText(url).catch(() => {});
+    }
+
+    const isMobile =
+      typeof navigator !== 'undefined' &&
+      /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+    if (chan.id === 'instagram') {
+      e.preventDefault();
+      showToast('Link copied // Paste in Instagram DM');
+      if (isMobile) {
+        // Deep-link directly into Instagram Direct Messages inbox on mobile app
+        window.location.href = 'instagram://direct-inbox';
+        setTimeout(() => {
+          if (document.hasFocus()) {
+            window.open('https://www.instagram.com/direct/inbox/', '_blank', 'noopener,noreferrer');
+          }
+        }, 1200);
+      } else {
+        window.open('https://www.instagram.com/direct/inbox/', '_blank', 'noopener,noreferrer');
+      }
+      return;
+    }
+
+    if (chan.id === 'messenger') {
+      e.preventDefault();
+      showToast('Opening Messenger to send...');
+      if (isMobile) {
+        // Deep-link directly into Messenger's native "Send to Contact" picker
+        window.location.href = `fb-messenger://share/?link=${encodedUrl}`;
+        setTimeout(() => {
+          if (document.hasFocus()) {
+            window.open('https://www.messenger.com/', '_blank', 'noopener,noreferrer');
+          }
+        }, 1200);
+      } else {
+        window.open('https://www.messenger.com/', '_blank', 'noopener,noreferrer');
+      }
+      return;
+    }
+
+    showToast(chan.toastText || `Opening ${chan.name}...`);
+  };
+
+  // 5 essential direct messaging & sharing platforms
   const channels = useMemo(
     () => [
       {
@@ -126,17 +173,17 @@ const ShareModal = ({ isOpen, onClose, title = 'Jenish Shah', url = '', subtitle
         id: 'instagram',
         name: 'Instagram',
         icon: FaInstagram,
-        href: 'https://www.instagram.com/',
+        href: 'https://www.instagram.com/direct/inbox/',
         color: '#E1306C',
-        toastText: 'Link copied // Paste in Instagram DM or Story',
+        toastText: 'Link copied // Paste in Instagram DM',
       },
       {
-        id: 'facebook',
-        name: 'Facebook',
-        icon: FaFacebookF,
-        href: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
-        color: '#1877F2',
-        toastText: 'Opening Facebook...',
+        id: 'messenger',
+        name: 'Messenger',
+        icon: FaFacebookMessenger,
+        href: `fb-messenger://share/?link=${encodedUrl}`,
+        color: '#0084FF',
+        toastText: 'Opening Messenger to send...',
       },
       {
         id: 'telegram',
@@ -360,12 +407,9 @@ const ShareModal = ({ isOpen, onClose, title = 'Jenish Shah', url = '', subtitle
                       <a
                         key={chan.id}
                         href={chan.href}
-                        target="_blank"
+                        target={chan.id === 'instagram' || chan.id === 'messenger' ? undefined : '_blank'}
                         rel="noopener noreferrer"
-                        onClick={() => {
-                          if (url) navigator.clipboard?.writeText(url);
-                          showToast(chan.toastText || `Opening ${chan.name}...`);
-                        }}
+                        onClick={(e) => handleChannelClick(chan, e)}
                         className="relative flex flex-col items-center justify-center py-2.5 px-1 sm:px-2 rounded-xl bg-white/[0.02] border border-white/[0.06] overflow-hidden shadow-sm active:scale-95 cursor-pointer"
                       >
                         {innerContent}

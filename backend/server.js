@@ -178,11 +178,88 @@ const paymentLimiter = rateLimit({
 });
 
 const customBundles = [
-  { id: 'all-in-one', title: 'All-in-One (1:1 + all 6 PDFs)', price: 1199, originalPrice: 1543, savings: 344, description: '1:1 Consultation\nAll 6 PDFs included\nMaximum value package', hasConsultation: true, pdfSelectionCount: 0, paymentLink: 'https://rzp.io/rzp/all61' },
-  { id: '1-1-any-4', title: '1:1 + any 4 PDFs', price: 949, originalPrice: 1145, savings: 196, description: '1:1 Consultation\nChoose any 4 PDFs', hasConsultation: true, pdfSelectionCount: 4, paymentLink: 'https://rzp.io/rzp/1and4' },
-  { id: '1-1-any-2', title: '1:1 + any 2 PDFs', price: 619, originalPrice: 747, savings: 128, description: '1:1 Consultation\nChoose any 2 PDFs', hasConsultation: true, pdfSelectionCount: 2, paymentLink: 'https://rzp.io/rzp/2and1' },
-  { id: 'any-4-pdfs', title: 'Any 4 PDFs', price: 649, originalPrice: 796, savings: 147, description: 'Choose any 4 PDFs', hasConsultation: false, pdfSelectionCount: 4, paymentLink: 'https://rzp.io/rzp/any4' },
-  { id: 'any-2-pdfs', title: 'Any 2 PDFs', price: 339, originalPrice: 398, savings: 59, description: 'Choose any 2 PDFs', hasConsultation: false, pdfSelectionCount: 2, paymentLink: 'https://rzp.io/rzp/any2pd' }
+  // 1. All in One (All 6 PDFs + 1:1)
+  { 
+    id: 'all-in-one', 
+    title: 'All 6 PDFs + 1:1 Mentorship', 
+    price: 929, 
+    originalPrice: 1543, 
+    savings: 614, 
+    description: '1:1 Mentorship Call (30 mins)\nAll 6 Premium Cybersecurity PDFs\nMaximum value package', 
+    hasConsultation: true, 
+    pdfSelectionCount: 0, 
+    category: 'consultation',
+    badge: 'Best Value',
+    paymentLink: 'https://rzp.io/rzp/all61' 
+  },
+  // 2. All 6 PDFs Standalone
+  { 
+    id: 'all-6-pdfs', 
+    title: 'All 6 PDFs Bundle', 
+    price: 749, 
+    originalPrice: 1194, 
+    savings: 445, 
+    description: 'Instant access to all 6 Cybersecurity PDFs\nComplete offensive & defensive library\nLifetime access & future revisions', 
+    hasConsultation: false, 
+    pdfSelectionCount: 0, 
+    category: 'pdf-only',
+    badge: '37.3% Off',
+    paymentLink: 'https://rzp.io/rzp/all6pdf' 
+  },
+  // 3. Any 4 PDFs + 1:1
+  { 
+    id: '1-1-any-4', 
+    title: 'Any 4 PDFs + 1:1 Mentorship', 
+    price: 799, 
+    originalPrice: 1245, 
+    savings: 446, 
+    description: '1:1 Mentorship Call (30 mins)\nChoose any 4 Cybersecurity PDFs\nTargeted mentorship & deep dives', 
+    hasConsultation: true, 
+    pdfSelectionCount: 4, 
+    category: 'consultation',
+    paymentLink: 'https://rzp.io/rzp/1and4' 
+  },
+  // 4. Any 4 PDFs Standalone
+  { 
+    id: 'any-4-pdfs', 
+    title: 'Any 4 PDFs Bundle', 
+    price: 579, 
+    originalPrice: 896, 
+    savings: 317, 
+    description: 'Choose any 4 Cybersecurity PDFs\nBuild your custom reading track\nLifetime access & future revisions', 
+    hasConsultation: false, 
+    pdfSelectionCount: 4, 
+    category: 'pdf-only',
+    badge: 'Up to 35% Off',
+    paymentLink: 'https://rzp.io/rzp/any4' 
+  },
+  // 5. Any 2 PDFs + 1:1
+  { 
+    id: '1-1-any-2', 
+    title: 'Any 2 PDFs + 1:1 Mentorship', 
+    price: 549, 
+    originalPrice: 847, 
+    savings: 298, 
+    description: '1:1 Mentorship Call (30 mins)\nChoose any 2 Cybersecurity PDFs\nStarter 1:1 session & core guides', 
+    hasConsultation: true, 
+    pdfSelectionCount: 2, 
+    category: 'consultation',
+    paymentLink: 'https://rzp.io/rzp/2and1' 
+  },
+  // 6. Any 2 PDFs Standalone
+  { 
+    id: 'any-2-pdfs', 
+    title: 'Any 2 PDFs Bundle', 
+    price: 329, 
+    originalPrice: 498, 
+    savings: 169, 
+    description: 'Choose any 2 Cybersecurity PDFs\nFocused learning package\nLifetime access & future revisions', 
+    hasConsultation: false, 
+    pdfSelectionCount: 2, 
+    category: 'pdf-only',
+    badge: '34% Off',
+    paymentLink: 'https://rzp.io/rzp/any2pd' 
+  }
 ];
 
 const contactSchema = z.object({
@@ -535,7 +612,22 @@ app.get('/api/connect-links', async (req, res) => {
 // --- OFFERINGS ROUTES ---
 app.get('/api/offerings', async (req, res) => {
   try {
-    const offerings = await prisma.offering.findMany({ orderBy: { id: 'asc' } });
+    const offerings = await prisma.offering.findMany();
+    // Layout order: 149 -> 249 -> 199 -> 149 -> 199 -> 249
+    const orderCovers = [
+      '/top-10-mistakes.png', // ₹149 (Beginner Blind Spots)
+      '/burp-suite.jpg',      // ₹249 (Crack the Request)
+      '/ctf-guide.jpg',       // ₹199 (Flag Hunter's Playbook)
+      '/hackers-toolkit.jpg',  // ₹149 (The Hacker's Arsenal)
+      '/cloud-security-v4.jpg',// ₹199 (Breach in the Cloud)
+      '/soc-analyst.jpg'      // ₹249 (Behind the Screens)
+    ];
+    offerings.sort((a, b) => {
+      const idxA = orderCovers.indexOf(a.coverImage);
+      const idxB = orderCovers.indexOf(b.coverImage);
+      if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+      return a.id - b.id;
+    });
     res.json(offerings);
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch offerings' });
@@ -545,63 +637,6 @@ app.get('/api/offerings', async (req, res) => {
 // --- BUNDLES ROUTES ---
 app.get('/api/bundles', async (req, res) => {
   try {
-    const customBundles = [
-      {
-        id: 'all-in-one',
-        title: 'All-in-One (1:1 + all 6 PDFs)',
-        price: 1199,
-        originalPrice: 1543,
-        savings: 344,
-        description: '1:1 Consultation\nAll 6 PDFs included\nMaximum value package',
-        hasConsultation: true,
-        pdfSelectionCount: 0, // Gets all of them automatically
-        paymentLink: 'https://rzp.io/rzp/all61'
-      },
-      {
-        id: '1-1-any-4',
-        title: '1:1 + any 4 PDFs',
-        price: 949,
-        originalPrice: 1145,
-        savings: 196,
-        description: '1:1 Consultation\nChoose any 4 PDFs',
-        hasConsultation: true,
-        pdfSelectionCount: 4,
-        paymentLink: 'https://rzp.io/rzp/1and4'
-      },
-      {
-        id: '1-1-any-2',
-        title: '1:1 + any 2 PDFs',
-        price: 619,
-        originalPrice: 747,
-        savings: 128,
-        description: '1:1 Consultation\nChoose any 2 PDFs',
-        hasConsultation: true,
-        pdfSelectionCount: 2,
-        paymentLink: 'https://rzp.io/rzp/2and1'
-      },
-      {
-        id: 'any-4-pdfs',
-        title: 'Any 4 PDFs',
-        price: 649,
-        originalPrice: 796,
-        savings: 147,
-        description: 'Choose any 4 PDFs',
-        hasConsultation: false,
-        pdfSelectionCount: 4,
-        paymentLink: 'https://rzp.io/rzp/any4'
-      },
-      {
-        id: 'any-2-pdfs',
-        title: 'Any 2 PDFs',
-        price: 339,
-        originalPrice: 398,
-        savings: 59,
-        description: 'Choose any 2 PDFs',
-        hasConsultation: false,
-        pdfSelectionCount: 2,
-        paymentLink: 'https://rzp.io/rzp/any2pd'
-      }
-    ];
     res.json(customBundles);
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch bundles' });

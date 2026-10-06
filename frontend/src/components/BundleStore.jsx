@@ -28,6 +28,7 @@ const BundleStore = ({ onSuccess }) => {
   
   const [bundles, setBundles] = useState([]);
   const [offerings, setOfferings] = useState([]);
+  const [filter, setFilter] = useState('all'); // 'all' | 'consultation' | 'pdf-only'
 
   // Buyer details
   const [name, setName] = useState('');
@@ -46,19 +47,37 @@ const BundleStore = ({ onSuccess }) => {
       
     fetch('/api/offerings')
       .then(res => res.json())
-      .then(data => setOfferings(Array.isArray(data) ? data : []))
+      .then(data => {
+        const list = Array.isArray(data) ? data : [];
+        const orderCovers = [
+          '/top-10-mistakes.png', // ₹149 (Beginner Blind Spots)
+          '/burp-suite.jpg',      // ₹249 (Crack the Request)
+          '/ctf-guide.jpg',       // ₹199 (Flag Hunter's Playbook)
+          '/hackers-toolkit.jpg',  // ₹149 (The Hacker's Arsenal)
+          '/cloud-security-v4.jpg',// ₹199 (Breach in the Cloud)
+          '/soc-analyst.jpg'      // ₹249 (Behind the Screens)
+        ];
+        list.sort((a, b) => {
+          const idxA = orderCovers.indexOf(a.coverImage);
+          const idxB = orderCovers.indexOf(b.coverImage);
+          if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+          return 0;
+        });
+        setOfferings(list);
+      })
       .catch(console.error);
   }, []);
 
   const handleBundleSelect = (b) => {
     setSelectedBundle(b);
-    setSelectedPdfs([]);
     if (b.pdfSelectionCount > 0) {
+      setSelectedPdfs([]);
       setStep('select-pdfs');
     } else if (b.hasConsultation) {
-      const pdfsToPass = b.id === 'all-in-one' ? offerings : [];
+      const pdfsToPass = offerings;
       navigate('/bundle', { state: { bundle: b, selectedPdfs: pdfsToPass } });
     } else {
+      setSelectedPdfs(offerings);
       setStep('checkout');
       setValidationError('');
     }
@@ -204,7 +223,30 @@ const BundleStore = ({ onSuccess }) => {
     }
   };
 
-  const filteredBundles = bundles;
+  const consultationCount = bundles.filter(b => b.hasConsultation).length;
+  const pdfOnlyCount = bundles.filter(b => !b.hasConsultation).length;
+
+  const bundleOrder = [
+    'all-in-one',
+    'all-6-pdfs',
+    '1-1-any-4',
+    'any-4-pdfs',
+    '1-1-any-2',
+    'any-2-pdfs'
+  ];
+
+  const filteredBundles = [...bundles]
+    .filter(b => {
+      if (filter === 'consultation') return b.hasConsultation === true;
+      if (filter === 'pdf-only') return b.hasConsultation === false;
+      return true;
+    })
+    .sort((a, b) => {
+      const idxA = bundleOrder.indexOf(a.id);
+      const idxB = bundleOrder.indexOf(b.id);
+      if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+      return 0;
+    });
 
   return (
     <motion.section 
@@ -219,7 +261,13 @@ const BundleStore = ({ onSuccess }) => {
           onClick={() => {
             if (step === 'store') navigate('/');
             if (step === 'select-pdfs') setStep('store');
-            if (step === 'checkout') selectedBundle.pdfSelectionCount > 0 ? setStep('select-pdfs') : setStep('store');
+            if (step === 'checkout') {
+              if (selectedBundle?.pdfSelectionCount > 0) {
+                setStep('select-pdfs');
+              } else {
+                setStep('store');
+              }
+            }
           }} 
           className="inline-flex items-center gap-2 text-sm sm:text-base md:text-sm text-slate-200 outline-none font-bold bg-white/10 px-4 sm:px-5 md:px-4 py-2.5 sm:py-3 md:py-2.5 rounded-full border border-white/15 shadow-sm active:scale-95 cursor-pointer"
         >
@@ -240,12 +288,60 @@ const BundleStore = ({ onSuccess }) => {
             {/* Header Block */}
             <div className="relative rounded-2xl sm:rounded-3xl bg-gradient-to-br from-[#14141A] via-[#101015] to-[#0A0A0E] p-5 sm:p-7 md:p-9 border border-white/10 shadow-xl overflow-hidden">
               <div className="relative z-10">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-sm sm:text-base md:text-sm font-bold text-[#E5C158]">Jenish Shah</span>
+                </div>
                 <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight leading-tight">
                   High-Impact Cyber Packages
                 </h1>
                 <p className="text-base sm:text-lg text-slate-200 mt-2.5 max-w-xl leading-relaxed font-normal">
-                  Fast-track your skills with strategic 1:1 mentorship and comprehensive blueprint guides at bundled savings.
+                  Fast-track your cybersecurity journey with strategic 1:1 mentorship and comprehensive guides at bundled savings.
                 </p>
+              </div>
+            </div>
+
+            {/* Professional Theme-Aligned Filter Tabs (Responsive, No Sliding on Mobile) */}
+            <div className="w-full sm:w-auto flex items-center justify-start pt-1">
+              <div 
+                role="tablist" 
+                aria-label="Filter bundle packages"
+                className="grid grid-cols-3 w-full sm:w-auto sm:inline-flex items-center p-1 bg-[#121217] rounded-xl border border-white/10"
+              >
+                {[
+                  { id: 'all', label: 'All Bundles', shortLabel: 'All', icon: Package },
+                  { id: 'consultation', label: 'PDF + 1:1 Mentorship', shortLabel: 'PDF + 1:1', icon: Calendar },
+                  { id: 'pdf-only', label: 'Only PDF Guides', shortLabel: 'Only PDFs', icon: BookOpen }
+                ].map(tab => {
+                  const isActive = filter === tab.id;
+                  const Icon = tab.icon;
+                  return (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      role="tab"
+                      aria-selected={isActive}
+                      onClick={() => setFilter(tab.id)}
+                      className={`relative px-2 sm:px-5 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-bold transition-colors duration-200 flex items-center justify-center gap-1.5 sm:gap-2 text-center cursor-pointer select-none ${
+                        isActive ? 'text-white' : 'text-slate-400 hover:text-slate-200'
+                      }`}
+                    >
+                      {isActive && (
+                        <motion.div
+                          layoutId="activeFilterPill"
+                          className="absolute inset-0 bg-[#1F1F28] border border-[#E5C158]/50 rounded-lg shadow-[0_0_15px_rgba(229,193,88,0.12)]"
+                          transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+                        />
+                      )}
+                      <Icon
+                        size={15}
+                        weight={isActive ? 'fill' : 'bold'}
+                        className={`relative z-10 shrink-0 transition-colors ${isActive ? 'text-[#E5C158]' : 'text-slate-400'}`}
+                      />
+                      <span className="relative z-10 hidden sm:inline whitespace-nowrap">{tab.label}</span>
+                      <span className="relative z-10 sm:hidden whitespace-nowrap">{tab.shortLabel}</span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
@@ -258,15 +354,15 @@ const BundleStore = ({ onSuccess }) => {
             ) : (
               <div className="grid grid-cols-1 gap-5 sm:gap-6">
                 {filteredBundles.map(b => {
-                  const isAllInOne = b.id === 'all-in-one';
+                  const isFeatured = b.id === 'all-in-one' || b.id === 'all-6-pdfs';
 
                   return (
                     <div 
                       key={b.id}
                       className={`relative rounded-2xl sm:rounded-3xl p-5 sm:p-7 md:p-8 transition-all duration-300 ${
-                        isAllInOne 
+                        isFeatured 
                           ? 'bg-gradient-to-b from-[#181822] via-[#121218] to-[#0D0D12] border-2 border-[#E5C158] shadow-[0_12px_40px_rgba(229,193,88,0.12)]' 
-                          : 'bg-[#121217] border border-white/10'
+                          : 'bg-[#121217] border border-white/10 hover:border-white/20'
                       }`}
                     >
                       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-5 sm:gap-6">
@@ -308,6 +404,11 @@ const BundleStore = ({ onSuccess }) => {
                                 ₹{b.price}
                               </span>
                             </div>
+                            {b.savings > 0 && (
+                              <span className="text-xs font-semibold text-emerald-400/90 mt-1 block">
+                                Save ₹{b.savings}
+                              </span>
+                            )}
                           </div>
 
                           <button 
@@ -315,7 +416,9 @@ const BundleStore = ({ onSuccess }) => {
                             className="w-full py-3.5 sm:py-4 px-5 bg-white text-slate-950 font-black text-sm sm:text-base rounded-xl transition-all border border-slate-200 border-l-[4px] border-l-[#C69214] active:scale-95 cursor-pointer shadow-md flex items-center justify-center gap-2 min-h-[48px]"
                           >
                             <ShoppingCart size={18} weight="bold" />
-                            {b.pdfSelectionCount > 0 ? `Choose ${b.pdfSelectionCount} PDFs` : 'Select Bundle'}
+                            {b.pdfSelectionCount > 0 
+                              ? `Choose ${b.pdfSelectionCount} PDFs` 
+                              : 'Get Bundle'}
                           </button>
                         </div>
                       </div>
@@ -463,10 +566,12 @@ const BundleStore = ({ onSuccess }) => {
                 </div>
 
                 {/* Selected Guides List */}
-                {selectedBundle.pdfSelectionCount > 0 && selectedPdfs.length > 0 && (
+                {selectedPdfs.length > 0 && (
                   <div className="mt-4 p-4 bg-[#08080C] rounded-xl border border-white/10">
                     <p className="text-xs sm:text-sm font-bold text-slate-300 uppercase tracking-wider mb-2.5">
-                      Included Ebooks ({selectedPdfs.length})
+                      {selectedBundle?.pdfSelectionCount > 0 
+                        ? `Included Ebooks (${selectedPdfs.length})` 
+                        : `All ${selectedPdfs.length} Ebooks Included`}
                     </p>
                     <ul className="space-y-2">
                       {selectedPdfs.map(pdf => (
@@ -485,9 +590,9 @@ const BundleStore = ({ onSuccess }) => {
                 <div>
                   <span className="text-sm sm:text-base md:text-sm font-bold text-slate-200 uppercase tracking-wide block">Total Due</span>
                   <span className="text-sm sm:text-base md:text-sm text-slate-300 font-medium mt-1 block">
-                    {selectedBundle.pdfSelectionCount > 0 
+                    {selectedBundle?.pdfSelectionCount > 0 
                       ? `${selectedPdfs.length} item${selectedPdfs.length > 1 ? 's' : ''} included` 
-                      : 'Complete Bundle Access included'}
+                      : 'All 6 Cybersecurity PDFs included'}
                   </span>
                 </div>
                 <span className="font-black text-[#F5C842] text-3xl sm:text-4xl md:text-3xl tracking-tight">
