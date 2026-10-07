@@ -178,86 +178,94 @@ const paymentLimiter = rateLimit({
 });
 
 const customBundles = [
-  // 1. All in One (All 6 PDFs + 1:1)
+  // 1. All 7 + 1:1
   { 
     id: 'all-in-one', 
-    title: 'All 6 PDFs + 1:1 Mentorship', 
-    price: 929, 
-    originalPrice: 1543, 
-    savings: 614, 
-    description: '1:1 Mentorship Call (30 mins)\nAll 6 Premium Cybersecurity PDFs\nMaximum value package', 
+    title: 'All 7 PDFs + 1:1 Mentorship', 
+    price: 1079, 
+    originalPrice: 1792, 
+    savings: 713, 
+    discount: '39.8%',
+    description: '1:1 Mentorship Call (30 mins)\nAll 7 Premium Cybersecurity PDFs\nMaximum value package', 
     hasConsultation: true, 
     pdfSelectionCount: 0, 
     category: 'consultation',
     badge: 'Best Value',
     paymentLink: 'https://rzp.io/rzp/all61' 
   },
-  // 2. All 6 PDFs Standalone
+  // 2. All 7 Standalone (no 1:1)
   { 
-    id: 'all-6-pdfs', 
-    title: 'All 6 PDFs Bundle', 
-    price: 749, 
-    originalPrice: 1194, 
-    savings: 445, 
-    description: 'Instant access to all 6 Cybersecurity PDFs\nComplete offensive & defensive library\nLifetime access & future revisions', 
+    id: 'all-7-pdfs', 
+    title: 'All 7 PDFs Bundle', 
+    price: 909, 
+    originalPrice: 1443, 
+    savings: 534, 
+    discount: '37.0%',
+    description: 'Instant access to all 7 Cybersecurity PDFs\nComplete offensive & defensive library\nLifetime access & future revisions', 
     hasConsultation: false, 
     pdfSelectionCount: 0, 
     category: 'pdf-only',
-    badge: '37.3% Off',
+    badge: '37.0% Off',
     paymentLink: 'https://rzp.io/rzp/all6pdf' 
   },
-  // 3. Any 4 PDFs + 1:1
+  // 3. Any 5 + 1:1
   { 
-    id: '1-1-any-4', 
-    title: 'Any 4 PDFs + 1:1 Mentorship', 
-    price: 799, 
-    originalPrice: 1245, 
-    savings: 446, 
-    description: '1:1 Mentorship Call (30 mins)\nChoose any 4 Cybersecurity PDFs\nTargeted mentorship & deep dives', 
+    id: '1-1-any-5', 
+    title: 'Any 5 PDFs + 1:1 Mentorship', 
+    price: 959, 
+    originalPrice: 1494, 
+    savings: 535, 
+    discount: '35.8%',
+    description: '1:1 Mentorship Call (30 mins)\nChoose any 5 Cybersecurity PDFs\nTargeted mentorship & deep dives', 
     hasConsultation: true, 
-    pdfSelectionCount: 4, 
+    pdfSelectionCount: 5, 
     category: 'consultation',
+    badge: '35.8% Off',
     paymentLink: 'https://rzp.io/rzp/1and4' 
   },
-  // 4. Any 4 PDFs Standalone
+  // 4. Any 5 Standalone (no 1:1)
   { 
-    id: 'any-4-pdfs', 
-    title: 'Any 4 PDFs Bundle', 
-    price: 579, 
-    originalPrice: 896, 
-    savings: 317, 
-    description: 'Choose any 4 Cybersecurity PDFs\nBuild your custom reading track\nLifetime access & future revisions', 
+    id: 'any-5-pdfs', 
+    title: 'Any 5 PDFs Bundle', 
+    price: 739, 
+    originalPrice: 1145, 
+    savings: 406, 
+    discount: '35.5%',
+    description: 'Choose any 5 Cybersecurity PDFs\nBuild your custom reading track\nLifetime access & future revisions', 
     hasConsultation: false, 
-    pdfSelectionCount: 4, 
+    pdfSelectionCount: 5, 
     category: 'pdf-only',
-    badge: 'Up to 35% Off',
+    badge: '35.5% Off',
     paymentLink: 'https://rzp.io/rzp/any4' 
   },
-  // 5. Any 2 PDFs + 1:1
+  // 5. Any 3 + 1:1
   { 
-    id: '1-1-any-2', 
-    title: 'Any 2 PDFs + 1:1 Mentorship', 
-    price: 549, 
-    originalPrice: 847, 
-    savings: 298, 
-    description: '1:1 Mentorship Call (30 mins)\nChoose any 2 Cybersecurity PDFs\nStarter 1:1 session & core guides', 
+    id: '1-1-any-3', 
+    title: 'Any 3 PDFs + 1:1 Mentorship', 
+    price: 709, 
+    originalPrice: 1096, 
+    savings: 387, 
+    discount: '35.3%',
+    description: '1:1 Mentorship Call (30 mins)\nChoose any 3 Cybersecurity PDFs\nStarter 1:1 session & core guides', 
     hasConsultation: true, 
-    pdfSelectionCount: 2, 
+    pdfSelectionCount: 3, 
     category: 'consultation',
+    badge: '35.3% Off',
     paymentLink: 'https://rzp.io/rzp/2and1' 
   },
-  // 6. Any 2 PDFs Standalone
+  // 6. Any 3 Standalone (no 1:1)
   { 
-    id: 'any-2-pdfs', 
-    title: 'Any 2 PDFs Bundle', 
-    price: 329, 
-    originalPrice: 498, 
-    savings: 169, 
-    description: 'Choose any 2 Cybersecurity PDFs\nFocused learning package\nLifetime access & future revisions', 
+    id: 'any-3-pdfs', 
+    title: 'Any 3 PDFs Bundle', 
+    price: 489, 
+    originalPrice: 747, 
+    savings: 258, 
+    discount: '34.5%',
+    description: 'Choose any 3 Cybersecurity PDFs\nFocused learning package\nLifetime access & future revisions', 
     hasConsultation: false, 
-    pdfSelectionCount: 2, 
+    pdfSelectionCount: 3, 
     category: 'pdf-only',
-    badge: '34% Off',
+    badge: '34.5% Off',
     paymentLink: 'https://rzp.io/rzp/any2pd' 
   }
 ];
@@ -616,11 +624,12 @@ app.get('/api/offerings', async (req, res) => {
     // Layout order: 149 -> 249 -> 199 -> 149 -> 199 -> 249
     const orderCovers = [
       '/top-10-mistakes.png', // ₹149 (Beginner Blind Spots)
-      '/burp-suite.jpg',      // ₹249 (Crack the Request)
+      '/burp-suite.jpg',      // ₹249 (Mastering Burp Suite)
       '/ctf-guide.jpg',       // ₹199 (Flag Hunter's Playbook)
       '/hackers-toolkit.jpg',  // ₹149 (The Hacker's Arsenal)
       '/cloud-security-v4.jpg',// ₹199 (Breach in the Cloud)
-      '/soc-analyst.jpg'      // ₹249 (Behind the Screens)
+      '/soc-analyst.jpg',      // ₹249 (Behind the Screens)
+      '/ai-in-cybersecurity.jpg' // ₹249 (How Hackers Actually Use AI)
     ];
     offerings.sort((a, b) => {
       const idxA = orderCovers.indexOf(a.coverImage);

@@ -241,9 +241,6 @@ const BookingSection = ({ onSuccess, isBundle }) => {
       {/* Creator Service Header */}
       <div className="p-5 sm:p-7 md:p-8 bg-[#141418] rounded-2xl sm:rounded-3xl border border-white/10 mb-6 sm:mb-8 relative z-10">
         <div>
-          <div className="flex items-center gap-2 mb-1.5">
-            <span className="text-sm sm:text-base md:text-sm font-bold text-[#E5C158]">Jenish Shah</span>
-          </div>
           <h2 className="text-3xl sm:text-4xl md:text-3xl font-black text-white tracking-tight leading-tight">
             {isBundle ? (bundle?.title || '1:1 + PDF Bundle') : '1:1 Consultation'}
           </h2>

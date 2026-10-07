@@ -11,3 +11,5 @@ backend/prisma/dev.db
 !.env.example
 .DS_Store
 scratch
+*-backup.*
+*_backup.*

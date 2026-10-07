@@ -6,8 +6,9 @@ const priceMap = [
   { coverImage: '/hackers-toolkit.jpg', title: "The Hacker's Arsenal", price: 149 },
   { coverImage: '/ctf-guide.jpg', title: "Flag Hunter's Playbook (CTF)", price: 199 },
   { coverImage: '/cloud-security-v4.jpg', title: 'Breach in the Cloud', price: 199 },
-  { coverImage: '/burp-suite.jpg', title: 'Crack the Request (Burp Suite)', price: 249 },
-  { coverImage: '/soc-analyst.jpg', title: 'Behind the Screens (SOC)', price: 249 }
+  { coverImage: '/burp-suite.jpg', title: 'Mastering Burp Suite', price: 249 },
+  { coverImage: '/soc-analyst.jpg', title: 'Behind the Screens (SOC)', price: 249 },
+  { coverImage: '/ai-in-cybersecurity.jpg', title: 'How Hackers Actually Use AI', price: 249 }
 ];
 
 async function main() {

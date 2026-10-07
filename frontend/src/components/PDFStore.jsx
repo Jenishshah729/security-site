@@ -37,11 +37,12 @@ const PDFStore = ({ onSuccess }) => {
         const list = Array.isArray(data) ? data : [];
         const orderCovers = [
           '/top-10-mistakes.png', // ₹149 (Beginner Blind Spots)
-          '/burp-suite.jpg',      // ₹249 (Crack the Request)
+          '/burp-suite.jpg',      // ₹249 (Mastering Burp Suite)
           '/ctf-guide.jpg',       // ₹199 (Flag Hunter's Playbook)
           '/hackers-toolkit.jpg',  // ₹149 (The Hacker's Arsenal)
           '/cloud-security-v4.jpg',// ₹199 (Breach in the Cloud)
-          '/soc-analyst.jpg'      // ₹249 (Behind the Screens)
+          '/soc-analyst.jpg',      // ₹249 (Behind the Screens)
+          '/ai-in-cybersecurity.jpg' // ₹249 (How Hackers Actually Use AI)
         ];
         list.sort((a, b) => {
           const idxA = orderCovers.indexOf(a.coverImage);
@@ -193,13 +194,10 @@ const PDFStore = ({ onSuccess }) => {
       {/* Creator Store Header */}
       <div className="p-5 sm:p-7 md:p-8 bg-[#141418] rounded-2xl sm:rounded-3xl border border-white/10 mb-6 sm:mb-8 relative z-10">
         <div>
-          <div className="flex items-center gap-2 mb-1.5">
-            <span className="text-sm sm:text-base md:text-sm font-bold text-[#E5C158]">Jenish Shah</span>
-          </div>
-          <h2 className="text-3xl sm:text-4xl md:text-3xl font-black text-white tracking-tight leading-tight">
+          <h2 className="text-3xl sm:text-4xl md:text-4xl font-black text-white tracking-tight leading-tight">
             PDF Store
           </h2>
-          <p className="text-base sm:text-lg md:text-[15px] text-slate-200 mt-2.5 leading-relaxed font-normal max-w-2xl">
+          <p className="text-base sm:text-lg md:text-base text-slate-200 mt-2.5 leading-relaxed font-normal max-w-2xl">
             Curated, high-impact cybersecurity blueprints and practical guides designed for real-world offensive &amp; defensive mastery.
           </p>
         </div>
@@ -207,16 +205,16 @@ const PDFStore = ({ onSuccess }) => {
         {/* Feature Pills Row */}
         <div className="flex flex-wrap items-center justify-between gap-3.5 sm:gap-4 mt-6 pt-5 border-t border-white/10">
           <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
-            <span className="inline-flex items-center gap-2 px-3.5 py-2 md:px-3 md:py-1.5 rounded-xl bg-white/5 border border-white/10 text-slate-200 text-sm sm:text-base md:text-sm font-semibold">
-              <ShieldCheck size={18} className="text-[#E5C158]" weight="fill" /> Lifetime Access
+            <span className="inline-flex items-center gap-2 px-4 py-2.5 md:px-3.5 md:py-2 rounded-xl bg-white/5 border border-white/10 text-slate-200 text-sm sm:text-base md:text-sm font-bold">
+              <ShieldCheck size={19} className="text-[#E5C158]" weight="fill" /> Lifetime Access
             </span>
-            <span className="inline-flex items-center gap-2 px-3.5 py-2 md:px-3 md:py-1.5 rounded-xl bg-white/5 border border-white/10 text-slate-200 text-sm sm:text-base md:text-sm font-semibold">
-              <Translate size={18} className="text-[#E5C158]" weight="bold" /> English
+            <span className="inline-flex items-center gap-2 px-4 py-2.5 md:px-3.5 md:py-2 rounded-xl bg-white/5 border border-white/10 text-slate-200 text-sm sm:text-base md:text-sm font-bold">
+              <Translate size={19} className="text-[#E5C158]" weight="bold" /> English
             </span>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-xs sm:text-sm md:text-xs text-slate-300 font-bold uppercase tracking-wider">Available:</span>
-            <span className="text-base sm:text-lg md:text-base font-black text-white">{offerings.length} Guides</span>
+            <span className="text-xs sm:text-sm md:text-sm text-slate-300 font-extrabold uppercase tracking-wider">Available:</span>
+            <span className="text-base sm:text-xl md:text-lg font-black text-white">{offerings.length} Guides</span>
           </div>
         </div>
       </div>
@@ -244,26 +242,26 @@ const PDFStore = ({ onSuccess }) => {
                       <div>
                         <div className="aspect-[2/3] w-full overflow-hidden bg-[#0c0c0e] relative flex items-center justify-center border-b border-white/5">
                           <img 
-                            src={p.coverImage ? `${import.meta.env.BASE_URL}${p.coverImage.replace(/^\/+/, '')}?v=3d` : "https://placehold.co/600x800/12141D/ffffff?text=PDF"} 
+                            src={p.coverImage ? `${import.meta.env.BASE_URL}${p.coverImage.replace(/^\/+/, '')}?v=3d-v3` : "https://placehold.co/600x800/12141D/ffffff?text=PDF"} 
                             alt={p.title} 
                             className="w-full h-full object-cover object-top opacity-95 transition-opacity duration-300" 
                           />
                         </div>
 
-                        <div className="p-4 sm:p-5 md:p-5">
-                          <h3 className="text-base sm:text-lg md:text-base font-black text-white leading-snug break-words tracking-tight">{p.title}</h3>
+                        <div className="p-4 sm:p-5 md:p-6">
+                          <h3 className="text-lg sm:text-xl md:text-lg lg:text-xl font-black text-white leading-snug break-words tracking-tight">{p.title}</h3>
                           {p.description && (
-                            <p className="text-sm sm:text-base md:text-[13px] text-slate-300 mt-2.5 leading-relaxed break-words font-normal">
+                            <p className="text-sm sm:text-base md:text-sm lg:text-[15px] text-slate-200 mt-2.5 leading-relaxed break-words font-normal">
                               {p.description}
                             </p>
                           )}
                         </div>
                       </div>
 
-                      <div className="p-4 sm:p-5 md:p-5 pt-0 mt-2 border-t border-white/5 flex items-center justify-between gap-3.5 pt-4 sm:pt-5">
+                      <div className="p-4 sm:p-5 md:p-6 pt-0 mt-2 border-t border-white/5 flex items-center justify-between gap-3.5 pt-4 sm:pt-5">
                         <div className="shrink-0">
-                          <span className="text-xs sm:text-sm md:text-xs text-slate-300 uppercase font-bold tracking-wider block mb-0.5">Price</span>
-                          <span className="text-2xl sm:text-3xl md:text-2xl font-black text-white flex items-center tracking-tight">
+                          <span className="text-xs sm:text-sm md:text-xs text-slate-400 uppercase font-black tracking-widest block mb-0.5">Price</span>
+                          <span className="text-2xl sm:text-3xl md:text-3xl font-black text-white flex items-center tracking-tight">
                             ₹{p.price}
                           </span>
                         </div>
@@ -271,16 +269,16 @@ const PDFStore = ({ onSuccess }) => {
                         {inCart ? (
                           <button 
                             onClick={() => removeFromCart(p.id)}
-                            className="py-3 sm:py-3.5 md:py-2.5 px-3.5 sm:px-4 md:px-3 rounded-xl bg-red-500/15 text-red-300 text-sm md:text-sm font-bold border border-red-500/30 flex items-center justify-center gap-1.5 transition-colors cursor-pointer min-h-[46px] md:min-h-[40px]"
+                            className="py-3 sm:py-3.5 md:py-3 px-4 sm:px-5 md:px-4 rounded-xl bg-red-500/15 text-red-300 text-sm sm:text-base md:text-sm font-bold border border-red-500/30 flex items-center justify-center gap-1.5 transition-colors cursor-pointer min-h-[46px] md:min-h-[44px]"
                           >
-                            <X size={17} weight="bold" /> Remove
+                            <X size={18} weight="bold" /> Remove
                           </button>
                         ) : (
                           <button 
                             onClick={() => addToCart(p)}
-                            className="py-3 sm:py-3.5 md:py-2.5 px-4 sm:px-5 md:px-3.5 rounded-xl bg-white text-slate-950 text-sm sm:text-base md:text-sm font-black flex items-center justify-center gap-2 transition-all border border-slate-200 border-l-[4px] border-l-[#C69214] active:scale-95 cursor-pointer shadow-md min-h-[46px] md:min-h-[40px]"
+                            className="py-3 sm:py-3.5 md:py-3 px-4 sm:px-5 md:px-4 rounded-xl bg-white text-slate-950 text-sm sm:text-base md:text-[15px] font-black flex items-center justify-center gap-2 transition-all border border-slate-200 border-l-[4px] border-l-[#C69214] active:scale-95 cursor-pointer shadow-md min-h-[46px] md:min-h-[44px]"
                           >
-                            <ShoppingCart size={18} weight="bold" /> Add to Cart
+                            <ShoppingCart size={19} weight="bold" /> Add to Cart
                           </button>
                         )}
                       </div>
@@ -300,18 +298,18 @@ const PDFStore = ({ onSuccess }) => {
                   className="sticky bottom-3 p-4 sm:p-5 bg-[#141418]/95 backdrop-blur-md border border-white/15 rounded-2xl shadow-2xl flex flex-wrap sm:flex-nowrap items-center justify-between gap-3.5 sm:gap-4 z-40"
                 >
                   <div className="flex flex-col">
-                    <span className="font-bold text-xs sm:text-sm text-[#E5C158] uppercase tracking-wider">
+                    <span className="font-black text-xs sm:text-sm md:text-sm text-[#E5C158] uppercase tracking-wider">
                       {cart.length} item{cart.length > 1 ? 's' : ''} selected
                     </span>
-                    <span className="text-2xl sm:text-3xl font-black text-[#F5C842] flex items-center">
+                    <span className="text-3xl sm:text-4xl font-black text-[#F5C842] flex items-center">
                       ₹{totalAmount}
                     </span>
                   </div>
                   <button 
                     onClick={() => setIsCheckout(true)} 
-                    className="w-full sm:w-auto px-6 sm:px-8 py-3.5 sm:py-4 md:py-3 bg-white text-slate-950 font-black text-sm sm:text-base md:text-sm rounded-xl flex items-center justify-center gap-2.5 transition-all border border-slate-200 border-l-[5px] border-l-[#C69214] active:scale-95 cursor-pointer shadow-lg min-h-[48px] md:min-h-[44px]"
+                    className="w-full sm:w-auto px-6 sm:px-8 py-3.5 sm:py-4 md:py-3.5 bg-white text-slate-950 font-black text-base sm:text-lg md:text-base rounded-xl flex items-center justify-center gap-2.5 transition-all border border-slate-200 border-l-[5px] border-l-[#C69214] active:scale-95 cursor-pointer shadow-lg min-h-[48px]"
                   >
-                    Proceed to Checkout <ArrowRight size={18} weight="bold" />
+                    Proceed to Checkout <ArrowRight size={20} weight="bold" />
                   </button>
                 </motion.div>
               )}

@@ -51,11 +51,12 @@ const BundleStore = ({ onSuccess }) => {
         const list = Array.isArray(data) ? data : [];
         const orderCovers = [
           '/top-10-mistakes.png', // ₹149 (Beginner Blind Spots)
-          '/burp-suite.jpg',      // ₹249 (Crack the Request)
+          '/burp-suite.jpg',      // ₹249 (Mastering Burp Suite)
           '/ctf-guide.jpg',       // ₹199 (Flag Hunter's Playbook)
           '/hackers-toolkit.jpg',  // ₹149 (The Hacker's Arsenal)
           '/cloud-security-v4.jpg',// ₹199 (Breach in the Cloud)
-          '/soc-analyst.jpg'      // ₹249 (Behind the Screens)
+          '/soc-analyst.jpg',      // ₹249 (Behind the Screens)
+          '/ai-in-cybersecurity.jpg' // ₹249 (How Hackers Actually Use AI)
         ];
         list.sort((a, b) => {
           const idxA = orderCovers.indexOf(a.coverImage);
@@ -228,11 +229,11 @@ const BundleStore = ({ onSuccess }) => {
 
   const bundleOrder = [
     'all-in-one',
-    'all-6-pdfs',
-    '1-1-any-4',
-    'any-4-pdfs',
-    '1-1-any-2',
-    'any-2-pdfs'
+    'all-7-pdfs',
+    '1-1-any-5',
+    'any-5-pdfs',
+    '1-1-any-3',
+    'any-3-pdfs'
   ];
 
   const filteredBundles = [...bundles]
@@ -288,9 +289,6 @@ const BundleStore = ({ onSuccess }) => {
             {/* Header Block */}
             <div className="relative rounded-2xl sm:rounded-3xl bg-gradient-to-br from-[#14141A] via-[#101015] to-[#0A0A0E] p-5 sm:p-7 md:p-9 border border-white/10 shadow-xl overflow-hidden">
               <div className="relative z-10">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-sm sm:text-base md:text-sm font-bold text-[#E5C158]">Jenish Shah</span>
-                </div>
                 <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight leading-tight">
                   High-Impact Cyber Packages
                 </h1>
@@ -322,20 +320,20 @@ const BundleStore = ({ onSuccess }) => {
                       aria-selected={isActive}
                       onClick={() => setFilter(tab.id)}
                       className={`relative px-2 sm:px-5 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-bold transition-colors duration-200 flex items-center justify-center gap-1.5 sm:gap-2 text-center cursor-pointer select-none ${
-                        isActive ? 'text-white' : 'text-slate-400 hover:text-slate-200'
+                        isActive ? 'text-zinc-950' : 'text-slate-400 hover:text-slate-200'
                       }`}
                     >
                       {isActive && (
                         <motion.div
                           layoutId="activeFilterPill"
-                          className="absolute inset-0 bg-[#1F1F28] border border-[#E5C158]/50 rounded-lg shadow-[0_0_15px_rgba(229,193,88,0.12)]"
+                          className="absolute inset-0 bg-white rounded-lg shadow-sm"
                           transition={{ type: 'spring', stiffness: 500, damping: 35 }}
                         />
                       )}
                       <Icon
                         size={15}
                         weight={isActive ? 'fill' : 'bold'}
-                        className={`relative z-10 shrink-0 transition-colors ${isActive ? 'text-[#E5C158]' : 'text-slate-400'}`}
+                        className={`relative z-10 shrink-0 transition-colors ${isActive ? 'text-zinc-950' : 'text-slate-400'}`}
                       />
                       <span className="relative z-10 hidden sm:inline whitespace-nowrap">{tab.label}</span>
                       <span className="relative z-10 sm:hidden whitespace-nowrap">{tab.shortLabel}</span>
@@ -354,11 +352,11 @@ const BundleStore = ({ onSuccess }) => {
             ) : (
               <div className="grid grid-cols-1 gap-5 sm:gap-6">
                 {filteredBundles.map(b => {
-                  const isFeatured = b.id === 'all-in-one' || b.id === 'all-6-pdfs';
+                  const isFeatured = b.id === 'all-in-one' || b.id === 'all-7-pdfs';
 
                   return (
                     <div 
-                      key={b.id}
+                      key={b.id} 
                       className={`relative rounded-2xl sm:rounded-3xl p-5 sm:p-7 md:p-8 transition-all duration-300 ${
                         isFeatured 
                           ? 'bg-gradient-to-b from-[#181822] via-[#121218] to-[#0D0D12] border-2 border-[#E5C158] shadow-[0_12px_40px_rgba(229,193,88,0.12)]' 
@@ -368,6 +366,11 @@ const BundleStore = ({ onSuccess }) => {
                       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-5 sm:gap-6">
                         {/* Left Info Column */}
                         <div className="flex-1 min-w-0">
+                          {b.badge && (
+                            <span className="inline-block px-3 py-1 mb-2.5 rounded-full text-xs font-black uppercase tracking-wider bg-[#E5C158]/15 text-[#E5C158] border border-[#E5C158]/30">
+                              {b.badge}
+                            </span>
+                          )}
                           <h3 className="text-xl sm:text-2xl md:text-3xl font-black text-white tracking-tight mb-3">
                             {b.title}
                           </h3>
@@ -405,8 +408,8 @@ const BundleStore = ({ onSuccess }) => {
                               </span>
                             </div>
                             {b.savings > 0 && (
-                              <span className="text-xs font-semibold text-emerald-400/90 mt-1 block">
-                                Save ₹{b.savings}
+                              <span className="text-xs font-bold text-emerald-400 mt-1 block">
+                                Save ₹{b.savings}{b.discount ? ` (${b.discount} off)` : ''}
                               </span>
                             )}
                           </div>
@@ -478,7 +481,7 @@ const BundleStore = ({ onSuccess }) => {
                     <div className="w-16 h-24 rounded-lg overflow-hidden bg-black/50 border border-white/10 shrink-0 flex items-center justify-center relative shadow-md">
                       {pdf.coverImage ? (
                         <img 
-                          src={pdf.coverImage ? `${pdf.coverImage}?v=3d` : ''} 
+                          src={pdf.coverImage ? `${pdf.coverImage}?v=3d-v3` : ''} 
                           alt={pdf.title} 
                           className="w-full h-full object-cover transition-transform" 
                         />

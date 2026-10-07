@@ -15,7 +15,7 @@ const pdfs = [
     coverImage: "/hackers-toolkit.jpg"
   },
   {
-    title: "Crack the Request (Burp Suite)",
+    title: "Mastering Burp Suite",
     description: "Go from install to your first intercepted request, step by step.",
     price: 249,
     coverImage: "/burp-suite.jpg"
@@ -37,6 +37,12 @@ const pdfs = [
     description: "The real tools and responsibilities nobody explains upfront.",
     price: 249,
     coverImage: "/soc-analyst.jpg"
+  },
+  {
+    title: "How Hackers Actually Use AI",
+    description: "The real ways AI is changing both attacks and defense — and what beginners actually need to know right now.",
+    price: 249,
+    coverImage: "/ai-in-cybersecurity.jpg"
   }
 ];
 
