@@ -352,13 +352,16 @@ const BundleStore = ({ onSuccess }) => {
             ) : (
               <div className="grid grid-cols-1 gap-5 sm:gap-6">
                 {filteredBundles.map(b => {
-                  const isFeatured = b.id === 'all-in-one' || b.id === 'all-7-pdfs';
+                  const isAllInOne = b.id === 'all-in-one';
+                  const isFeatured = b.id === 'all-7-pdfs';
 
                   return (
                     <div 
                       key={b.id} 
                       className={`relative rounded-2xl sm:rounded-3xl p-5 sm:p-7 md:p-8 transition-all duration-300 ${
-                        isFeatured 
+                        isAllInOne
+                          ? 'bg-gradient-to-b from-[#00f0ff]/[0.05] via-[#121218] to-[#0D0D12] border-2 border-[#00f0ff] shadow-[0_0_35px_rgba(0,240,255,0.22),0_12px_40px_rgba(0,0,0,0.8)]'
+                          : isFeatured 
                           ? 'bg-gradient-to-b from-[#181822] via-[#121218] to-[#0D0D12] border-2 border-[#E5C158] shadow-[0_12px_40px_rgba(229,193,88,0.12)]' 
                           : 'bg-[#121217] border border-white/10 hover:border-white/20'
                       }`}
@@ -366,11 +369,6 @@ const BundleStore = ({ onSuccess }) => {
                       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-5 sm:gap-6">
                         {/* Left Info Column */}
                         <div className="flex-1 min-w-0">
-                          {b.badge && (
-                            <span className="inline-block px-3 py-1 mb-2.5 rounded-full text-xs font-black uppercase tracking-wider bg-[#E5C158]/15 text-[#E5C158] border border-[#E5C158]/30">
-                              {b.badge}
-                            </span>
-                          )}
                           <h3 className="text-xl sm:text-2xl md:text-3xl font-black text-white tracking-tight mb-3">
                             {b.title}
                           </h3>
@@ -379,7 +377,7 @@ const BundleStore = ({ onSuccess }) => {
                           <ul className="space-y-2.5 text-sm sm:text-base text-slate-200 max-w-lg font-medium">
                             {b.description ? b.description.split('\n').filter(l => l.trim()).map((line, i) => (
                               <li key={i} className="flex items-start gap-2.5">
-                                <CheckCircle weight="fill" className="text-[#E5C158] text-lg shrink-0 mt-0.5"/> 
+                                <CheckCircle weight="fill" className={`${isAllInOne ? 'text-[#00f0ff]' : 'text-[#E5C158]'} text-lg shrink-0 mt-0.5`}/> 
                                 <span className="leading-snug text-slate-100">{line}</span>
                               </li>
                             )) : (
@@ -390,9 +388,16 @@ const BundleStore = ({ onSuccess }) => {
                           </ul>
                         </div>
 
-                        {/* Right Pricing & Action Box */}
-                        <div className="w-full md:w-64 shrink-0 bg-[#08080C] border border-white/10 p-5 sm:p-6 rounded-2xl flex flex-col items-center justify-center gap-3.5">
-                          <div className="text-center w-full">
+                        {/* Right Pricing & Action Box with Lightning Blue Layer */}
+                        <div className={`w-full md:w-64 shrink-0 relative overflow-hidden p-5 sm:p-6 rounded-2xl flex flex-col items-center justify-center gap-3.5 transition-all duration-300 ${
+                          isAllInOne
+                            ? 'bg-gradient-to-b from-[#00f0ff]/15 via-[#0a111a] to-[#08080C] border-2 border-[#00f0ff] shadow-[0_0_25px_rgba(0,240,255,0.22)]'
+                            : 'bg-gradient-to-b from-[#00f0ff]/[0.08] via-[#090d14] to-[#08080C] border border-[#00f0ff]/40 shadow-[0_0_20px_rgba(0,240,255,0.12)]'
+                        }`}>
+                          {/* Subtle Ambient Lightning Blue Glow Layer */}
+                          <div className="absolute -top-10 -right-10 w-28 h-28 bg-[#00f0ff]/15 rounded-full blur-xl pointer-events-none" />
+
+                          <div className="text-center w-full relative z-10">
                             <span className="text-xs sm:text-sm font-bold text-slate-300 uppercase tracking-widest block mb-1">
                               Bundle Price
                             </span>
@@ -409,14 +414,14 @@ const BundleStore = ({ onSuccess }) => {
                             </div>
                             {b.savings > 0 && (
                               <span className="text-xs font-bold text-emerald-400 mt-1 block">
-                                Save ₹{b.savings}{b.discount ? ` (${b.discount} off)` : ''}
+                                Save ₹{b.savings}
                               </span>
                             )}
                           </div>
 
                           <button 
                             onClick={() => handleBundleSelect(b)}
-                            className="w-full py-3.5 sm:py-4 px-5 bg-white text-slate-950 font-black text-sm sm:text-base rounded-xl transition-all border border-slate-200 border-l-[4px] border-l-[#C69214] active:scale-95 cursor-pointer shadow-md flex items-center justify-center gap-2 min-h-[48px]"
+                            className={`w-full py-3.5 sm:py-4 px-5 bg-white text-slate-950 font-black text-sm sm:text-base rounded-xl transition-all border border-slate-200 ${isAllInOne ? 'border-l-[4px] border-l-[#00f0ff]' : 'border-l-[4px] border-l-[#C69214]'} active:scale-95 cursor-pointer shadow-md flex items-center justify-center gap-2 min-h-[48px] relative z-10`}
                           >
                             <ShoppingCart size={18} weight="bold" />
                             {b.pdfSelectionCount > 0 
@@ -595,7 +600,7 @@ const BundleStore = ({ onSuccess }) => {
                   <span className="text-sm sm:text-base md:text-sm text-slate-300 font-medium mt-1 block">
                     {selectedBundle?.pdfSelectionCount > 0 
                       ? `${selectedPdfs.length} item${selectedPdfs.length > 1 ? 's' : ''} included` 
-                      : 'All 6 Cybersecurity PDFs included'}
+                      : 'All 7 Premium Cybersecurity PDFs included'}
                   </span>
                 </div>
                 <span className="font-black text-[#F5C842] text-3xl sm:text-4xl md:text-3xl tracking-tight">
