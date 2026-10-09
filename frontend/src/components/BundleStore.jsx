@@ -360,7 +360,7 @@ const BundleStore = ({ onSuccess }) => {
                       key={b.id} 
                       className={`relative rounded-2xl sm:rounded-3xl p-5 sm:p-7 md:p-8 transition-all duration-300 ${
                         isAllInOne
-                          ? 'bg-gradient-to-b from-[#181822] via-[#121218] to-[#0D0D12] border-2 border-[#E5C158] ring-2 ring-[#00f0ff] ring-offset-2 ring-offset-[#09090D] shadow-[0_12px_40px_rgba(0,0,0,0.8),0_0_25px_rgba(0,240,255,0.15)]'
+                          ? 'bg-gradient-to-b from-[#181822] via-[#121218] to-[#0D0D12] border-2 border-[#00f0ff] shadow-[0_12px_40px_rgba(0,0,0,0.8)]'
                           : isFeatured 
                           ? 'bg-gradient-to-b from-[#181822] via-[#121218] to-[#0D0D12] border-2 border-[#E5C158] shadow-[0_12px_40px_rgba(229,193,88,0.12)]' 
                           : 'bg-[#121217] border border-white/10 hover:border-white/20'
@@ -372,8 +372,8 @@ const BundleStore = ({ onSuccess }) => {
                           <div className="flex-1 min-w-0">
                             {/* Prestige Eyebrow */}
                             <div className="flex items-center gap-2 mb-2">
-                              <span className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-[0.16em] text-[#00f0ff]">
-                                <Lightning size={14} weight="fill" className="text-[#00f0ff]" />
+                              <span className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-[0.16em] text-[#E5C158]">
+                                <Lightning size={14} weight="fill" className="text-[#E5C158]" />
                                 Complete VIP Master Package
                               </span>
                               <span className="h-1 w-1 rounded-full bg-white/40" />
@@ -394,10 +394,10 @@ const BundleStore = ({ onSuccess }) => {
                             <div className="mb-4 p-3 rounded-xl bg-black/40 border border-white/[0.08] max-w-xl">
                               <div className="flex items-center justify-between mb-2">
                                 <span className="text-[11px] font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
-                                  <BookOpen size={14} className="text-[#00f0ff]" weight="bold" />
+                                  <BookOpen size={14} className="text-[#E5C158]" weight="bold" />
                                   All 7 Ebooks Included:
                                 </span>
-                                <span className="text-[11px] font-bold text-[#00f0ff]">
+                                <span className="text-[11px] font-bold text-[#E5C158]">
                                   Full Library
                                 </span>
                               </div>
@@ -425,7 +425,7 @@ const BundleStore = ({ onSuccess }) => {
                             {/* Dual Core Value Pillars */}
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-w-xl">
                               <div className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.08] flex items-start gap-2.5">
-                                <Calendar size={18} weight="fill" className="text-[#00f0ff] shrink-0 mt-0.5" />
+                                <Calendar size={18} weight="fill" className="text-[#E5C158] shrink-0 mt-0.5" />
                                 <div>
                                   <div className="text-xs sm:text-sm font-bold text-white">1:1 Mentorship Call (30 mins)</div>
                                   <div className="text-[11px] text-slate-300 mt-0.5 leading-snug">Direct career roadmap &amp; strategy with Jenish</div>
@@ -442,7 +442,7 @@ const BundleStore = ({ onSuccess }) => {
                           </div>
 
                           {/* Right Pricing & Action Box */}
-                          <div className="w-full lg:w-64 shrink-0 bg-[#08080C] border-2 border-[#00f0ff] shadow-[0_0_20px_rgba(0,240,255,0.18)] p-5 sm:p-6 rounded-2xl flex flex-col items-center justify-center gap-3.5">
+                          <div className="w-full lg:w-64 shrink-0 bg-[#08080C] border-2 border-[#00f0ff] p-5 sm:p-6 rounded-2xl flex flex-col items-center justify-center gap-3.5">
                             <div className="text-center w-full">
                               <span className="text-xs sm:text-sm font-bold text-slate-300 uppercase tracking-widest block mb-1">
                                 Bundle Price
