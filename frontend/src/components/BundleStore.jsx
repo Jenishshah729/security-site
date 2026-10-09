@@ -410,7 +410,7 @@ const BundleStore = ({ onSuccess }) => {
                               </span>
                             </div>
                             {b.savings > 0 && (
-                              <span className="text-xs font-bold text-emerald-400 mt-1 block">
+                              <span className="text-xs font-bold text-[#E5C158] mt-1 block">
                                 Save ₹{b.savings}
                               </span>
                             )}
