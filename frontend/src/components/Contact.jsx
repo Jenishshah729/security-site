@@ -181,7 +181,7 @@ const Contact = () => {
                   </p>
                 </div>
 
-                <ArrowSquareOut size={18} className="text-gray-400 flex-shrink-0" />
+                <ArrowSquareOut size={19} weight="bold" className="text-[#C69214] flex-shrink-0" />
               </a>
             );
           })}
