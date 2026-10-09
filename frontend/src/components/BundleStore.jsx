@@ -366,67 +366,169 @@ const BundleStore = ({ onSuccess }) => {
                           : 'bg-[#121217] border border-white/10 hover:border-white/20'
                       }`}
                     >
-                      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-5 sm:gap-6">
-                        {/* Left Info Column */}
-                        <div className="flex-1 min-w-0">
-                          <h3 className="text-xl sm:text-2xl md:text-3xl font-black text-white tracking-tight mb-3">
-                            {b.title}
-                          </h3>
+                      {isAllInOne ? (
+                        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 relative z-10">
+                          {/* Left Info Column */}
+                          <div className="flex-1 min-w-0">
+                            {/* Prestige Eyebrow */}
+                            <div className="flex items-center gap-2 mb-2">
+                              <span className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-[0.16em] text-[#00f0ff]">
+                                <Lightning size={14} weight="fill" className="text-[#00f0ff]" />
+                                Complete VIP Master Package
+                              </span>
+                              <span className="h-1 w-1 rounded-full bg-white/40" />
+                              <span className="text-xs font-semibold text-slate-300">
+                                Most Comprehensive
+                              </span>
+                            </div>
 
-                          {/* Features List */}
-                          <ul className="space-y-2.5 text-sm sm:text-base text-slate-200 max-w-lg font-medium">
-                            {b.description ? b.description.split('\n').filter(l => l.trim()).map((line, i) => (
-                              <li key={i} className="flex items-start gap-2.5">
-                                <CheckCircle weight="fill" className="text-[#E5C158] text-lg shrink-0 mt-0.5"/> 
-                                <span className="leading-snug text-slate-100">{line}</span>
-                              </li>
-                            )) : (
-                              <li className="flex items-center gap-2 text-slate-500 italic">
-                                <span>No description provided.</span>
-                              </li>
-                            )}
-                          </ul>
-                        </div>
+                            <h3 className="text-2xl sm:text-3xl md:text-3xl font-black text-white tracking-tight mb-2">
+                              {b.title}
+                            </h3>
 
-                        {/* Right Pricing & Action Box */}
-                        <div className={`w-full md:w-64 shrink-0 bg-[#08080C] p-5 sm:p-6 rounded-2xl flex flex-col items-center justify-center gap-3.5 transition-all duration-300 ${
-                          isAllInOne
-                            ? 'border-2 border-[#00f0ff] shadow-[0_0_20px_rgba(0,240,255,0.18)]'
-                            : 'border border-white/10'
-                        }`}>
-                          <div className="text-center w-full">
-                            <span className="text-xs sm:text-sm font-bold text-slate-300 uppercase tracking-widest block mb-1">
-                              Bundle Price
-                            </span>
-                            
-                            <div className="flex items-baseline justify-center gap-2.5">
-                              {b.originalPrice > b.price && (
+                            <p className="text-sm sm:text-base text-slate-200 mb-4 max-w-xl font-normal leading-relaxed">
+                              The definitive offensive &amp; defensive package. Get private 1:1 live strategic guidance with Jenish Shah plus instant lifetime access to all 7 cybersecurity guides.
+                            </p>
+
+                            {/* Miniature Visual Showcase of all 7 Ebooks */}
+                            <div className="mb-4 p-3 rounded-xl bg-black/40 border border-white/[0.08] max-w-xl">
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+                                  <BookOpen size={14} className="text-[#00f0ff]" weight="bold" />
+                                  All 7 Ebooks Included:
+                                </span>
+                                <span className="text-[11px] font-bold text-[#00f0ff]">
+                                  Full Library
+                                </span>
+                              </div>
+                              <div className="flex items-center -space-x-2 sm:-space-x-2.5 overflow-x-auto py-1 no-scrollbar">
+                                {[
+                                  { src: '/ai-in-cybersecurity.jpg', title: 'How Hackers Actually Use AI' },
+                                  { src: '/top-10-mistakes.png', title: 'The Mistake Map for Beginners' },
+                                  { src: '/hackers-toolkit.jpg', title: 'The Toolkit Nobody Hands You' },
+                                  { src: '/ctf-guide.jpg', title: 'Your First CTF, Made Simple' },
+                                  { src: '/burp-suite.jpg', title: 'Burp Suite, Minus the Confusion' },
+                                  { src: '/soc-analyst.jpg', title: 'Before You Walk Into a SOC' },
+                                  { src: '/cloud-security-v4.jpg', title: 'The Cloud Security Gap' }
+                                ].map((book, idx) => (
+                                  <div 
+                                    key={idx} 
+                                    title={book.title} 
+                                    className="relative shrink-0 w-11 h-16 sm:w-13 sm:h-18 rounded-md overflow-hidden border border-white/20 shadow-md hover:-translate-y-1 hover:z-20 transition-transform duration-200"
+                                  >
+                                    <img src={book.src} alt={book.title} className="w-full h-full object-cover" />
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+
+                            {/* Dual Core Value Pillars */}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-w-xl">
+                              <div className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.08] flex items-start gap-2.5">
+                                <Calendar size={18} weight="fill" className="text-[#00f0ff] shrink-0 mt-0.5" />
+                                <div>
+                                  <div className="text-xs sm:text-sm font-bold text-white">1:1 Mentorship Call (30 mins)</div>
+                                  <div className="text-[11px] text-slate-300 mt-0.5 leading-snug">Direct career roadmap &amp; strategy with Jenish</div>
+                                </div>
+                              </div>
+                              <div className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.08] flex items-start gap-2.5">
+                                <ShieldCheck size={18} weight="fill" className="text-[#E5C158] shrink-0 mt-0.5" />
+                                <div>
+                                  <div className="text-xs sm:text-sm font-bold text-white">Complete 7-Ebook Arsenal</div>
+                                  <div className="text-[11px] text-slate-300 mt-0.5 leading-snug">Instant email delivery + all future revisions</div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Right Pricing & Action Box */}
+                          <div className="w-full lg:w-64 shrink-0 bg-[#08080C] border-2 border-[#00f0ff] shadow-[0_0_20px_rgba(0,240,255,0.18)] p-5 sm:p-6 rounded-2xl flex flex-col items-center justify-center gap-3.5">
+                            <div className="text-center w-full">
+                              <span className="text-xs sm:text-sm font-bold text-slate-300 uppercase tracking-widest block mb-1">
+                                Bundle Price
+                              </span>
+                              
+                              <div className="flex items-baseline justify-center gap-2.5">
                                 <span className="text-base sm:text-lg font-semibold text-slate-500 line-through">
                                   ₹{b.originalPrice}
                                 </span>
-                              )}
-                              <span className="text-3xl sm:text-4xl font-black text-white tracking-tight">
-                                ₹{b.price}
-                              </span>
-                            </div>
-                            {b.savings > 0 && (
+                                <span className="text-3xl sm:text-4xl font-black text-white tracking-tight">
+                                  ₹{b.price}
+                                </span>
+                              </div>
                               <span className="text-xs font-bold text-[#E5C158] mt-1 block">
                                 Save ₹{b.savings}
                               </span>
-                            )}
+                            </div>
+
+                            <button 
+                              onClick={() => handleBundleSelect(b)}
+                              className="w-full py-3.5 sm:py-4 px-5 bg-white text-slate-950 font-black text-sm sm:text-base rounded-xl transition-all border border-slate-200 border-l-[4px] border-l-[#C69214] active:scale-95 cursor-pointer shadow-md flex items-center justify-center gap-2 min-h-[48px]"
+                            >
+                              <ShoppingCart size={18} weight="bold" />
+                              Get Complete Bundle
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-5 sm:gap-6">
+                          {/* Left Info Column */}
+                          <div className="flex-1 min-w-0">
+                            <h3 className="text-xl sm:text-2xl md:text-3xl font-black text-white tracking-tight mb-3">
+                              {b.title}
+                            </h3>
+
+                            {/* Features List */}
+                            <ul className="space-y-2.5 text-sm sm:text-base text-slate-200 max-w-lg font-medium">
+                              {b.description ? b.description.split('\n').filter(l => l.trim()).map((line, i) => (
+                                <li key={i} className="flex items-start gap-2.5">
+                                  <CheckCircle weight="fill" className="text-[#E5C158] text-lg shrink-0 mt-0.5"/> 
+                                  <span className="leading-snug text-slate-100">{line}</span>
+                                </li>
+                              )) : (
+                                <li className="flex items-center gap-2 text-slate-500 italic">
+                                  <span>No description provided.</span>
+                                </li>
+                              )}
+                            </ul>
                           </div>
 
-                          <button 
-                            onClick={() => handleBundleSelect(b)}
-                            className="w-full py-3.5 sm:py-4 px-5 bg-white text-slate-950 font-black text-sm sm:text-base rounded-xl transition-all border border-slate-200 border-l-[4px] border-l-[#C69214] active:scale-95 cursor-pointer shadow-md flex items-center justify-center gap-2 min-h-[48px]"
-                          >
-                            <ShoppingCart size={18} weight="bold" />
-                            {b.pdfSelectionCount > 0 
-                              ? `Choose ${b.pdfSelectionCount} PDFs` 
-                              : 'Get Bundle'}
-                          </button>
+                          {/* Right Pricing & Action Box */}
+                          <div className="w-full md:w-64 shrink-0 bg-[#08080C] border border-white/10 p-5 sm:p-6 rounded-2xl flex flex-col items-center justify-center gap-3.5">
+                            <div className="text-center w-full">
+                              <span className="text-xs sm:text-sm font-bold text-slate-300 uppercase tracking-widest block mb-1">
+                                Bundle Price
+                              </span>
+                              
+                              <div className="flex items-baseline justify-center gap-2.5">
+                                {b.originalPrice > b.price && (
+                                  <span className="text-base sm:text-lg font-semibold text-slate-500 line-through">
+                                    ₹{b.originalPrice}
+                                  </span>
+                                )}
+                                <span className="text-3xl sm:text-4xl font-black text-white tracking-tight">
+                                  ₹{b.price}
+                                </span>
+                              </div>
+                              {b.savings > 0 && (
+                                <span className="text-xs font-bold text-[#E5C158] mt-1 block">
+                                  Save ₹{b.savings}
+                                </span>
+                              )}
+                            </div>
+
+                            <button 
+                              onClick={() => handleBundleSelect(b)}
+                              className="w-full py-3.5 sm:py-4 px-5 bg-white text-slate-950 font-black text-sm sm:text-base rounded-xl transition-all border border-slate-200 border-l-[4px] border-l-[#C69214] active:scale-95 cursor-pointer shadow-md flex items-center justify-center gap-2 min-h-[48px]"
+                            >
+                              <ShoppingCart size={18} weight="bold" />
+                              {b.pdfSelectionCount > 0 
+                                ? `Choose ${b.pdfSelectionCount} PDFs` 
+                                : 'Get Bundle'}
+                            </button>
+                          </div>
                         </div>
-                      </div>
+                      )}
                     </div>
                   );
                 })}
