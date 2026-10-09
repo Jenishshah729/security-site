@@ -61,12 +61,12 @@ const About = () => {
           <div className="relative group flex-shrink-0">
             <div className="p-1 rounded-2xl bg-gradient-to-b from-white/10 via-[var(--accent-gold,#E5C158)]/25 to-white/5 border border-white/10 shadow-lg">
               <img 
-                src={`${import.meta.env.BASE_URL}logo.jpg`} 
+                src={`${import.meta.env.BASE_URL}jenish-shah.jpg`} 
                 alt="Jenish Shah" 
-                className="w-28 h-28 md:w-32 md:h-32 rounded-xl object-cover"
+                className="w-28 h-28 md:w-32 md:h-32 rounded-xl object-cover object-center shadow-inner"
                 onError={(e) => {
                   e.target.onerror = null;
-                  e.target.src = "https://placehold.co/256x256/141418/E5C158?text=Jenish+Shah";
+                  e.target.src = `${import.meta.env.BASE_URL}logo.jpg`;
                 }}
               />
             </div>
