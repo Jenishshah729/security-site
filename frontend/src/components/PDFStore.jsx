@@ -36,13 +36,13 @@ const PDFStore = ({ onSuccess }) => {
       .then(data => {
         const list = Array.isArray(data) ? data : [];
         const orderCovers = [
-          '/top-10-mistakes.png', // ₹149 (Beginner Blind Spots)
-          '/burp-suite.jpg',      // ₹249 (Mastering Burp Suite)
-          '/ctf-guide.jpg',       // ₹199 (Flag Hunter's Playbook)
-          '/hackers-toolkit.jpg',  // ₹149 (The Hacker's Arsenal)
-          '/cloud-security-v4.jpg',// ₹199 (Breach in the Cloud)
-          '/soc-analyst.jpg',      // ₹249 (Behind the Screens)
-          '/ai-in-cybersecurity.jpg' // ₹249 (How Hackers Actually Use AI)
+          '/ai-in-cybersecurity.jpg', // ₹249 (1. How Hackers Actually Use AI)
+          '/top-10-mistakes.png',     // ₹149 (2. The Mistake Map for Beginners)
+          '/hackers-toolkit.jpg',     // ₹149 (3. The Toolkit Nobody Hands You)
+          '/ctf-guide.jpg',           // ₹199 (4. Your First CTF, Made Simple)
+          '/burp-suite.jpg',          // ₹249 (5. Burp Suite, Minus the Confusion)
+          '/soc-analyst.jpg',         // ₹249 (6. Before You Walk Into a SOC)
+          '/cloud-security-v4.jpg'    // ₹199 (7. The Cloud Security Gap)
         ];
         list.sort((a, b) => {
           const idxA = orderCovers.indexOf(a.coverImage);

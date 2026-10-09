@@ -2,13 +2,13 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 const priceMap = [
-  { coverImage: '/top-10-mistakes.png', title: 'Beginner Blind Spots', price: 149 },
-  { coverImage: '/hackers-toolkit.jpg', title: "The Hacker's Arsenal", price: 149 },
-  { coverImage: '/ctf-guide.jpg', title: "Flag Hunter's Playbook (CTF)", price: 199 },
-  { coverImage: '/cloud-security-v4.jpg', title: 'Breach in the Cloud', price: 199 },
-  { coverImage: '/burp-suite.jpg', title: 'Mastering Burp Suite', price: 249 },
-  { coverImage: '/soc-analyst.jpg', title: 'Behind the Screens (SOC)', price: 249 },
-  { coverImage: '/ai-in-cybersecurity.jpg', title: 'How Hackers Actually Use AI', price: 249 }
+  { coverImage: '/ai-in-cybersecurity.jpg', title: 'How Hackers Actually Use AI', price: 249 },
+  { coverImage: '/top-10-mistakes.png', title: 'The Mistake Map for Beginners', price: 149 },
+  { coverImage: '/hackers-toolkit.jpg', title: 'The Toolkit Nobody Hands You', price: 149 },
+  { coverImage: '/ctf-guide.jpg', title: 'Your First CTF, Made Simple', price: 199 },
+  { coverImage: '/burp-suite.jpg', title: 'Burp Suite, Minus the Confusion', price: 249 },
+  { coverImage: '/soc-analyst.jpg', title: 'Before You Walk Into a SOC', price: 249 },
+  { coverImage: '/cloud-security-v4.jpg', title: 'The Cloud Security Gap', price: 199 }
 ];
 
 async function main() {

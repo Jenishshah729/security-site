@@ -621,15 +621,22 @@ app.get('/api/connect-links', async (req, res) => {
 app.get('/api/offerings', async (req, res) => {
   try {
     const offerings = await prisma.offering.findMany();
-    // Layout order: 149 -> 249 -> 199 -> 149 -> 199 -> 249
+    // Layout order requested:
+    // 1. How Hackers Actually Use AI (₹249)
+    // 2. The Mistake Map for Beginners (₹149)
+    // 3. The Toolkit Nobody Hands You (₹149)
+    // 4. Your First CTF, Made Simple (₹199)
+    // 5. Burp Suite, Minus the Confusion (₹249)
+    // 6. Before You Walk Into a SOC (₹249)
+    // 7. The Cloud Security Gap (₹199)
     const orderCovers = [
-      '/top-10-mistakes.png', // ₹149 (Beginner Blind Spots)
-      '/burp-suite.jpg',      // ₹249 (Mastering Burp Suite)
-      '/ctf-guide.jpg',       // ₹199 (Flag Hunter's Playbook)
-      '/hackers-toolkit.jpg',  // ₹149 (The Hacker's Arsenal)
-      '/cloud-security-v4.jpg',// ₹199 (Breach in the Cloud)
-      '/soc-analyst.jpg',      // ₹249 (Behind the Screens)
-      '/ai-in-cybersecurity.jpg' // ₹249 (How Hackers Actually Use AI)
+      '/ai-in-cybersecurity.jpg', // ₹249 (1. How Hackers Actually Use AI)
+      '/top-10-mistakes.png',     // ₹149 (2. The Mistake Map for Beginners)
+      '/hackers-toolkit.jpg',     // ₹149 (3. The Toolkit Nobody Hands You)
+      '/ctf-guide.jpg',           // ₹199 (4. Your First CTF, Made Simple)
+      '/burp-suite.jpg',          // ₹249 (5. Burp Suite, Minus the Confusion)
+      '/soc-analyst.jpg',         // ₹249 (6. Before You Walk Into a SOC)
+      '/cloud-security-v4.jpg'    // ₹199 (7. The Cloud Security Gap)
     ];
     offerings.sort((a, b) => {
       const idxA = orderCovers.indexOf(a.coverImage);
