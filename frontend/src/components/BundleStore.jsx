@@ -360,7 +360,7 @@ const BundleStore = ({ onSuccess }) => {
                       key={b.id} 
                       className={`relative rounded-2xl sm:rounded-3xl p-5 sm:p-7 md:p-8 transition-all duration-300 ${
                         isAllInOne
-                          ? 'bg-gradient-to-b from-[#00f0ff]/[0.05] via-[#121218] to-[#0D0D12] border-2 border-[#00f0ff] shadow-[0_0_35px_rgba(0,240,255,0.22),0_12px_40px_rgba(0,0,0,0.8)]'
+                          ? 'bg-gradient-to-b from-[#181822] via-[#121218] to-[#0D0D12] border-2 border-[#E5C158] ring-2 ring-[#00f0ff] ring-offset-2 ring-offset-[#09090D] shadow-[0_12px_40px_rgba(0,0,0,0.8),0_0_25px_rgba(0,240,255,0.15)]'
                           : isFeatured 
                           ? 'bg-gradient-to-b from-[#181822] via-[#121218] to-[#0D0D12] border-2 border-[#E5C158] shadow-[0_12px_40px_rgba(229,193,88,0.12)]' 
                           : 'bg-[#121217] border border-white/10 hover:border-white/20'
@@ -377,7 +377,7 @@ const BundleStore = ({ onSuccess }) => {
                           <ul className="space-y-2.5 text-sm sm:text-base text-slate-200 max-w-lg font-medium">
                             {b.description ? b.description.split('\n').filter(l => l.trim()).map((line, i) => (
                               <li key={i} className="flex items-start gap-2.5">
-                                <CheckCircle weight="fill" className={`${isAllInOne ? 'text-[#00f0ff]' : 'text-[#E5C158]'} text-lg shrink-0 mt-0.5`}/> 
+                                <CheckCircle weight="fill" className="text-[#E5C158] text-lg shrink-0 mt-0.5"/> 
                                 <span className="leading-snug text-slate-100">{line}</span>
                               </li>
                             )) : (
@@ -388,16 +388,13 @@ const BundleStore = ({ onSuccess }) => {
                           </ul>
                         </div>
 
-                        {/* Right Pricing & Action Box with Lightning Blue Layer */}
-                        <div className={`w-full md:w-64 shrink-0 relative overflow-hidden p-5 sm:p-6 rounded-2xl flex flex-col items-center justify-center gap-3.5 transition-all duration-300 ${
+                        {/* Right Pricing & Action Box */}
+                        <div className={`w-full md:w-64 shrink-0 bg-[#08080C] p-5 sm:p-6 rounded-2xl flex flex-col items-center justify-center gap-3.5 transition-all duration-300 ${
                           isAllInOne
-                            ? 'bg-gradient-to-b from-[#00f0ff]/15 via-[#0a111a] to-[#08080C] border-2 border-[#00f0ff] shadow-[0_0_25px_rgba(0,240,255,0.22)]'
-                            : 'bg-gradient-to-b from-[#00f0ff]/[0.08] via-[#090d14] to-[#08080C] border border-[#00f0ff]/40 shadow-[0_0_20px_rgba(0,240,255,0.12)]'
+                            ? 'border-2 border-[#00f0ff] shadow-[0_0_20px_rgba(0,240,255,0.18)]'
+                            : 'border border-white/10'
                         }`}>
-                          {/* Subtle Ambient Lightning Blue Glow Layer */}
-                          <div className="absolute -top-10 -right-10 w-28 h-28 bg-[#00f0ff]/15 rounded-full blur-xl pointer-events-none" />
-
-                          <div className="text-center w-full relative z-10">
+                          <div className="text-center w-full">
                             <span className="text-xs sm:text-sm font-bold text-slate-300 uppercase tracking-widest block mb-1">
                               Bundle Price
                             </span>
@@ -421,7 +418,7 @@ const BundleStore = ({ onSuccess }) => {
 
                           <button 
                             onClick={() => handleBundleSelect(b)}
-                            className={`w-full py-3.5 sm:py-4 px-5 bg-white text-slate-950 font-black text-sm sm:text-base rounded-xl transition-all border border-slate-200 ${isAllInOne ? 'border-l-[4px] border-l-[#00f0ff]' : 'border-l-[4px] border-l-[#C69214]'} active:scale-95 cursor-pointer shadow-md flex items-center justify-center gap-2 min-h-[48px] relative z-10`}
+                            className="w-full py-3.5 sm:py-4 px-5 bg-white text-slate-950 font-black text-sm sm:text-base rounded-xl transition-all border border-slate-200 border-l-[4px] border-l-[#C69214] active:scale-95 cursor-pointer shadow-md flex items-center justify-center gap-2 min-h-[48px]"
                           >
                             <ShoppingCart size={18} weight="bold" />
                             {b.pdfSelectionCount > 0 
