@@ -128,7 +128,7 @@ const About = () => {
           </h2>
 
           <p className="text-slate-200 text-base md:text-[15px] leading-relaxed mb-5 md:mb-5">
-            Under the handle @thejenishshah, Jenish Shah creates cybersecurity content publishing beginner guides, tool walkthroughs, and CTF/pentesting explainers. He also produces a set of practical PDF guides covering tools like Burp Suite, cloud security fundamentals, and SOC analyst basics, built for people starting exactly where he did.
+            Under the handle @thejenishshah, Jenish Shah creates cybersecurity content publishing beginner guides, tool walkthroughs, and CTF/pentesting explainers. He also produces a curated collection of practical, high-impact PDF guides designed to fast-track real-world security skills, built for people starting exactly where he did.
           </p>
 
           <div className="flex flex-wrap gap-3 pt-1">

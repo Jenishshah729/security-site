@@ -137,12 +137,12 @@ const WorkWithMe = () => {
           <div className="flex items-center gap-3.5 mb-4">
             {/* Clean borderless Jenish avatar image without thick white border */}
             <img
-              src={`${import.meta.env.BASE_URL}logo.jpg`}
+              src={`${import.meta.env.BASE_URL}jenish-shah.jpg`}
               alt="Jenish Shah"
               className="w-12 h-12 rounded-xl object-cover shrink-0 shadow-md border border-white/10"
               onError={(e) => {
                 e.target.onerror = null;
-                e.target.src = "https://placehold.co/44x44/141418/E5C158?text=JS";
+                e.target.src = `${import.meta.env.BASE_URL}logo.jpg`;
               }}
             />
             <h2 className="text-xl sm:text-2xl md:text-xl font-black text-white tracking-tight leading-snug">
