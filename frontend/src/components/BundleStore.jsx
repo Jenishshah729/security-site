@@ -442,7 +442,7 @@ const BundleStore = ({ onSuccess }) => {
                           </div>
 
                           {/* Right Pricing & Action Box */}
-                          <div className="w-full lg:w-64 shrink-0 bg-[#08080C] border-2 border-[#00f0ff] p-5 sm:p-6 rounded-2xl flex flex-col items-center justify-center gap-3.5">
+                          <div className="w-full lg:w-64 shrink-0 bg-[#08080C] border-2 border-[#E5C158] p-5 sm:p-6 rounded-2xl flex flex-col items-center justify-center gap-3.5">
                             <div className="text-center w-full">
                               <span className="text-xs sm:text-sm font-bold text-slate-300 uppercase tracking-widest block mb-1">
                                 Bundle Price
