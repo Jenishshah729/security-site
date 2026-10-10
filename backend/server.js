@@ -618,9 +618,88 @@ app.get('/api/connect-links', async (req, res) => {
 });
 
 // --- OFFERINGS ROUTES ---
+export const DEFAULT_OFFERINGS = [
+  {
+    title: "How Hackers Actually Use AI",
+    description: "The real ways AI is changing both attacks and defense — and what beginners actually need to know right now.",
+    price: 249,
+    coverImage: "/ai-in-cybersecurity.jpg"
+  },
+  {
+    title: "The Mistake Map for Beginners",
+    description: "The invisible mistakes that cost beginners the most time — skip them entirely.",
+    price: 149,
+    coverImage: "/top-10-mistakes.png"
+  },
+  {
+    title: "The Toolkit Nobody Hands You",
+    description: "20 free tools real hackers use — what to grab, and when.",
+    price: 149,
+    coverImage: "/hackers-toolkit.jpg"
+  },
+  {
+    title: "Your First CTF, Made Simple",
+    description: "The mindset and strategy to land your first flag, fast.",
+    price: 199,
+    coverImage: "/ctf-guide.jpg"
+  },
+  {
+    title: "Burp Suite, Minus the Confusion",
+    description: "Go from install to your first intercepted request, step by step.",
+    price: 249,
+    coverImage: "/burp-suite.jpg"
+  },
+  {
+    title: "Before You Walk Into a SOC",
+    description: "The real tools and responsibilities nobody explains upfront.",
+    price: 249,
+    coverImage: "/soc-analyst.jpg"
+  },
+  {
+    title: "The Cloud Security Gap",
+    description: "Close the exact gap that trips most beginners up.",
+    price: 199,
+    coverImage: "/cloud-security-v4.jpg"
+  }
+];
+
+export async function ensureDefaultOfferings() {
+  try {
+    for (const item of DEFAULT_OFFERINGS) {
+      const existing = await prisma.offering.findFirst({
+        where: {
+          OR: [
+            { title: item.title },
+            { coverImage: item.coverImage }
+          ]
+        }
+      });
+      if (!existing) {
+        await prisma.offering.create({ data: item });
+      } else {
+        await prisma.offering.update({
+          where: { id: existing.id },
+          data: {
+            title: item.title,
+            description: item.description,
+            price: item.price,
+            coverImage: item.coverImage
+          }
+        });
+      }
+    }
+  } catch (err) {
+    console.error('[Default Offerings Sync Error]:', err);
+  }
+}
+
 app.get('/api/offerings', async (req, res) => {
   try {
-    const offerings = await prisma.offering.findMany();
+    let offerings = await prisma.offering.findMany();
+    if (offerings.length < DEFAULT_OFFERINGS.length) {
+      await ensureDefaultOfferings();
+      offerings = await prisma.offering.findMany();
+    }
     // Layout order requested:
     // 1. How Hackers Actually Use AI (₹249)
     // 2. The Mistake Map for Beginners (₹149)
@@ -1000,4 +1079,5 @@ app.use((err, req, res, next) => {
 
 app.listen(PORT, () => {
   console.log(`Secure server running on port ${PORT}`);
+  ensureDefaultOfferings();
 });

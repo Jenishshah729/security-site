@@ -14,8 +14,60 @@ import {
   X
 } from '@phosphor-icons/react';
 
+const DEFAULT_OFFERINGS = [
+  {
+    id: 84,
+    title: "How Hackers Actually Use AI",
+    description: "The real ways AI is changing both attacks and defense — and what beginners actually need to know right now.",
+    price: 249,
+    coverImage: "/ai-in-cybersecurity.jpg"
+  },
+  {
+    id: 78,
+    title: "The Mistake Map for Beginners",
+    description: "The invisible mistakes that cost beginners the most time — skip them entirely.",
+    price: 149,
+    coverImage: "/top-10-mistakes.png"
+  },
+  {
+    id: 79,
+    title: "The Toolkit Nobody Hands You",
+    description: "20 free tools real hackers use — what to grab, and when.",
+    price: 149,
+    coverImage: "/hackers-toolkit.jpg"
+  },
+  {
+    id: 81,
+    title: "Your First CTF, Made Simple",
+    description: "The mindset and strategy to land your first flag, fast.",
+    price: 199,
+    coverImage: "/ctf-guide.jpg"
+  },
+  {
+    id: 80,
+    title: "Burp Suite, Minus the Confusion",
+    description: "Go from install to your first intercepted request, step by step.",
+    price: 249,
+    coverImage: "/burp-suite.jpg"
+  },
+  {
+    id: 83,
+    title: "Before You Walk Into a SOC",
+    description: "The real tools and responsibilities nobody explains upfront.",
+    price: 249,
+    coverImage: "/soc-analyst.jpg"
+  },
+  {
+    id: 82,
+    title: "The Cloud Security Gap",
+    description: "Close the exact gap that trips most beginners up.",
+    price: 199,
+    coverImage: "/cloud-security-v4.jpg"
+  }
+];
+
 const PDFStore = ({ onSuccess }) => {
-  const [offerings, setOfferings] = useState([]);
+  const [offerings, setOfferings] = useState(DEFAULT_OFFERINGS);
   const [cart, setCart] = useState([]); // Array of selected PDF objects
   const [isCheckout, setIsCheckout] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -32,7 +84,14 @@ const PDFStore = ({ onSuccess }) => {
     fetch('/api/offerings')
       .then(res => res.json())
       .then(data => {
-        const list = Array.isArray(data) ? data : [];
+        const list = Array.isArray(data) && data.length > 0 ? [...data] : [...DEFAULT_OFFERINGS];
+        // Ensure all default offerings exist even if backend DB hasn't been updated
+        DEFAULT_OFFERINGS.forEach(def => {
+          const exists = list.some(item => item.coverImage === def.coverImage || item.title === def.title);
+          if (!exists) {
+            list.push(def);
+          }
+        });
         const orderCovers = [
           '/ai-in-cybersecurity.jpg', // ₹249 (1. How Hackers Actually Use AI)
           '/top-10-mistakes.png',     // ₹149 (2. The Mistake Map for Beginners)
@@ -50,7 +109,9 @@ const PDFStore = ({ onSuccess }) => {
         });
         setOfferings(list);
       })
-      .catch(console.error);
+      .catch((err) => {
+        console.warn('Using default offerings due to network/API error:', err);
+      });
   }, []);
 
   const addToCart = (pdf) => {
