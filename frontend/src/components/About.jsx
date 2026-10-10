@@ -6,7 +6,13 @@ import {
   ShieldCheck, 
   Code, 
   MegaphoneSimple, 
-  ArrowSquareOut
+  ArrowSquareOut,
+  Hammer,
+  Factory,
+  CarSimple,
+  Flame,
+  Lightning,
+  GearSix
 } from '@phosphor-icons/react';
 import { FaWhatsapp, FaInstagram, FaFacebook, FaYoutube, FaLinkedin } from 'react-icons/fa';
 
@@ -61,7 +67,7 @@ const About = () => {
           <div className="relative group flex-shrink-0">
             <div className="p-1 rounded-2xl bg-gradient-to-b from-white/10 via-[var(--accent-gold,#E5C158)]/25 to-white/5 border border-white/10 shadow-lg">
               <img 
-                src={`${import.meta.env.BASE_URL}jenish-shah.jpg?v=natural`} 
+                src={`${import.meta.env.BASE_URL}jenish-shah.jpg?v=warm-v2`} 
                 alt="Jenish Shah" 
                 className="w-28 h-28 md:w-32 md:h-32 rounded-xl object-cover object-center shadow-inner"
                 onError={(e) => {
@@ -151,9 +157,9 @@ const About = () => {
 
         {/* Section 3: Matrix Fortress — Founder & CEO */}
         <article className="p-5 sm:p-6 md:p-7 bg-gradient-to-br from-[#141418] via-[#16161c] to-[#121216] rounded-2xl border border-white/10 shadow-lg transition-all">
-          <div className="flex items-center gap-3.5 mb-4">
+          <div className="flex items-center gap-4 mb-4">
             {/* Original crisp white background container */}
-            <div className="w-11 h-11 md:w-11 md:h-11 rounded-xl bg-white p-1.5 flex items-center justify-center flex-shrink-0 border border-white/20 shadow-md">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-white p-2 flex items-center justify-center flex-shrink-0 border border-white/20 shadow-md">
               <img 
                 src={`${import.meta.env.BASE_URL}matrix-fortress-logo.png?v=3`} 
                 alt="Matrix Fortress Logo" 
@@ -164,52 +170,58 @@ const About = () => {
                 }}
               />
             </div>
-            <h2 className="text-xl md:text-xl font-extrabold md:font-bold text-white tracking-tight">
-              Matrix Fortress — Founder &amp; CEO
+            <h2 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight">
+              Matrix Fortress
             </h2>
           </div>
 
           <p className="text-slate-200 text-base md:text-[15px] leading-relaxed mb-5">
-            As founder and CEO of Matrix Fortress, Jenish Shah leads a firm based in Ahmedabad, Gujarat, offering:
+            As founder and CEO of Matrix Fortress, Jenish Shah leads a cybersecurity and digital solutions firm based in Ahmedabad, delivering services to clients and businesses worldwide — helping organizations globally identify critical vulnerabilities, build secure software architectures, and drive strategic growth.
           </p>
 
-          <div className="flex flex-col gap-3">
-            {/* Service 1: Cybersecurity Core */}
-            <div className="p-3.5 md:p-4 bg-white/[0.03] rounded-xl border border-white/5 transition-colors flex items-start gap-3">
-              <div className="p-2 w-fit bg-[#E5C158]/10 border border-[#E5C158]/20 rounded-lg text-[#E5C158] shrink-0 mt-0.5">
-                <ShieldCheck size={20} />
+          {/* Matrix Fortress Offerings */}
+          <div className="mt-5 pt-5 border-t border-white/5">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3.5">
+              Services &amp; Solutions Offerings
+            </h3>
+            <div className="flex flex-col gap-2.5">
+              {/* 1. Cybersecurity Core */}
+              <div className="p-3.5 bg-white/[0.03] rounded-xl border border-white/5 flex items-start gap-3.5 transition-colors">
+                <div className="w-9 h-9 rounded-lg bg-[#01649e]/10 border border-[#01649e]/20 flex items-center justify-center shrink-0 mt-0.5 text-[#01649e]">
+                  <ShieldCheck size={18} weight="bold" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-semibold text-white leading-tight mb-1">Cybersecurity Core</h4>
+                  <p className="text-xs md:text-[13px] text-slate-300 leading-relaxed font-normal">
+                    Cybersecurity services, the firm's core focus — helping businesses identify and close security gaps
+                  </p>
+                </div>
               </div>
-              <div>
-                <h3 className="text-base md:text-[15px] font-bold md:font-semibold text-white mb-1">Cybersecurity Core</h3>
-                <p className="text-sm md:text-[13px] text-slate-300 leading-relaxed font-normal">
-                  Cybersecurity services, the firm's core focus — helping businesses identify and close security gaps
-                </p>
-              </div>
-            </div>
 
-            {/* Service 2: Secure Development */}
-            <div className="p-3.5 md:p-4 bg-white/[0.03] rounded-xl border border-white/5 transition-colors flex items-start gap-3">
-              <div className="p-2 w-fit bg-[#E5C158]/10 border border-[#E5C158]/20 rounded-lg text-[#E5C158] shrink-0 mt-0.5">
-                <Code size={20} />
+              {/* 2. Secure Development */}
+              <div className="p-3.5 bg-white/[0.03] rounded-xl border border-white/5 flex items-start gap-3.5 transition-colors">
+                <div className="w-9 h-9 rounded-lg bg-[#01649e]/10 border border-[#01649e]/20 flex items-center justify-center shrink-0 mt-0.5 text-[#01649e]">
+                  <Code size={18} weight="bold" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-semibold text-white leading-tight mb-1">Secure Development</h4>
+                  <p className="text-xs md:text-[13px] text-slate-300 leading-relaxed font-normal">
+                    Secure development services for web, app, and software projects
+                  </p>
+                </div>
               </div>
-              <div>
-                <h3 className="text-base md:text-[15px] font-bold md:font-semibold text-white mb-1">Secure Development</h3>
-                <p className="text-sm md:text-[13px] text-slate-300 leading-relaxed font-normal">
-                  Secure development services for web, app, and software projects
-                </p>
-              </div>
-            </div>
 
-            {/* Service 3: Marketing */}
-            <div className="p-3.5 md:p-4 bg-white/[0.03] rounded-xl border border-white/5 transition-colors flex items-start gap-3">
-              <div className="p-2 w-fit bg-[#E5C158]/10 border border-[#E5C158]/20 rounded-lg text-[#E5C158] shrink-0 mt-0.5">
-                <MegaphoneSimple size={20} />
-              </div>
-              <div>
-                <h3 className="text-base md:text-[15px] font-bold md:font-semibold text-white mb-1">Marketing</h3>
-                <p className="text-sm md:text-[13px] text-slate-300 leading-relaxed font-normal">
-                  Marketing services for businesses
-                </p>
+              {/* 3. Marketing */}
+              <div className="p-3.5 bg-white/[0.03] rounded-xl border border-white/5 flex items-start gap-3.5 transition-colors">
+                <div className="w-9 h-9 rounded-lg bg-[#01649e]/10 border border-[#01649e]/20 flex items-center justify-center shrink-0 mt-0.5 text-[#01649e]">
+                  <MegaphoneSimple size={18} weight="bold" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-semibold text-white leading-tight mb-1">Marketing</h4>
+                  <p className="text-xs md:text-[13px] text-slate-300 leading-relaxed font-normal">
+                    Marketing services and digital marketing for businesses
+                  </p>
+                </div>
               </div>
             </div>
           </div>
@@ -217,9 +229,9 @@ const About = () => {
 
         {/* Section 4: Family Business — Himmatlal Machine Tools */}
         <article className="p-5 sm:p-6 md:p-7 bg-[#141418] rounded-2xl border border-white/10 transition-all">
-          <div className="flex items-center gap-3.5 mb-4">
+          <div className="flex items-center gap-4 mb-4">
             {/* Original crisp white background container */}
-            <div className="w-11 h-11 md:w-11 md:h-11 rounded-xl bg-white p-1.5 flex items-center justify-center flex-shrink-0 border border-white/20 shadow-md">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-white p-2 flex items-center justify-center flex-shrink-0 border border-white/20 shadow-md">
               <img 
                 src={`${import.meta.env.BASE_URL}hmt-logo-transparent.png?v=4`} 
                 alt="Himmatlal Machine Tools Logo" 
@@ -230,14 +242,70 @@ const About = () => {
                 }}
               />
             </div>
-            <h2 className="text-xl md:text-xl font-extrabold md:font-bold text-white tracking-tight">
-              Family Business — Himmatlal Machine Tools
+            <h2 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight">
+              Himmatlal Machine Tools
             </h2>
           </div>
 
-          <p className="text-slate-200 text-base md:text-[15px] leading-relaxed">
-            As the sales and marketing specialist at Himmatlal Machine Tools (HMT), his family's machinery business in Ahmedabad, founded by his father, Kamlesh Shah, in 2006, Jenish Shah helps drive sales and marketing for a firm that supplies woodworking machinery, sheet metal machinery, garage equipment, welding machines, power tools, and machine parts &amp; accessories to businesses across Gujarat.
+          <p className="text-slate-200 text-base md:text-[15px] leading-relaxed mb-5">
+            As the sales and marketing specialist at Himmatlal Machine Tools (HMT), his family's machinery business in Ahmedabad, founded by his father, Kamlesh Shah, in 2006, Jenish Shah helps drive sales and marketing for a firm that supplies industrial machinery, tools, and equipment across India.
           </p>
+
+          {/* HMT Offerings */}
+          <div className="mt-5 pt-5 border-t border-white/5">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3.5">
+              Machinery &amp; Equipment Offerings
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+              {/* 1. Woodworking Machinery */}
+              <div className="p-3 bg-white/[0.03] rounded-xl border border-white/5 flex items-center gap-3 transition-colors">
+                <div className="w-9 h-9 rounded-lg bg-[#0070BA]/10 border border-[#0070BA]/20 flex items-center justify-center shrink-0 text-[#0070BA]">
+                  <Hammer size={18} weight="bold" />
+                </div>
+                <span className="text-sm font-semibold text-white leading-tight">Woodworking Machinery</span>
+              </div>
+
+              {/* 2. Sheet Metal Machinery */}
+              <div className="p-3 bg-white/[0.03] rounded-xl border border-white/5 flex items-center gap-3 transition-colors">
+                <div className="w-9 h-9 rounded-lg bg-[#0070BA]/10 border border-[#0070BA]/20 flex items-center justify-center shrink-0 text-[#0070BA]">
+                  <Factory size={18} weight="bold" />
+                </div>
+                <span className="text-sm font-semibold text-white leading-tight">Sheet Metal Machinery</span>
+              </div>
+
+              {/* 3. Garage Machinery */}
+              <div className="p-3 bg-white/[0.03] rounded-xl border border-white/5 flex items-center gap-3 transition-colors">
+                <div className="w-9 h-9 rounded-lg bg-[#0070BA]/10 border border-[#0070BA]/20 flex items-center justify-center shrink-0 text-[#0070BA]">
+                  <CarSimple size={18} weight="bold" />
+                </div>
+                <span className="text-sm font-semibold text-white leading-tight">Garage Machinery</span>
+              </div>
+
+              {/* 4. Welding Machines */}
+              <div className="p-3 bg-white/[0.03] rounded-xl border border-white/5 flex items-center gap-3 transition-colors">
+                <div className="w-9 h-9 rounded-lg bg-[#0070BA]/10 border border-[#0070BA]/20 flex items-center justify-center shrink-0 text-[#0070BA]">
+                  <Flame size={18} weight="bold" />
+                </div>
+                <span className="text-sm font-semibold text-white leading-tight">Welding Machines</span>
+              </div>
+
+              {/* 5. Power Tools */}
+              <div className="p-3 bg-white/[0.03] rounded-xl border border-white/5 flex items-center gap-3 transition-colors">
+                <div className="w-9 h-9 rounded-lg bg-[#0070BA]/10 border border-[#0070BA]/20 flex items-center justify-center shrink-0 text-[#0070BA]">
+                  <Lightning size={18} weight="bold" />
+                </div>
+                <span className="text-sm font-semibold text-white leading-tight">Power Tools</span>
+              </div>
+
+              {/* 6. Parts and Accessories */}
+              <div className="p-3 bg-white/[0.03] rounded-xl border border-white/5 flex items-center gap-3 transition-colors">
+                <div className="w-9 h-9 rounded-lg bg-[#0070BA]/10 border border-[#0070BA]/20 flex items-center justify-center shrink-0 text-[#0070BA]">
+                  <GearSix size={18} weight="bold" />
+                </div>
+                <span className="text-sm font-semibold text-white leading-tight">Parts &amp; Accessories</span>
+              </div>
+            </div>
+          </div>
         </article>
 
         {/* Social Links Footer Bar */}

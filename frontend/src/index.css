@@ -62,14 +62,22 @@
     box-shadow: none !important;
   }
 
-  /* Global complete suppression of all hover effects across the entire website */
-  *:hover,
-  *:hover * {
+  /* Global complete suppression of all hover effects without affecting rotating HUD orbital rings */
+  *:hover:not(.animate-hud-spin):not(.animate-hud-reverse),
+  *:hover *:not(.animate-hud-spin):not(.animate-hud-reverse) {
+    scale: none;
+    filter: none;
+  }
+
+  a:hover,
+  button:hover,
+  img:hover,
+  [role="button"]:hover,
+  [role="tab"]:hover {
     transform: none !important;
     scale: none !important;
     translate: none !important;
     rotate: none !important;
-    filter: none !important;
   }
 }
 
@@ -194,11 +202,13 @@
 }
 
 .animate-hud-spin {
-  animation: hudSlowSpin 28s linear infinite;
+  animation: hudSlowSpin 14s linear infinite !important;
+  transform-origin: 50% 50%;
 }
 
 .animate-hud-reverse {
-  animation: hudReverseSpin 38s linear infinite;
+  animation: hudReverseSpin 18s linear infinite !important;
+  transform-origin: 50% 50%;
 }
 
 .animate-avatar-pulse {
@@ -212,8 +222,6 @@
   .animate-cyber-scan,
   .animate-particle-slow,
   .animate-beacon-glow,
-  .animate-hud-spin,
-  .animate-hud-reverse,
   .animate-avatar-pulse {
     animation: none !important;
   }

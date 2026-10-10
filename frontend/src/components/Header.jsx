@@ -70,9 +70,7 @@ const Header = () => {
 
         {/* Outer Rotating Precision HUD Segmented Orbital Ring */}
         <svg
-          className={`absolute -inset-2 w-[calc(100%+16px)] h-[calc(100%+16px)] pointer-events-none ${
-            shouldReduceMotion ? '' : 'animate-hud-spin'
-          }`}
+          className="absolute -inset-2 w-[calc(100%+16px)] h-[calc(100%+16px)] pointer-events-none animate-hud-spin"
           viewBox="0 0 100 100"
           fill="none"
           aria-hidden="true"
@@ -95,9 +93,7 @@ const Header = () => {
 
         {/* Counter-Rotating Inner Dotted Orbit */}
         <svg
-          className={`absolute -inset-0.5 w-[calc(100%+4px)] h-[calc(100%+4px)] pointer-events-none ${
-            shouldReduceMotion ? '' : 'animate-hud-reverse'
-          }`}
+          className="absolute -inset-0.5 w-[calc(100%+4px)] h-[calc(100%+4px)] pointer-events-none animate-hud-reverse"
           viewBox="0 0 100 100"
           fill="none"
           aria-hidden="true"

@@ -69,9 +69,9 @@ const WorkWithMe = () => {
 
         {/* Opportunity 1: Matrix Fortress */}
         <article className="p-5 sm:p-7 md:p-8 bg-[#141418] rounded-2xl border border-white/10 transition-all">
-          <div className="flex items-center gap-3.5 mb-4">
+          <div className="flex items-center gap-4 mb-4">
             {/* White background container for company logo */}
-            <div className="w-12 h-12 rounded-xl bg-white p-1.5 flex items-center justify-center flex-shrink-0 border border-white/20 shadow-md">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-white p-2 flex items-center justify-center flex-shrink-0 border border-white/20 shadow-md">
               <img 
                 src={`${import.meta.env.BASE_URL}matrix-fortress-logo.png?v=3`} 
                 alt="Matrix Fortress Logo" 
@@ -101,9 +101,9 @@ const WorkWithMe = () => {
 
         {/* Opportunity 2: Himmatlal Machine Tools */}
         <article className="p-5 sm:p-7 md:p-8 bg-[#141418] rounded-2xl border border-white/10 transition-all">
-          <div className="flex items-center gap-3.5 mb-4">
+          <div className="flex items-center gap-4 mb-4">
             {/* White background container for company logo */}
-            <div className="w-12 h-12 rounded-xl bg-white p-1.5 flex items-center justify-center flex-shrink-0 border border-white/20 shadow-md">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-white p-2 flex items-center justify-center flex-shrink-0 border border-white/20 shadow-md">
               <img 
                 src={`${import.meta.env.BASE_URL}hmt-logo-transparent.png?v=4`} 
                 alt="Himmatlal Machine Tools Logo" 
@@ -133,18 +133,20 @@ const WorkWithMe = () => {
 
         {/* Opportunity 3: Collaborations & Partnerships */}
         <article className="p-5 sm:p-7 md:p-8 bg-[#141418] rounded-2xl border border-white/10 transition-all">
-          <div className="flex items-center gap-3.5 mb-4">
-            {/* Clean borderless Jenish avatar image without thick white border */}
-            <img
-              src={`${import.meta.env.BASE_URL}jenish-shah.jpg?v=natural`}
-              alt="Jenish Shah"
-              className="w-12 h-12 rounded-xl object-cover shrink-0 shadow-md border border-white/10"
-              onError={(e) => {
-                e.target.onerror = null;
-                e.target.src = `${import.meta.env.BASE_URL}logo.jpg`;
-              }}
-            />
-            <h2 className="text-xl sm:text-2xl md:text-xl font-black text-white tracking-tight leading-snug">
+          <div className="flex items-center gap-4 mb-4">
+            {/* Creator logo container matching MF and HMT */}
+            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-[#0e1015] p-1.5 flex items-center justify-center flex-shrink-0 border border-white/20 shadow-md overflow-hidden">
+              <img
+                src={`${import.meta.env.BASE_URL}logo.jpg`}
+                alt="Jenish Shah"
+                className="w-full h-full object-cover rounded-xl"
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = "https://placehold.co/256x256/141418/E5C158?text=JS";
+                }}
+              />
+            </div>
+            <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight leading-snug">
               Collaborations &amp; Partnerships
             </h2>
           </div>
