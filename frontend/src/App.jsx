@@ -14,6 +14,24 @@ import WorkWithMe from './components/WorkWithMe';
 import Contact from './components/Contact';
 import CyberBackground from './components/CyberBackground';
 
+// Eagerly pre-cache all 7 store covers in memory on app boot for instant display
+const STORE_COVERS = [
+  '/ai-in-cybersecurity.jpg',
+  '/top-10-mistakes.png',
+  '/hackers-toolkit.jpg',
+  '/ctf-guide.jpg',
+  '/burp-suite.jpg',
+  '/soc-analyst.jpg',
+  '/cloud-security-v4.jpg'
+];
+
+if (typeof window !== 'undefined') {
+  STORE_COVERS.forEach((src) => {
+    const img = new Image();
+    img.src = src;
+  });
+}
+
 function ScrollToTop() {
   const { pathname } = useLocation();
   useEffect(() => {

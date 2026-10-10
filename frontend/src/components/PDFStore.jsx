@@ -280,7 +280,7 @@ const PDFStore = ({ onSuccess }) => {
       
       <AnimatePresence mode="wait">
         {!isCheckout ? (
-          <motion.div key="store" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="relative z-10 space-y-6">
+          <motion.div key="store" initial={false} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="relative z-10 space-y-6">
             {/* Offerings Grid - 1 Col Mobile, 2 Col Tablet, 3 Col Desktop */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
               {offerings.length === 0 ? (
@@ -294,16 +294,19 @@ const PDFStore = ({ onSuccess }) => {
                   return (
                     <div 
                       key={p.id} 
-                      className={`group relative rounded-2xl overflow-hidden bg-[#141418] border transition-colors flex flex-col justify-between ${
+                      className={`relative rounded-2xl overflow-hidden bg-[#141418] border flex flex-col justify-between ${
                         inCart ? 'border-[#E5C158]' : 'border-white/10'
                       }`}
                     >
                       <div>
                         <div className="w-full h-72 sm:h-80 md:h-[360px] bg-gradient-to-b from-[#101015] to-[#0a0a0d] relative flex items-center justify-center p-2.5 sm:p-3.5 md:p-4 border-b border-white/5 overflow-hidden">
-                          <div className="relative h-full aspect-[2/3] flex items-center justify-center transition-transform duration-300 group-hover:scale-105">
+                          <div className="relative h-full aspect-[2/3] flex items-center justify-center">
                             <img 
-                              src={p.coverImage ? `${import.meta.env.BASE_URL}${p.coverImage.replace(/^\/+/, '')}?v=3d-v3` : "https://placehold.co/600x800/12141D/ffffff?text=PDF"} 
+                              src={p.coverImage ? `${import.meta.env.BASE_URL}${p.coverImage.replace(/^\/+/, '')}` : "https://placehold.co/600x800/12141D/ffffff?text=PDF"} 
                               alt={p.title} 
+                              loading="eager"
+                              fetchpriority="high"
+                              decoding="async"
                               className="w-full h-full object-cover object-top rounded-lg shadow-[0_12px_32px_rgba(0,0,0,0.85)] border border-white/10" 
                             />
                           </div>

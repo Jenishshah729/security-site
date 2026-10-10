@@ -62,9 +62,13 @@
     box-shadow: none !important;
   }
 
-  /* Global suppression of hover effects across the website */
-  *:hover:not(:active) {
+  /* Global complete suppression of all hover effects across the entire website */
+  *:hover,
+  *:hover * {
     transform: none !important;
+    scale: none !important;
+    translate: none !important;
+    rotate: none !important;
     filter: none !important;
   }
 }

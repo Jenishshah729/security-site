@@ -334,7 +334,7 @@ const BundleStore = ({ onSuccess }) => {
         {step === 'store' && (
           <motion.div 
             key="store" 
-            initial={{ opacity: 0, y: 10 }} 
+            initial={false} 
             animate={{ opacity: 1, y: 0 }} 
             exit={{ opacity: 0, y: -10 }} 
             className="relative z-10 space-y-6 sm:space-y-8"
@@ -373,7 +373,7 @@ const BundleStore = ({ onSuccess }) => {
                       aria-selected={isActive}
                       onClick={() => setFilter(tab.id)}
                       className={`relative px-2 sm:px-5 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-bold transition-colors duration-200 flex items-center justify-center gap-1.5 sm:gap-2 text-center cursor-pointer select-none ${
-                        isActive ? 'text-zinc-950' : 'text-slate-400 hover:text-slate-200'
+                        isActive ? 'text-zinc-950' : 'text-slate-400'
                       }`}
                     >
                       {isActive && (
@@ -416,7 +416,7 @@ const BundleStore = ({ onSuccess }) => {
                           ? 'bg-gradient-to-b from-[#181822] via-[#121218] to-[#0D0D12] border-2 border-[#00f0ff] shadow-[0_12px_40px_rgba(0,0,0,0.8)]'
                           : isFeatured 
                           ? 'bg-gradient-to-b from-[#181822] via-[#121218] to-[#0D0D12] border-2 border-[#E5C158] shadow-[0_12px_40px_rgba(229,193,88,0.12)]' 
-                          : 'bg-[#121217] border border-white/10 hover:border-white/20'
+                          : 'bg-[#121217] border border-white/10'
                       }`}
                     >
                       {isAllInOne ? (
@@ -455,9 +455,16 @@ const BundleStore = ({ onSuccess }) => {
                                   <div 
                                     key={idx} 
                                     title={book.title} 
-                                    className="relative shrink-0 w-11 h-16 sm:w-13 sm:h-18 rounded-md overflow-hidden border border-white/20 shadow-md hover:-translate-y-1 hover:z-20 transition-transform duration-200"
+                                    className="relative shrink-0 w-11 h-16 sm:w-13 sm:h-18 rounded-md overflow-hidden border border-white/20 shadow-md"
                                   >
-                                    <img src={book.src} alt={book.title} className="w-full h-full object-cover" />
+                                    <img 
+                                      src={book.src} 
+                                      alt={book.title} 
+                                      loading="eager"
+                                      fetchpriority="high"
+                                      decoding="async"
+                                      className="w-full h-full object-cover" 
+                                    />
                                   </div>
                                 ))}
                               </div>
@@ -626,9 +633,12 @@ const BundleStore = ({ onSuccess }) => {
                     <div className="w-16 h-24 rounded-lg overflow-hidden bg-black/50 border border-white/10 shrink-0 flex items-center justify-center relative shadow-md">
                       {pdf.coverImage ? (
                         <img 
-                          src={pdf.coverImage ? `${pdf.coverImage}?v=3d-v3` : ''} 
+                          src={pdf.coverImage || ''} 
                           alt={pdf.title} 
-                          className="w-full h-full object-cover transition-transform" 
+                          loading="eager"
+                          fetchpriority="high"
+                          decoding="async"
+                          className="w-full h-full object-cover" 
                         />
                       ) : (
                         <BookOpen size={24} className="text-[#E5C158]" weight="duotone" />
