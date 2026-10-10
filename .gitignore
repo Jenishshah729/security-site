@@ -13,3 +13,6 @@ backend/prisma/dev.db
 scratch
 *-backup.*
 *_backup.*
+.claude
+.windsurf
+skills-lock.json

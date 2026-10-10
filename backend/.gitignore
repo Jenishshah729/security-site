@@ -6,7 +6,11 @@ node_modules/
 
 google-credentials.json
 
-
 *.db
 *.db-journal
 *.db-wal
+
+.claude
+.windsurf
+.agents
+skills-lock.json
