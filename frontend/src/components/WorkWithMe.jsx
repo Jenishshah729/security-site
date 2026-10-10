@@ -136,7 +136,7 @@ const WorkWithMe = () => {
           <div className="flex items-center gap-3.5 mb-4">
             {/* Clean borderless Jenish avatar image without thick white border */}
             <img
-              src={`${import.meta.env.BASE_URL}jenish-shah.jpg`}
+              src={`${import.meta.env.BASE_URL}jenish-shah.jpg?v=natural`}
               alt="Jenish Shah"
               className="w-12 h-12 rounded-xl object-cover shrink-0 shadow-md border border-white/10"
               onError={(e) => {
