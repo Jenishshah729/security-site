@@ -10,13 +10,8 @@ import {
   BookOpen, 
   Check, 
   User, 
-  EnvelopeSimple, 
-  Phone, 
-  Sparkle, 
   Calendar, 
-  Lightning, 
-  LockKey,
-  Star
+  LockKey
 } from '@phosphor-icons/react';
 import { useNavigate } from 'react-router-dom';
 
@@ -152,7 +147,7 @@ const BundleStore = ({ onSuccess }) => {
       let orderData;
       try {
         orderData = JSON.parse(responseText);
-      } catch (parseErr) {
+      } catch {
         throw new Error(`Server returned unexpected response (${res.status}). Please try again.`);
       }
 
@@ -223,9 +218,6 @@ const BundleStore = ({ onSuccess }) => {
       setIsProcessing(false);
     }
   };
-
-  const consultationCount = bundles.filter(b => b.hasConsultation).length;
-  const pdfOnlyCount = bundles.filter(b => !b.hasConsultation).length;
 
   const bundleOrder = [
     'all-in-one',
@@ -370,18 +362,6 @@ const BundleStore = ({ onSuccess }) => {
                         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 relative z-10">
                           {/* Left Info Column */}
                           <div className="flex-1 min-w-0">
-                            {/* Prestige Eyebrow */}
-                            <div className="flex items-center gap-2 mb-2">
-                              <span className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-[0.16em] text-[#E5C158]">
-                                <Lightning size={14} weight="fill" className="text-[#E5C158]" />
-                                Complete VIP Master Package
-                              </span>
-                              <span className="h-1 w-1 rounded-full bg-white/40" />
-                              <span className="text-xs font-semibold text-slate-300">
-                                Most Comprehensive
-                              </span>
-                            </div>
-
                             <h3 className="text-2xl sm:text-3xl md:text-3xl font-black text-white tracking-tight mb-2">
                               {b.title}
                             </h3>
@@ -621,7 +601,7 @@ const BundleStore = ({ onSuccess }) => {
             <div className="pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
               <span className="text-xs sm:text-sm text-slate-400">
                 {selectedPdfs.length === selectedBundle.pdfSelectionCount ? (
-                  <span className="text-emerald-400 font-semibold flex items-center gap-1.5">
+                  <span className="text-[#E5C158] font-semibold flex items-center gap-1.5">
                     <CheckCircle size={16} weight="fill" /> Ready to proceed!
                   </span>
                 ) : (

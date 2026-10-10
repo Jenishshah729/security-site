@@ -8,9 +8,7 @@ import {
   DotsThreeVertical,
   UserCircle,
   Briefcase,
-  EnvelopeSimple,
-  Sparkle,
-  ArrowRight
+  EnvelopeSimple
 } from '@phosphor-icons/react';
 import Header from './Header';
 import ShareModal from './ShareModal';

@@ -134,7 +134,7 @@ const BookingSection = ({ onSuccess, isBundle }) => {
         let data;
         try {
           data = JSON.parse(responseText);
-        } catch (parseErr) {
+        } catch {
           throw new Error(`Server returned unexpected response (${response.status}). Please try again.`);
         }
         

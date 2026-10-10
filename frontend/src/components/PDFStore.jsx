@@ -5,10 +5,8 @@ import {
   ArrowLeft, 
   ArrowRight, 
   BookOpen, 
-  CheckCircle, 
   ShieldCheck, 
   ShoppingCart, 
-  Sparkle, 
   User, 
   EnvelopeSimple, 
   Phone,
@@ -103,7 +101,7 @@ const PDFStore = ({ onSuccess }) => {
       let orderData;
       try {
         orderData = JSON.parse(responseText);
-      } catch (parseErr) {
+      } catch {
         throw new Error(`Server returned unexpected response (${res.status}). Please try again.`);
       }
 
@@ -240,12 +238,14 @@ const PDFStore = ({ onSuccess }) => {
                       }`}
                     >
                       <div>
-                        <div className="aspect-[2/3] w-full overflow-hidden bg-[#0c0c0e] relative flex items-center justify-center border-b border-white/5">
-                          <img 
-                            src={p.coverImage ? `${import.meta.env.BASE_URL}${p.coverImage.replace(/^\/+/, '')}?v=3d-v3` : "https://placehold.co/600x800/12141D/ffffff?text=PDF"} 
-                            alt={p.title} 
-                            className="w-full h-full object-cover object-top opacity-95 transition-opacity duration-300" 
-                          />
+                        <div className="w-full h-72 sm:h-80 md:h-[360px] bg-gradient-to-b from-[#101015] to-[#0a0a0d] relative flex items-center justify-center p-2.5 sm:p-3.5 md:p-4 border-b border-white/5 overflow-hidden">
+                          <div className="relative h-full aspect-[2/3] flex items-center justify-center transition-transform duration-300 group-hover:scale-105">
+                            <img 
+                              src={p.coverImage ? `${import.meta.env.BASE_URL}${p.coverImage.replace(/^\/+/, '')}?v=3d-v3` : "https://placehold.co/600x800/12141D/ffffff?text=PDF"} 
+                              alt={p.title} 
+                              className="w-full h-full object-cover object-top rounded-lg shadow-[0_12px_32px_rgba(0,0,0,0.85)] border border-white/10" 
+                            />
+                          </div>
                         </div>
 
                         <div className="p-4 sm:p-5 md:p-6">

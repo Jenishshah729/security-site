@@ -3,8 +3,7 @@ import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
 import { 
   ArrowLeft, 
-  EnvelopeSimple, 
-  ArrowSquareOut
+  EnvelopeSimple 
 } from '@phosphor-icons/react';
 
 const WorkWithMe = () => {
